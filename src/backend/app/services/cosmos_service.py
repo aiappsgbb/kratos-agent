@@ -310,12 +310,12 @@ class CosmosService:
 
     # ─── Sessions (SDK session ID mapping) ────────────────────────────────────
 
-    async def upsert_session_mapping(self, conversation_id: str, sdk_session_id: str) -> None:
-        """Store the SDK session ID for a conversation."""
+    async def upsert_session_mapping(self, conversation_id: str, agent_session_id: str) -> None:
+        """Store the gateway agent session ID for a conversation."""
         doc = {
             "id": conversation_id,
             "conversationId": conversation_id,
-            "sdkSessionId": sdk_session_id,
+            "agentSessionId": agent_session_id,
         }
         if self._using_sqlite():
             await self._sqlite_upsert("session_mappings", conversation_id, conversation_id, doc)
@@ -325,15 +325,15 @@ class CosmosService:
         await self._sessions_container.upsert_item(doc)
 
     async def get_session_mapping(self, conversation_id: str) -> str | None:
-        """Return the SDK session ID for a conversation, or None."""
+        """Return the gateway agent session ID for a conversation, or None."""
         if self._using_sqlite():
             row = await self._sqlite_read("session_mappings", conversation_id, conversation_id)
-            return row.get("sdkSessionId") if row else None
+            return row.get("agentSessionId") if row else None
         if not self._sessions_container:
             return None
         try:
             item = await self._sessions_container.read_item(item=conversation_id, partition_key=conversation_id)
-            return item.get("sdkSessionId")
+            return item.get("agentSessionId")
         except Exception:
             return None
 
@@ -348,7 +348,7 @@ class CosmosService:
             await self._sessions_container.delete_item(item=conversation_id, partition_key=conversation_id)
 
     async def delete_all_session_mappings(self) -> None:
-        """Delete all stored SDK session mappings (called on prompt/config resets)."""
+        """Delete all stored gateway session mappings (called on prompt/config resets)."""
         if self._using_sqlite():
             await self._sqlite_truncate("session_mappings")
             return

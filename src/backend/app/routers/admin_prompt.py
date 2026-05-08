@@ -41,7 +41,6 @@ async def get_system_prompt(request: Request, use_case: str = Query("generic")) 
 async def update_system_prompt(body: SystemPromptUpdate, request: Request, use_case: str = Query("generic")) -> SystemPromptResponse:
     """Update the system prompt for a use-case. Persists to Blob Storage / local disk."""
     registry = _get_registry(request, use_case)
-    copilot_agent = request.app.state.copilot_agent
 
     registry.system_prompt = body.content
 
@@ -56,8 +55,6 @@ async def update_system_prompt(body: SystemPromptUpdate, request: Request, use_c
         prompt_path.parent.mkdir(parents=True, exist_ok=True)
         prompt_path.write_text(body.content)
 
-    # Reset sessions for this use-case so new conversations pick up the change
-    await copilot_agent.reset_sessions_for_use_case(use_case)
     logger.info("System prompt updated for use-case '%s' (%d chars)", use_case, len(body.content))
     return SystemPromptResponse(content=body.content, isDefault=False)
 
@@ -66,7 +63,6 @@ async def update_system_prompt(body: SystemPromptUpdate, request: Request, use_c
 async def reset_system_prompt(request: Request, use_case: str = Query("generic")) -> None:
     """Reset the system prompt by re-syncing from blob storage."""
     registry = _get_registry(request, use_case)
-    copilot_agent = request.app.state.copilot_agent
 
     blob_service = getattr(registry, "_blob_service", None)
     if blob_service and blob_service.is_available:
@@ -76,5 +72,4 @@ async def reset_system_prompt(request: Request, use_case: str = Query("generic")
         if prompt_path.exists():
             registry.system_prompt = prompt_path.read_text()
 
-    await copilot_agent.reset_sessions_for_use_case(use_case)
     logger.info("System prompt reset for use-case '%s'", use_case)

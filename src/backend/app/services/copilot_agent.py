@@ -509,7 +509,12 @@ class CopilotAgent:
             return True
         return False
 
-    async def _get_or_create_session(self, conversation_id: str) -> object:
+    def get_sdk_session_id(self, conversation_id: str) -> str | None:
+        """Return the SDK session ID for a conversation, if one is cached."""
+        session = self._sessions.get(conversation_id)
+        return getattr(session, "session_id", None) if session else None
+
+    async def _get_or_create_session(self, conversation_id: str, sdk_session_id: str | None = None) -> object:
         """Return an existing session or create/resume one for this conversation."""
         if conversation_id in self._sessions:
             logger.info("Reusing SDK session for conversation=%s", conversation_id)
@@ -537,9 +542,9 @@ class CopilotAgent:
         system_prompt = self._get_system_prompt(conversation_id)
         config = self._build_session_config(enabled_tools, skill_dirs, system_prompt, mcp_servers)
 
-        # Try to resume an existing SDK session from Cosmos DB
-        sdk_session_id = None
-        if self._cosmos_service:
+        # Try to resume an existing SDK session — prefer explicitly passed ID,
+        # then fall back to Cosmos DB lookup.
+        if sdk_session_id is None and self._cosmos_service:
             sdk_session_id = await self._cosmos_service.get_session_mapping(conversation_id)
 
         t0 = time.monotonic()
@@ -589,6 +594,7 @@ class CopilotAgent:
         message: str,
         conversation_id: str,
         attachments: list[dict] | None = None,
+        sdk_session_id: str | None = None,
     ) -> AsyncGenerator[ThoughtEvent | ToolCallEvent | ContentEvent | ErrorEvent | UserInputRequestEvent, None]:
         """Send a message and stream SDK events as typed SSE events."""
 
@@ -624,7 +630,7 @@ class CopilotAgent:
             self._response_parts[conversation_id] = []  # reset for this turn
 
             try:
-                session = await self._get_or_create_session(conversation_id)
+                session = await self._get_or_create_session(conversation_id, sdk_session_id=sdk_session_id)
                 logger.info("Sending prompt for conversation=%s message=%r", conversation_id, message)
                 self._send_time = time.monotonic()
 

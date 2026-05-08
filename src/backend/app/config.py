@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     foundry_model_deployment: str = ""
     foundry_project_name: str = ""
 
+    # Hosted agent proxy — backend forwards requests to the Foundry hosted agent
+    foundry_project_endpoint: str = ""  # e.g. https://host/api/projects/proj
+    foundry_agent_name: str = "kratos-agent"
+    foundry_agent_invocations_endpoint: str = ""  # full URL override (optional)
+    foundry_api_version: str = "v1"
+
     # Azure Blob Storage for skills
     blob_storage_endpoint: str = ""
     blob_skills_container: str = "skills"

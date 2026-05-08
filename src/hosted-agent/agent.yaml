@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/AgentSchema/refs/heads/main/schemas/v1.0/ContainerAgent.yaml
+
+name: kratos-agent
+description: >
+  Kratos — enterprise AI assistant powered by GitHub Copilot SDK.
+  Multi-use-case agent with dynamic skills loaded from Azure Blob Storage,
+  Cosmos DB conversation persistence, and OpenTelemetry observability.
+kind: hosted
+protocols:
+  - protocol: invocations
+    version: 1.0.0
+resources:
+  cpu: "1"
+  memory: 2Gi
+environment_variables:
+  # Model deployment (referenced in CopilotAgent._build_provider_config)
+  - name: MODEL_DEPLOYMENT_NAME
+    value: ${FOUNDRY_MODEL_DEPLOYMENT}
+  # AI Services base URL (fallback if platform doesn't inject FOUNDRY_ENDPOINT)
+  - name: AI_SERVICES_ENDPOINT
+    value: ${AZURE_AI_PROJECT_ENDPOINT}
+  # Azure service endpoints (injected by Bicep / azd env)
+  - name: COSMOS_DB_ENDPOINT
+    value: ${AZURE_COSMOS_DB_ENDPOINT}
+  - name: AZURE_AI_SEARCH_ENDPOINT
+    value: ${AZURE_AI_SEARCH_ENDPOINT}
+  - name: KEY_VAULT_URI
+    value: ${AZURE_KEY_VAULT_URI}
+  - name: BLOB_STORAGE_ENDPOINT
+    value: ${AZURE_BLOB_STORAGE_ENDPOINT}
+  - name: BLOB_SKILLS_CONTAINER
+    value: skills
+  # Local fallback path for use-case manifests (Dockerfile copies to /app/use-cases)
+  - name: APM_USE_CASES_ROOT
+    value: /app/use-cases
+  # Cosmos DB database name
+  - name: COSMOS_DB_DATABASE
+    value: kratos-agent
+  # Environment tag
+  - name: ENVIRONMENT
+    value: production

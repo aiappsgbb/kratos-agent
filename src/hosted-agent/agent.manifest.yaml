@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/AgentSchema/refs/heads/main/schemas/v1.0/AgentManifest.yaml
+name: kratos-agent
+displayName: "Kratos Agent"
+description: >
+  Enterprise AI assistant powered by GitHub Copilot SDK with dynamic skills
+  from Azure Blob Storage, Cosmos DB persistence, and multi-use-case support.
+  Hosted on Foundry via the Invocations protocol.
+metadata:
+  tags:
+    - AI Agent Hosting
+    - GitHub Copilot SDK
+    - Invocations Protocol
+    - Bring Your Own
+    - Enterprise Assistant
+template:
+  name: kratos-agent
+  kind: hosted
+  protocols:
+    - protocol: invocations
+      version: 1.0.0
+  environment_variables:
+    # APPLICATIONINSIGHTS_CONNECTION_STRING is auto-injected by the platform.
+    # FOUNDRY_PROJECT_ENDPOINT is auto-injected by the platform.
+    - name: MODEL_DEPLOYMENT_NAME
+      value: ${FOUNDRY_MODEL_DEPLOYMENT}
+    - name: COSMOS_DB_ENDPOINT
+      value: ${AZURE_COSMOS_DB_ENDPOINT}
+    - name: AZURE_AI_SEARCH_ENDPOINT
+      value: ${AZURE_AI_SEARCH_ENDPOINT}
+    - name: KEY_VAULT_URI
+      value: ${AZURE_KEY_VAULT_URI}
+    - name: BLOB_STORAGE_ENDPOINT
+      value: ${AZURE_BLOB_STORAGE_ENDPOINT}
+    - name: BLOB_SKILLS_CONTAINER
+      value: skills
+    - name: COSMOS_DB_DATABASE
+      value: kratos-agent
+parameters:
+  properties: []
+resources: []

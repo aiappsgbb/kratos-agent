@@ -35,10 +35,6 @@ async def update_mcp_config(use_case: str, body: MCPConfigUpdate, request: Reque
 
     await registry.update_mcp_servers(body.servers)
 
-    # Drop active sessions so they rebuild with the new MCP config
-    copilot_agent = request.app.state.copilot_agent
-    await copilot_agent.reset_sessions_for_use_case(use_case)
-
     logger.info("MCP config updated for use-case '%s': %d servers", use_case, len(body.servers))
     return MCPConfigResponse(
         servers=body.servers,

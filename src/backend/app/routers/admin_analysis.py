@@ -282,10 +282,8 @@ async def _call_llm(system_prompt: str, user_content: str, *, json_mode: bool = 
 
 
 def _reset_sessions(request: Request) -> None:
-    """Clear active SDK sessions so new conversations pick up changes."""
-    copilot_agent = getattr(request.app.state, "copilot_agent", None)
-    if copilot_agent is not None:
-        copilot_agent._sessions.clear()
+    """No-op — sessions are managed by the Foundry hosted agent."""
+    logger.debug("Session reset skipped — Copilot SDK runs in hosted agent")
 
 
 @router.post("/apply-fix", response_model=ApplyFixResponse)
@@ -338,15 +336,13 @@ async def apply_fix(
                 fixed = re.sub(r"\n?```$", "", fixed)
 
             if fixed and fixed != prompt:
-                # Update in Cosmos + copilot agent
+                # Update in Cosmos and registry
                 cosmos = request.app.state.cosmos_service
-                copilot_agent = request.app.state.copilot_agent
                 await cosmos.upsert_setting({
                     "id": "system-prompt",
                     "category": "system",
                     "content": fixed,
                 })
-                await copilot_agent.update_system_prompt(fixed)
                 registry.system_prompt = fixed
                 changes.append(FixChange(
                     target="system-prompt",

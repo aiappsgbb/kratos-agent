@@ -102,6 +102,7 @@ class SkillRegistry:
         use_case: str,
         blob_service: BlobSkillService | None = None,
         apm_service: ApmService | None = None,
+        local_root: str = "use-cases",
     ) -> None:
         """Load skills for a use-case from blob storage.
 
@@ -148,16 +149,16 @@ class SkillRegistry:
             logger.info("Loaded use-case '%s': %d skills from blob", use_case, len(self.skills))
         else:
             # No blob available — fall back to local use-cases/ directory
-            await self._load_from_local(use_case)
+            await self._load_from_local(use_case, local_root)
 
         # Merge APM-materialised skills (local/blob wins on name collision)
         if apm_service is not None:
             await self._load_apm_skills(apm_service)
             await self._load_apm_mcp_servers(apm_service)
 
-    async def _load_from_local(self, use_case: str) -> None:
+    async def _load_from_local(self, use_case: str, local_root: str = "use-cases") -> None:
         """Load a use-case from the baked-in use-cases/ directory (local dev fallback)."""
-        uc_dir = Path("use-cases") / use_case
+        uc_dir = Path(local_root) / use_case
         if not uc_dir.exists():
             logger.warning("No local use-case directory found: %s", uc_dir)
             return
@@ -301,6 +302,10 @@ class SkillRegistry:
 
         The SDK expects directory paths containing SKILL.md files.
         After blob sync, these are already on the local filesystem.
+
+        If a skill directory contains auxiliary files (scripts, references,
+        data), a ``## Available Files`` section is appended to SKILL.md so
+        the agent knows it can ``read_file`` them at runtime.
         """
         dirs: list[str] = []
         for skill in self.get_enabled_skills():
@@ -309,10 +314,40 @@ class SkillRegistry:
                 # Ensure SKILL.md is written (may have been updated via admin)
                 if skill.instructions:
                     skill_dir.mkdir(parents=True, exist_ok=True)
-                    (skill_dir / "SKILL.md").write_text(skill.instructions)
+                    enriched = self._enrich_skill_md(skill.instructions, skill_dir)
+                    (skill_dir / "SKILL.md").write_text(enriched)
                 if skill_dir.exists():
                     dirs.append(str(skill_dir))
         return dirs
+
+    @staticmethod
+    def _enrich_skill_md(instructions: str, skill_dir: Path) -> str:
+        """Append an inventory of auxiliary files to the SKILL.md content.
+
+        The SDK only reads SKILL.md, but the Copilot CLI has a built-in
+        ``read_file`` tool.  By listing the files that exist alongside
+        SKILL.md the agent learns about them and can read them on demand.
+        """
+        aux_files: list[str] = []
+        for f in sorted(skill_dir.rglob("*")):
+            if f.is_file() and f.name != "SKILL.md":
+                aux_files.append(str(f.relative_to(skill_dir)))
+
+        if not aux_files:
+            return instructions
+
+        # Strip any previously appended inventory (idempotent)
+        marker = "\n\n<!-- skill-files -->"
+        base = instructions.split(marker)[0]
+
+        listing = "\n".join(f"- `{p}`" for p in aux_files)
+        return (
+            f"{base}{marker}\n"
+            f"## Available Files\n\n"
+            f"This skill directory contains the following files you can read "
+            f"with `read_file` using their absolute paths (prefix `{skill_dir}/`):\n\n"
+            f"{listing}\n"
+        )
 
     def get_enabled_tool_names(self) -> set[str]:
         """Return tool function names for enabled skills."""

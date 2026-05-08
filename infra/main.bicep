@@ -195,6 +195,7 @@ module agentService './modules/agent-service.bicep' = {
     foundryEndpoint: aiFoundry.outputs.endpoint
     foundryModelDeployment: aiFoundry.outputs.modelDeploymentName
     foundryProjectName: aiFoundry.outputs.projectName
+    foundryProjectEndpoint: aiFoundry.outputs.projectEndpoint
     bingSearchEndpoint: bingSearch.outputs.endpoint
     blobStorageEndpoint: blobStorage.outputs.endpoint
     staticWebAppUrl: staticWebApp.outputs.url
@@ -256,5 +257,6 @@ output AGENT_SERVICE_URL string = agentService.outputs.url
 output AI_GATEWAY_URL string = aiGateway.outputs.gatewayUrl
 output FOUNDRY_ENDPOINT string = aiFoundry.outputs.endpoint
 output FOUNDRY_MODEL_DEPLOYMENT string = aiFoundry.outputs.modelDeploymentName
+output AZURE_AI_PROJECT_ENDPOINT string = aiFoundry.outputs.projectEndpoint
 output AZURE_BLOB_STORAGE_ENDPOINT string = blobStorage.outputs.endpoint
 output AZURE_BLOB_STORAGE_ACCOUNT_NAME string = blobStorage.outputs.name

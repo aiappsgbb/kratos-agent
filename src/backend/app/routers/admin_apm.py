@@ -151,7 +151,7 @@ async def _reload_use_case(request: Request, use_case: str) -> None:
         try:
             await copilot_agent.reset_sessions_for_use_case(use_case)
         except Exception:  # noqa: BLE001
-            logger.exception("Failed to reset sessions for use-case '%s'", use_case)
+            logger.debug("Session reset skipped — Copilot SDK runs in hosted agent")
 
 
 async def _build_command_response(

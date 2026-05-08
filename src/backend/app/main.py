@@ -26,8 +26,8 @@ from app.routers import (
 )
 from app.services.apm_service import ApmError, ApmService
 from app.services.blob_skill_service import BlobSkillService
-from app.services.copilot_agent import CopilotAgent
 from app.services.cosmos_service import CosmosService
+from app.services.foundry_agent_proxy import FoundryAgentProxy
 from app.services.skill_registry import SkillRegistry
 
 logging.basicConfig(
@@ -78,14 +78,12 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan: initialize services on startup, cleanup on shutdown."""
     settings = get_settings()
 
-    # Fail fast if required settings are missing
-    _required = {
-        "foundry_endpoint": settings.foundry_endpoint,
-        "foundry_model_deployment": settings.foundry_model_deployment,
-    }
-    missing = [k for k, v in _required.items() if not v]
-    if missing:
-        raise RuntimeError(f"Missing required configuration: {', '.join(missing)}")
+    # Fail fast if the hosted agent endpoint is not configured
+    if not settings.foundry_agent_invocations_endpoint and not settings.foundry_project_endpoint:
+        raise RuntimeError(
+            "Missing required configuration: set FOUNDRY_AGENT_INVOCATIONS_ENDPOINT "
+            "or FOUNDRY_PROJECT_ENDPOINT + FOUNDRY_AGENT_NAME"
+        )
 
     # Setup OpenTelemetry (traces, metrics, logs/events exporters)
     setup_telemetry(settings)
@@ -134,19 +132,17 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     application.state.skill_registry = registries.get("generic", SkillRegistry())
     logger.info("Loaded %d use-cases: %s", len(registries), list(registries.keys()))
 
-    # Initialize Copilot SDK agent (uses DefaultAzureCredential for Microsoft Foundry)
-    copilot_agent = CopilotAgent(settings)
-    copilot_agent.set_registries(registries)
-    copilot_agent.set_cosmos_service(cosmos_service)
-
-    await copilot_agent.start()
-    application.state.copilot_agent = copilot_agent
+    # Initialize Foundry hosted agent proxy (Copilot SDK runs in the hosted agent only)
+    foundry_proxy = FoundryAgentProxy(settings)
+    await foundry_proxy.start()
+    application.state.foundry_proxy = foundry_proxy
+    application.state.settings = settings
 
     logger.info("Kratos Agent Service started — environment=%s", settings.environment)
     yield
 
     # Cleanup
-    await copilot_agent.stop()
+    await foundry_proxy.stop()
     await blob_skill_service.close()
     await cosmos_service.close()
     logger.info("Kratos Agent Service shutting down")

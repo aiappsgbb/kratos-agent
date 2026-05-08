@@ -1,42 +1,71 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+requiredVersions:
+    extensions:
+        azure.ai.agents: '>=0.1.25-preview'
 name: kratos-agent
 metadata:
-  template: kratos-agent@0.1.0
-
+    template: kratos-agent@0.1.0
 services:
-  agent-service:
-    project: ./src/backend
-    language: python
-    host: containerapp
-    docker:
-      path: ./Dockerfile
-      context: ../..
-
-  web:
-    project: ./src/frontend
-    language: js
-    host: staticwebapp
-    dist: out
-    hooks:
-      predeploy:
+    agent-service:
+        project: ./src/backend
+        host: containerapp
+        language: python
+        docker:
+            path: ./Dockerfile
+            context: ../..
+    hosted-agent:
+        project: ./src/hosted-agent
+        host: azure.ai.agent
+        language: docker
+        docker:
+            path: ./Dockerfile
+            context: ../..
+        config:
+            container:
+                resources:
+                    cpu: "1"
+                    memory: 2Gi
+            env:
+                APM_USE_CASES_ROOT: /app/use-cases
+                AZURE_AI_SEARCH_ENDPOINT: ${AZURE_AI_SEARCH_ENDPOINT}
+                BLOB_SKILLS_CONTAINER: skills
+                BLOB_STORAGE_ENDPOINT: ${AZURE_BLOB_STORAGE_ENDPOINT}
+                COSMOS_DB_DATABASE: kratos-agent
+                COSMOS_DB_ENDPOINT: ${AZURE_COSMOS_DB_ENDPOINT}
+                KEY_VAULT_URI: ${AZURE_KEY_VAULT_URI}
+                MODEL_DEPLOYMENT_NAME: ${FOUNDRY_MODEL_DEPLOYMENT}
+    web:
+        project: ./src/frontend
+        host: staticwebapp
+        language: js
+        dist: out
+        hooks:
+            predeploy:
+                name: predeploy
+                kind: sh
+                shell: sh
+                run: |
+                    if [ -n "${AGENT_SERVICE_URL}" ]; then
+                      echo "{\"apiUrl\":\"${AGENT_SERVICE_URL}\"}" > out/config.json
+                      echo "Injected config.json with apiUrl=${AGENT_SERVICE_URL}"
+                    fi
+hooks:
+    postdeploy:
+        name: postdeploy
+        kind: sh
+        shell: sh
+        run: ./hooks/postdeploy.sh
+        interactive: true
+    postprovision:
+        name: postprovision
+        kind: sh
         shell: sh
         run: |
-          if [ -n "${AGENT_SERVICE_URL}" ]; then
-            echo "{\"apiUrl\":\"${AGENT_SERVICE_URL}\"}" > out/config.json
-            echo "Injected config.json with apiUrl=${AGENT_SERVICE_URL}"
-          fi
-
-hooks:
-  preprovision:
-    shell: sh
-    run: echo "Provisioning Azure resources..."
-
-  postprovision:
-    shell: sh
-    run: |
-      echo "Post-provisioning: configuring services..."
-      echo "Deployment complete."
-
-  postdeploy:
-    shell: sh
-    run: ./hooks/postdeploy.sh
-    interactive: true
+            echo "Post-provisioning: configuring services..."
+            echo "Deployment complete."
+    preprovision:
+        name: preprovision
+        kind: sh
+        shell: sh
+        run: echo "Provisioning Azure resources..."

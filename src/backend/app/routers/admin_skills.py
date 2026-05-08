@@ -27,11 +27,8 @@ def _get_registry(request: Request, use_case: str) -> SkillRegistry:
 
 
 def _reset_sessions(request: Request) -> None:
-    """Clear all SDK sessions so new conversations pick up skill changes."""
-    copilot_agent = getattr(request.app.state, "copilot_agent", None)
-    if copilot_agent is not None:
-        copilot_agent._sessions.clear()
-        logger.info("Cleared SDK sessions after skill change")
+    """No-op — sessions are managed by the Foundry hosted agent."""
+    logger.debug("Session reset skipped — Copilot SDK runs in hosted agent")
 
 
 def _count_skill_files(skill: SkillMetadata) -> int:

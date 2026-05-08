@@ -1,10 +1,7 @@
-"""Agent endpoint — accepts user prompts and streams Copilot SDK responses via SSE."""
+"""Agent endpoint — forwards requests to the Foundry hosted agent and streams SSE."""
 
-import base64
 import json
 import logging
-import os
-import tempfile
 import time
 import uuid
 from datetime import datetime, timezone
@@ -15,17 +12,11 @@ from sse_starlette.sse import EventSourceResponse
 
 from app.models import (
     AgentRequest,
-    ContentEvent,
     DoneEvent,
     ErrorEvent,
     FollowUpQuestionsEvent,
     Message,
     MessageRole,
-    ThoughtEvent,
-    ToolCallEvent,
-    UsageEvent,
-    UserInputRequestEvent,
-    UserInputResponseRequest,
 )
 from app.services.follow_up_service import generate_follow_ups
 
@@ -36,7 +27,7 @@ router = APIRouter()
 
 @router.post("/chat")
 async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
-    """Run the Copilot SDK agent and stream results as Server-Sent Events.
+    """Forward the request to the Foundry hosted agent and stream results as SSE.
 
     The response is a stream of JSON events:
     - thought: Agent reasoning / plan
@@ -46,10 +37,7 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
     - error: Error details
     """
     cosmos = request.app.state.cosmos_service
-    copilot_agent = request.app.state.copilot_agent
-
-    # Associate conversation with the requested use-case
-    copilot_agent.set_conversation_use_case(body.conversationId, body.useCase)
+    foundry_proxy = request.app.state.foundry_proxy
 
     async def event_generator():  # noqa: ANN202
         start_time = time.monotonic()
@@ -66,72 +54,76 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
             )
             await cosmos.upsert_message(user_message)
 
-            # Convert attachments to SDK format — write uploaded content to temp files
-            sdk_attachments = None
-            temp_files: list[str] = []
-            if body.attachments:
-                sdk_attachments = []
-                for att in body.attachments:
-                    dumped = att.model_dump()
-                    if dumped.get("content") and dumped.get("type") == "file":
-                        # Decode base64 content and write to a temp file
-                        raw = base64.b64decode(dumped["content"])
-                        suffix = os.path.splitext(dumped.get("path", ""))[1] or ""
-                        fd, tmp_path = tempfile.mkstemp(suffix=suffix, prefix="kratos-")
-                        os.write(fd, raw)
-                        os.close(fd)
-                        temp_files.append(tmp_path)
-                        sdk_attachments.append({
-                            "type": "file",
-                            "path": tmp_path,
-                            "displayName": dumped.get("displayName", ""),
-                        })
-                    else:
-                        # Strip content field for non-upload attachments
-                        dumped.pop("content", None)
-                        sdk_attachments.append(dumped)
+            # Resolve use-case system prompt from the registry
+            registries = getattr(request.app.state, "registries", {})
+            registry = registries.get(body.useCase)
+            system_prompt = getattr(registry, "system_prompt", None) if registry else None
 
-            # Run the Copilot SDK agent
+            # Look up existing gateway session ID so the hosted agent
+            # container (and its in-process CopilotClient state) is reused.
+            agent_session_id = await cosmos.get_session_mapping(body.conversationId)
+            logger.info("Session lookup for conversation=%s: agent_session_id=%s", body.conversationId, agent_session_id)
+
+            # Stream events from the Foundry hosted agent
             assistant_content_parts: list[str] = []
             collected_thoughts: list[str] = []
             collected_tool_calls: list[dict] = []
+            proxy_done: dict = {}
+            gateway_session_id: str | None = None
 
-            async for event in copilot_agent.run(
+            async for event_dict in foundry_proxy.invoke(
                 message=body.message,
                 conversation_id=body.conversationId,
-                attachments=sdk_attachments,
+                use_case=body.useCase,
+                system_prompt=system_prompt,
+                agent_session_id=agent_session_id,
             ):
-                if isinstance(event, ThoughtEvent):
-                    collected_thoughts.append(event.content)
-                    yield {"event": "thought", "data": json.dumps(event.model_dump())}
-                elif isinstance(event, ToolCallEvent):
-                    if event.status == "completed":
+                event_name = event_dict.get("event")
+                event_data = event_dict.get("data", {})
+
+                if event_name == "thought":
+                    collected_thoughts.append(event_data.get("content", ""))
+                    yield {"event": "thought", "data": json.dumps(event_data)}
+                elif event_name == "tool_call":
+                    if event_data.get("status") == "completed":
                         total_tool_calls += 1
-                    collected_tool_calls.append(event.model_dump())
-                    yield {"event": "tool_call", "data": json.dumps(event.model_dump())}
-                elif isinstance(event, UsageEvent):
-                    yield {"event": "usage", "data": json.dumps(event.model_dump())}
-                elif isinstance(event, ContentEvent):
-                    assistant_content_parts.append(event.content)
-                    yield {"event": "content", "data": json.dumps(event.model_dump())}
-                elif isinstance(event, UserInputRequestEvent):
-                    yield {"event": "user_input_request", "data": json.dumps(event.model_dump())}
-                elif isinstance(event, ErrorEvent):
-                    yield {"event": "error", "data": json.dumps(event.model_dump())}
+                    collected_tool_calls.append(event_data)
+                    yield {"event": "tool_call", "data": json.dumps(event_data)}
+                elif event_name == "usage":
+                    yield {"event": "usage", "data": json.dumps(event_data)}
+                elif event_name == "content":
+                    assistant_content_parts.append(event_data.get("content", ""))
+                    yield {"event": "content", "data": json.dumps(event_data)}
+                elif event_name == "user_input_request":
+                    yield {"event": "user_input_request", "data": json.dumps(event_data)}
+                elif event_name == "error":
+                    yield {"event": "error", "data": json.dumps(event_data)}
+                elif event_name == "done":
+                    proxy_done = event_data
+                elif event_name == "_gateway_session":
+                    gateway_session_id = event_data.get("agentSessionId")
+
+            # Persist gateway session ID so subsequent messages reuse the
+            # same hosted agent container (preserving CopilotClient state).
+            if gateway_session_id:
+                logger.info("Gateway session for conversation=%s: %s", body.conversationId, gateway_session_id)
+                try:
+                    await cosmos.upsert_session_mapping(body.conversationId, gateway_session_id)
+                except Exception:
+                    logger.warning("Failed to persist gateway session mapping (non-fatal)", exc_info=True)
 
             # Persist assistant response with execution details
             full_response = "".join(assistant_content_parts)
-            stats = copilot_agent.get_run_stats(body.conversationId)
             elapsed_ms = int((time.monotonic() - start_time) * 1000)
             run_stats = {
                 "totalDurationMs": elapsed_ms,
                 "totalToolCalls": total_tool_calls,
-                "promptTokens": stats["prompt_tokens"],
-                "completionTokens": stats["completion_tokens"],
-                "reasoningTokens": stats.get("reasoning_tokens", 0),
-                "totalTokens": stats["total_tokens"],
-                "timeToFirstTokenMs": stats["time_to_first_token_ms"],
-                "modelLatencyMs": stats["model_latency_ms"],
+                "promptTokens": proxy_done.get("promptTokens", 0),
+                "completionTokens": proxy_done.get("completionTokens", 0),
+                "reasoningTokens": proxy_done.get("reasoningTokens", 0),
+                "totalTokens": proxy_done.get("totalTokens", 0),
+                "timeToFirstTokenMs": proxy_done.get("timeToFirstTokenMs", 0),
+                "modelLatencyMs": proxy_done.get("modelLatencyMs", 0),
             }
             assistant_message = Message(
                 id=str(uuid.uuid4()),
@@ -149,7 +141,9 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
 
             # Generate follow-up questions (best-effort, non-blocking)
             try:
-                skill_names = copilot_agent.get_enabled_skill_names(body.conversationId)
+                registries = getattr(request.app.state, "registries", {})
+                registry = registries.get(body.useCase)
+                skill_names = [s.name for s in registry.skills if s.enabled] if registry else []
                 follow_ups = await generate_follow_ups(body.message, full_response, skill_names)
                 if follow_ups:
                     yield {"event": "follow_up_questions", "data": json.dumps(FollowUpQuestionsEvent(questions=follow_ups).model_dump())}
@@ -171,28 +165,17 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
             yield {"event": "done", "data": json.dumps(done.model_dump())}
 
         except Exception:
-            logger.exception("Copilot agent failed for conversation=%s", body.conversationId)
+            logger.exception("Agent proxy failed for conversation=%s", body.conversationId)
             error = ErrorEvent(message="An internal error occurred", code="AGENT_ERROR")
             yield {"event": "error", "data": json.dumps(error.model_dump())}
-        finally:
-            # Clean up temp files created for uploaded attachments
-            for tmp in temp_files:
-                try:
-                    os.unlink(tmp)
-                except OSError:
-                    pass
 
     return EventSourceResponse(event_generator())
 
 
 @router.post("/user-input")
-async def user_input_response(body: UserInputResponseRequest, request: Request) -> JSONResponse:
-    """Respond to a user input request from the agent (ask_user tool)."""
-    copilot_agent = request.app.state.copilot_agent
-    resolved = copilot_agent.resolve_user_input(body.requestId, body.answer)
-    if not resolved:
-        return JSONResponse(
-            status_code=404,
-            content={"error": "User input request not found or already resolved"},
-        )
-    return JSONResponse(content={"status": "ok"})
+async def user_input_response(request: Request) -> JSONResponse:
+    """User input responses are not supported via the hosted agent proxy."""
+    return JSONResponse(
+        status_code=501,
+        content={"error": "User input is handled directly by the hosted agent"},
+    )
