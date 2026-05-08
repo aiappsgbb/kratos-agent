@@ -265,6 +265,10 @@ class BlobSkillService:
 
     # ─── Internal helpers ─────────────────────────────────────────────────
 
+    async def download_blob(self, blob_path: str) -> bytes | None:
+        """Download a blob by its full path. Returns None if not found."""
+        return await self._download_file(blob_path)
+
     async def _download_file(self, blob_path: str) -> bytes | None:
         """Download a single blob by path."""
         if not self._container_client:

@@ -1,7 +1,9 @@
 """Agent endpoint — forwards requests to the Foundry hosted agent and streams SSE."""
 
+import base64
 import json
 import logging
+import re
 import time
 import uuid
 from datetime import datetime, timezone
@@ -23,6 +25,27 @@ from app.services.follow_up_service import generate_follow_ups
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+_SAFE_FILENAME_RE = re.compile(r"^[\w\-. ]+$")
+
+
+def _save_streamed_file(event_data: dict) -> None:
+    """Save a file streamed from the hosted agent to /tmp."""
+    filename = event_data.get("filename", "")
+    content_b64 = event_data.get("content", "")
+    if not filename or not content_b64:
+        return
+    if not _SAFE_FILENAME_RE.match(filename):
+        logger.warning("Ignoring streamed file with unsafe name: %s", filename)
+        return
+    try:
+        data = base64.b64decode(content_b64)
+        path = f"/tmp/{filename}"  # noqa: S108
+        with open(path, "wb") as f:
+            f.write(data)
+        logger.info("Saved streamed file: %s (%d bytes)", path, len(data))
+    except Exception:
+        logger.warning("Failed to save streamed file: %s", filename, exc_info=True)
 
 
 @router.post("/chat")
@@ -94,6 +117,10 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                 elif event_name == "content":
                     assistant_content_parts.append(event_data.get("content", ""))
                     yield {"event": "content", "data": json.dumps(event_data)}
+                elif event_name == "file_content":
+                    # Hosted agent streams generated files — save to /tmp for
+                    # the download endpoint to serve. Do NOT forward to frontend.
+                    _save_streamed_file(event_data)
                 elif event_name == "user_input_request":
                     yield {"event": "user_input_request", "data": json.dumps(event_data)}
                 elif event_name == "error":

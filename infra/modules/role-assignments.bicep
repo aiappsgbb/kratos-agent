@@ -130,6 +130,17 @@ resource agentStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   }
 }
 
+// ─── AI Services (Hosted Agent) → Blob Storage ───
+resource aiServicesStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageAccount.id, aiServices.identity.principalId, storageBlobDataContributor)
+  scope: storageAccount
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributor)
+    principalId: aiServices.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // ─── Deploying User → Cosmos DB (for local dev) ───
 resource userCosmosRole 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-02-15-preview' = if (!empty(principalId)) {
   parent: cosmosDb

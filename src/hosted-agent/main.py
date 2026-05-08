@@ -12,6 +12,7 @@ Key differences from the FastAPI backend:
 """
 
 import asyncio
+import base64
 import json
 import logging
 import os
@@ -75,6 +76,7 @@ logger = logging.getLogger(__name__)
 
 _copilot_agent: CopilotAgent | None = None
 _cosmos_service: CosmosService | None = None
+_blob_service: BlobSkillService | None = None
 _registries: dict[str, SkillRegistry] = {}
 _settings: Settings | None = None
 
@@ -109,7 +111,7 @@ async def _apm_startup_sync(apm_service: ApmService, use_cases_root: str) -> tup
 
 async def _startup() -> None:
     """Initialise all services — mirrors the FastAPI lifespan startup."""
-    global _copilot_agent, _cosmos_service, _settings
+    global _copilot_agent, _cosmos_service, _blob_service, _settings
 
     _settings = get_settings()
 
@@ -123,6 +125,7 @@ async def _startup() -> None:
     # Blob Storage for skills
     blob_service = BlobSkillService(_settings)
     await blob_service.initialize()
+    _blob_service = blob_service
 
     # APM service
     apm_service = ApmService(_settings, blob_service)
@@ -186,6 +189,35 @@ async def _shutdown() -> None:
 
 # ─── Invocation Handler ─────────────────────────────────────────────────────
 
+_TMP_FILE_PATTERN = re.compile(r"/tmp/([\w.\- ]+\.[a-zA-Z0-9]{1,10})")
+
+
+def _collect_generated_files(response_text: str) -> list[tuple[str, bytes]]:
+    """Scan the agent response for /tmp/ file paths and collect their contents.
+
+    Returns a list of (filename, file_bytes) tuples for files that exist locally.
+    These will be streamed to the backend proxy via SSE events.
+    """
+    matches = _TMP_FILE_PATTERN.findall(response_text)
+    if not matches:
+        return []
+
+    files: list[tuple[str, bytes]] = []
+    for filename in set(matches):
+        local_path = f"/tmp/{filename}"
+        if not os.path.isfile(local_path):
+            logger.warning("Referenced file not found locally: %s", local_path)
+            continue
+        try:
+            with open(local_path, "rb") as f:
+                data = f.read()
+            files.append((filename, data))
+            logger.info("Collected generated file: %s (%d bytes)", filename, len(data))
+        except Exception:
+            logger.warning("Failed to read generated file %s", filename, exc_info=True)
+    return files
+
+
 async def _stream_response(invocation_id: str, conversation_id: str, message: str, use_case: str):
     """Run the Copilot SDK agent and stream our SSE event schema."""
     start_time = time.monotonic()
@@ -241,6 +273,18 @@ async def _stream_response(invocation_id: str, conversation_id: str, message: st
 
         # Persist assistant response
         full_response = "".join(assistant_content_parts)
+
+        # Stream generated files to the backend proxy so it can serve them
+        # from its own /tmp. This avoids needing blob access from the hosted
+        # agent container (which is outside the VNet).
+        generated_files = _collect_generated_files(full_response)
+        for filename, data in generated_files:
+            file_event = {
+                "event": "file_content",
+                "data": {"filename": filename, "content": base64.b64encode(data).decode("ascii")},
+            }
+            yield f"data: {json.dumps(file_event)}\n\n".encode()
+
         stats = _copilot_agent.get_run_stats(conversation_id)
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
         run_stats = {
