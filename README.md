@@ -48,26 +48,29 @@ One example of what the agent can produce: the wealth management persona generat
 
 ## Architecture
 
-```
-User ──▶ Static Web App ──▶ API Management ──▶ Backend ──▶ Hosted Agent
-         (Next.js 14)       (AI Gateway)       (FastAPI)   (Foundry)
-                                 │                              │
-                                 ▼                              ▼
-                           App Insights               CopilotClient
-                           + Foundry Traces           (Agentic Loop)
-                                                       /        \
-                                                      ▼          ▼
-                                                   Skills      Models
-                                                   (MCP)     (GPT-4o/5)
-                                                      │
-                       ┌─────────────────┬────────────┼──────────────────┐
-                       ▼                 ▼            ▼                  ▼
-                  Generic          Retail Banking  Wealth Mgmt       Insurance
-                  ├─ web search    ├─ account lookup   ├─ portfolio      ├─ policy info
-                  ├─ code interp.  ├─ transactions     ├─ tax analysis   ├─ claims
-                  ├─ file sharing  ├─ mortgage calc    ├─ PDF reports    ├─ coverage
-                  └─ RAG search    └─ spending         └─ investment     └─ risk
-```
+### Why This Architecture — One Agent, N Skills
+
+Instead of orchestrating handoffs between multiple specialized agents, Kratos uses a single agent backed by N swappable MCP skills — simpler to reason about, debug, and extend.
+
+<div align="center">
+<img src="docs/static/img/accelerator-approach.png" alt="Single agent with N skills vs. multi-agent handoffs" width="800">
+</div>
+
+### Agentic Loop — Reason, Act, Observe
+
+Each turn follows a Reason → Act → Observe cycle powered by the Copilot SDK. The agent plans its approach, invokes tools, inspects results, and iterates until it has a complete answer.
+
+<div align="center">
+<img src="docs/static/img/agentic-loop.png" alt="Agentic Loop — Reason, Act, Observe" width="800">
+</div>
+
+### System Overview
+
+End-to-end request flow from the frontend through the AI Gateway to the Foundry-hosted agent, which calls models and executes skills against platform services.
+
+<div align="center">
+<img src="docs/static/img/architecture-overview.png" alt="Architecture Overview" width="800">
+</div>
 
 ### Dual-Compute Architecture
 
