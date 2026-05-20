@@ -1,0 +1,17 @@
+[
+  { "id": "USR-101", "name": "Alex Rivera",      "role": "AE — Strategic",   "email": "a.rivera@kratos.example.com" },
+  { "id": "USR-102", "name": "Sam Tanaka",       "role": "AE — Strategic",   "email": "s.tanaka@kratos.example.com" },
+  { "id": "USR-103", "name": "Jordan Pelletier", "role": "AE — Mid-Market",  "email": "j.pelletier@kratos.example.com" },
+  { "id": "USR-104", "name": "Morgan Davies",    "role": "AE — Strategic",   "email": "m.davies@kratos.example.com" },
+  { "id": "USR-105", "name": "Casey Lin",        "role": "AE — SMB / PLG",   "email": "c.lin@kratos.example.com" },
+
+  { "id": "USR-201", "name": "Reese Patel",      "role": "CSM",              "email": "r.patel@kratos.example.com" },
+  { "id": "USR-202", "name": "Tariq Hassan",     "role": "CSM",              "email": "t.hassan@kratos.example.com" },
+  { "id": "USR-203", "name": "Maya Brooks",      "role": "CSM",              "email": "m.brooks@kratos.example.com" },
+
+  { "id": "USR-301", "name": "Devon Park",       "role": "Solutions Engineer", "email": "d.park@kratos.example.com" },
+  { "id": "USR-302", "name": "Iris Romero",      "role": "Solutions Engineer", "email": "i.romero@kratos.example.com" },
+
+  { "id": "USR-901", "name": "Quinn Adebayo",    "role": "Support Engineer", "email": "q.adebayo@kratos.example.com" },
+  { "id": "USR-902", "name": "Robin Cho",        "role": "Support Engineer", "email": "r.cho@kratos.example.com" }
+]

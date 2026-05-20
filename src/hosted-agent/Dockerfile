@@ -13,6 +13,14 @@ RUN apt-get update \
 RUN npm install -g @github/copilot@latest faker-mcp-server@latest \
     && rm -rf /root/.npm /tmp/*
 
+# ── Layer 2b: In-repo mock MCP servers (Salesforce, etc.) ──
+COPY mocks/ /opt/mocks/
+RUN cd /opt/mocks \
+    && npm install --workspaces \
+    && npm run build --workspaces --if-present \
+    && npm install -g ./packages/* \
+    && rm -rf /root/.npm /tmp/*
+
 # ── Layer 3: Playwright Chromium for PDF rendering ──
 RUN npx -y playwright install --with-deps chromium \
     && rm -rf /var/lib/apt/lists/* /tmp/*

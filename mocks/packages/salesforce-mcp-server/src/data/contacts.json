@@ -1,0 +1,21 @@
+[
+  { "id": "CON-1001", "account_id": "ACC-001", "first_name": "Margaret", "last_name": "Chen", "title": "Chief Financial Officer", "email": "m.chen@acme.example.com", "phone": "+1-216-555-0142", "is_primary": true, "role": "Economic Buyer" },
+  { "id": "CON-1002", "account_id": "ACC-001", "first_name": "David", "last_name": "Okafor", "title": "VP, Data & Analytics", "email": "d.okafor@acme.example.com", "phone": "+1-216-555-0177", "is_primary": false, "role": "Technical Buyer" },
+  { "id": "CON-1003", "account_id": "ACC-001", "first_name": "Priya", "last_name": "Rao", "title": "Director, FP&A", "email": "p.rao@acme.example.com", "phone": "+1-216-555-0188", "is_primary": false, "role": "Champion" },
+
+  { "id": "CON-2001", "account_id": "ACC-002", "first_name": "Hank", "last_name": "Mueller", "title": "Chief Information Officer", "email": "h.mueller@globex.example.com", "phone": "+1-713-555-0211", "is_primary": true, "role": "Economic Buyer" },
+  { "id": "CON-2002", "account_id": "ACC-002", "first_name": "Sara", "last_name": "Lindqvist", "title": "VP Engineering (new, starts 5/27)", "email": "s.lindqvist@globex.example.com", "phone": "+1-713-555-0244", "is_primary": false, "role": "Technical Buyer" },
+  { "id": "CON-2003", "account_id": "ACC-002", "first_name": "Marcus", "last_name": "Webb", "title": "Director, Refinery Operations", "email": "m.webb@globex.example.com", "phone": "+1-713-555-0266", "is_primary": false, "role": "End User" },
+
+  { "id": "CON-3001", "account_id": "ACC-003", "first_name": "Bill", "last_name": "Lumbergh", "title": "VP Sales", "email": "b.lumbergh@initech.example.com", "phone": "+1-512-555-0301", "is_primary": true, "role": "Economic Buyer" },
+  { "id": "CON-3002", "account_id": "ACC-003", "first_name": "Peter", "last_name": "Gibbons", "title": "Senior Engineer (active P1 ticket)", "email": "p.gibbons@initech.example.com", "phone": "+1-512-555-0322", "is_primary": false, "role": "Detractor" },
+
+  { "id": "CON-4001", "account_id": "ACC-004", "first_name": "Tony", "last_name": "Stark", "title": "Chief Technology Officer", "email": "t.stark@stark.example.com", "phone": "+1-310-555-0411", "is_primary": true, "role": "Executive Champion" },
+  { "id": "CON-4002", "account_id": "ACC-004", "first_name": "Pepper", "last_name": "Potts", "title": "Chief Operating Officer", "email": "p.potts@stark.example.com", "phone": "+1-310-555-0422", "is_primary": false, "role": "Economic Buyer" },
+  { "id": "CON-4003", "account_id": "ACC-004", "first_name": "James", "last_name": "Rhodes", "title": "Director, Platform Engineering", "email": "j.rhodes@stark.example.com", "phone": "+1-310-555-0433", "is_primary": false, "role": "Technical Buyer" },
+
+  { "id": "CON-5001", "account_id": "ACC-005", "first_name": "Lucius", "last_name": "Fox", "title": "Chief Operating Officer", "email": "l.fox@wayne.example.com", "phone": "+1-201-555-0501", "is_primary": true, "role": "Economic Buyer" },
+  { "id": "CON-5002", "account_id": "ACC-005", "first_name": "Alexandra", "last_name": "Powell", "title": "VP, Enterprise Architecture", "email": "a.powell@wayne.example.com", "phone": "+1-201-555-0522", "is_primary": false, "role": "Champion" },
+
+  { "id": "CON-6001", "account_id": "ACC-006", "first_name": "Richard", "last_name": "Hendricks", "title": "Founder & CEO", "email": "r.hendricks@piedpiper.example.com", "phone": "+1-650-555-0601", "is_primary": true, "role": "Decision Maker" }
+]

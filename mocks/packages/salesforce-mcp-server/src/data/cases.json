@@ -1,0 +1,9 @@
+[
+  { "id": "CASE-3001", "account_id": "ACC-003", "subject": "P1 — Auth outage blocking SSO logins", "priority": "P1", "status": "Open", "opened_date": "2026-05-09", "owner_user_id": "USR-901", "summary": "Customer SSO integration failing intermittently since 5/09. Workaround in place; root cause under investigation." },
+  { "id": "CASE-3002", "account_id": "ACC-003", "subject": "P1 — Data export pipeline stuck", "priority": "P1", "status": "Open", "opened_date": "2026-05-14", "owner_user_id": "USR-902", "summary": "Nightly data export to S3 has been failing for 5 nights. ETA for fix 5/24." },
+  { "id": "CASE-3003", "account_id": "ACC-003", "subject": "P3 — Dashboard slow render", "priority": "P3", "status": "Resolved", "opened_date": "2026-04-30", "owner_user_id": "USR-901", "summary": "Resolved via index optimization on 5/03." },
+
+  { "id": "CASE-2001", "account_id": "ACC-002", "subject": "P2 — Refinery dashboard missing field", "priority": "P2", "status": "In Progress", "opened_date": "2026-05-12", "owner_user_id": "USR-902", "summary": "Custom field request for compliance reporting. Targeted for next release." },
+
+  { "id": "CASE-5001", "account_id": "ACC-005", "subject": "P3 — Feature request: SAML JIT provisioning", "priority": "P3", "status": "Open", "opened_date": "2026-05-01", "owner_user_id": "USR-901", "summary": "Wayne IT requested JIT provisioning; on roadmap for Q3." }
+]

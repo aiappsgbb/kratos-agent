@@ -1,0 +1,20 @@
+[
+  { "id": "ACT-1001", "account_id": "ACC-001", "type": "Meeting", "subject": "QBR with CFO + FP&A", "date": "2026-05-08", "owner_user_id": "USR-101", "summary": "Reviewed Q1 usage; CFO confirmed expansion budget approved. Action: send Analytics proposal by 5/15." },
+  { "id": "ACT-1002", "account_id": "ACC-001", "type": "Email", "subject": "Analytics proposal v2", "date": "2026-05-14", "owner_user_id": "USR-101", "summary": "Sent revised proposal with 3-yr pricing. Awaiting procurement red-lines." },
+  { "id": "ACT-1003", "account_id": "ACC-001", "type": "Call", "subject": "Champion sync — Priya Rao", "date": "2026-05-18", "owner_user_id": "USR-101", "summary": "Confirmed CFO support; expects MSA sign by 6/15." },
+
+  { "id": "ACT-2001", "account_id": "ACC-002", "type": "Meeting", "subject": "Discovery — refinery analytics", "date": "2026-04-22", "owner_user_id": "USR-102", "summary": "Met with outgoing VP Eng; positive but role change announced. Pause until new VP onboards." },
+  { "id": "ACT-2002", "account_id": "ACC-002", "type": "Email", "subject": "Renewal quote", "date": "2026-05-12", "owner_user_id": "USR-102", "summary": "Sent renewal quote with flat pricing to de-risk renewal during leadership transition." },
+  { "id": "ACT-2003", "account_id": "ACC-002", "type": "Call", "subject": "CIO check-in", "date": "2026-05-19", "owner_user_id": "USR-102", "summary": "Hank Mueller confirmed renewal is on track; new VP Eng starts 5/27 — will intro then." },
+
+  { "id": "ACT-3001", "account_id": "ACC-003", "type": "Call", "subject": "Save play prep call", "date": "2026-05-16", "owner_user_id": "USR-103", "summary": "Aligned with CSM on exec save plan; need to address two open P1s before 5/22 call." },
+  { "id": "ACT-3002", "account_id": "ACC-003", "type": "Email", "subject": "Exec apology + remediation plan", "date": "2026-05-17", "owner_user_id": "USR-201", "summary": "CSM sent remediation plan to Bill Lumbergh; offered service credit." },
+
+  { "id": "ACT-4001", "account_id": "ACC-004", "type": "Meeting", "subject": "Quarterly exec sync with Tony Stark", "date": "2026-05-06", "owner_user_id": "USR-101", "summary": "Discussed roadmap for code-interpreter add-on; Tony wants demo to Rhodes' team in June." },
+  { "id": "ACT-4002", "account_id": "ACC-004", "type": "Email", "subject": "Reference call follow-up", "date": "2026-05-13", "owner_user_id": "USR-203", "summary": "Pepper agreed to be a public reference; case study draft due 6/01." },
+
+  { "id": "ACT-5001", "account_id": "ACC-005", "type": "Meeting", "subject": "Renewal commercials with Lucius Fox", "date": "2026-04-02", "owner_user_id": "USR-104", "summary": "Agreed on 18% uplift in exchange for Analytics tier inclusion. Paperwork in motion." },
+  { "id": "ACT-5002", "account_id": "ACC-005", "type": "Call", "subject": "Procurement final review", "date": "2026-05-15", "owner_user_id": "USR-104", "summary": "Procurement requested SOC2 evidence + DPA update; sent same day. Close target 4/18 slipping to 4/22 (still in window)." },
+
+  { "id": "ACT-6001", "account_id": "ACC-006", "type": "Email", "subject": "PLG nurture #3", "date": "2026-05-10", "owner_user_id": "USR-105", "summary": "Automated nurture sent; Pied Piper now at 18 seats — trigger threshold is 25." }
+]

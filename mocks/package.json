@@ -1,0 +1,13 @@
+{
+  "name": "kratos-mocks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "In-repo stdio MCP servers that mock enterprise systems (Salesforce, Workday, SAP, etc.) for Kratos use-cases.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "link-all": "npm run link --workspaces --if-present"
+  }
+}

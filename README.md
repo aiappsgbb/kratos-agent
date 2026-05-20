@@ -284,6 +284,7 @@ Kratos ships with four configurable agent personas, each with its own system pro
 | **Retail Banking** | `use-cases/retail-banking/` | Account lookup, transaction history, mortgage calculator, spending analysis |
 | **Wealth Management** | `use-cases/wealth-management/` | Portfolio review, tax analysis, PDF wealth reports with charts |
 | **Insurance** | `use-cases/insurance/` | Policy information, claims processing, coverage analysis |
+| **Sales Account Review** | `use-cases/sales-account-review/` | AE/CSM co-pilot — account briefings, pipeline review, at-risk signals against the in-repo `salesforce-mcp-server` mock |
 
 Each use case has:
 - `SYSTEM_PROMPT.md` — Agent persona and behavior instructions

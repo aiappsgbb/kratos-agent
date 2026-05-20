@@ -1,0 +1,8 @@
+{
+  "salesforce": {
+    "type": "local",
+    "command": "salesforce-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  }
+}
