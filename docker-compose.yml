@@ -13,6 +13,29 @@ services:
       retries: 10
       start_period: 5s
 
+  hosted-agent:
+    build:
+      context: .
+      dockerfile: src/hosted-agent/Dockerfile
+    ports:
+      - "8088:8088"
+    environment:
+      LOCAL_MODE: "true"
+      COPILOT_GITHUB_TOKEN: ${COPILOT_GITHUB_TOKEN}
+      GITHUB_TOKEN: ${COPILOT_GITHUB_TOKEN}
+      BLOB_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
+      BLOB_SKILLS_CONTAINER: skills
+      LOCAL_DATA_DIR: /data
+      APM_USE_CASES_ROOT: /app/use-cases
+      ENVIRONMENT: development
+      APM_ENABLED: "true"
+    volumes:
+      - ./.local/hosted-agent:/data
+      - ./use-cases:/app/use-cases
+    depends_on:
+      azurite:
+        condition: service_healthy
+
   backend:
     build:
       context: .
@@ -22,6 +45,7 @@ services:
     environment:
       LOCAL_MODE: "true"
       COPILOT_GITHUB_TOKEN: ${COPILOT_GITHUB_TOKEN}
+      FOUNDRY_AGENT_INVOCATIONS_ENDPOINT: "http://hosted-agent:8088/invocations"
       BLOB_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;"
       BLOB_SKILLS_CONTAINER: skills
       LOCAL_DATA_DIR: /data
@@ -33,3 +57,5 @@ services:
     depends_on:
       azurite:
         condition: service_healthy
+      hosted-agent:
+        condition: service_started

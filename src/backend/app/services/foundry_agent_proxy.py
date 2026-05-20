@@ -35,9 +35,16 @@ class FoundryAgentProxy:
                 f"/endpoint/protocols/invocations?api-version={api_version}"
             )
 
-        self._credential = DefaultAzureCredential()
+        # In local mode the hosted agent is an unauthenticated localhost stub;
+        # skip the Azure credential entirely (container has no `az` CLI / MSI).
+        self._local_mode = settings.is_local_mode
+        self._credential = None if self._local_mode else DefaultAzureCredential()
         self._http_session: aiohttp.ClientSession | None = None
-        logger.info("FoundryAgentProxy endpoint: %s", self._endpoint)
+        logger.info(
+            "FoundryAgentProxy endpoint: %s (local_mode=%s)",
+            self._endpoint,
+            self._local_mode,
+        )
 
     async def start(self) -> None:
         self._http_session = aiohttp.ClientSession()
@@ -45,9 +52,12 @@ class FoundryAgentProxy:
     async def stop(self) -> None:
         if self._http_session:
             await self._http_session.close()
-        await self._credential.close()
+        if self._credential is not None:
+            await self._credential.close()
 
-    async def _get_token(self) -> str:
+    async def _get_token(self) -> str | None:
+        if self._credential is None:
+            return None
         token = await self._credential.get_token(_AI_SCOPE)
         return token.token
 
@@ -87,11 +97,12 @@ class FoundryAgentProxy:
 
         token = await self._get_token()
         headers = {
-            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
             "Accept": "text/event-stream",
             "Foundry-Features": "HostedAgents=V1Preview",
         }
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
         payload = {
             "input": input_text,
             "conversationId": conversation_id,
