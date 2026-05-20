@@ -34,6 +34,82 @@ function prettyToolName(name: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** Collapse "Salesforce Salesforce List Open Cases" → "Salesforce List Open Cases".
+ *  The SDK sometimes emits thought labels that include the MCP server name
+ *  twice (once from the namespace, once from the tool name). Drop the dupe.
+ */
+function collapseAdjacentDuplicateWords(s: string): string {
+  return s.replace(/\b(\w+)(\s+\1\b)+/gi, "$1");
+}
+
+/** Reserved names that come from the SDK / Copilot runtime itself rather than from a skill or MCP server. */
+const BUILTIN_NAMES = new Set([
+  "skill",
+  "report_intent",
+  "code_interpreter",
+  "web_search",
+  "think",
+]);
+
+export type ToolKind = "mcp" | "skill" | "builtin";
+
+/** Classify a tool call by where it came from.
+ *  - MCP server tool:   "<server>-<server>_<verb>" or "<server>-<verb>_<noun>"  (server prefix + underscore in the suffix)
+ *  - Skill (markdown):  "account-briefing", "at-risk-signals"               (kebab-case folder name, no underscores)
+ *  - Built-in:          reserved names from BUILTIN_NAMES
+ */
+function classifyTool(rawName: string): ToolKind {
+  const name = rawName.toLowerCase();
+  if (BUILTIN_NAMES.has(name)) return "builtin";
+  if (name.includes("-")) {
+    const afterDash = name.slice(name.indexOf("-") + 1);
+    if (afterDash.includes("_")) return "mcp";
+    return "skill";
+  }
+  if (name.includes("_")) return "builtin";
+  return "skill";
+}
+
+/** Strip noisy filler suffixes that don't add information in context. */
+function stripFillerSuffix(s: string): string {
+  return s.replace(/_by_[a-z]+$/i, "");
+}
+
+/** Build a clean human label for a pill.
+ *  Examples:
+ *    salesforce-salesforce_search_accounts_by_name → "Salesforce · Search Accounts"
+ *    salesforce-list_contacts_by_account            → "Salesforce · List Contacts"
+ *    account-briefing                               → "Account Briefing"
+ *    report_intent                                  → "Report Intent"
+ */
+function formatToolLabel(rawName: string): string {
+  if (BUILTIN_NAMES.has(rawName.toLowerCase())) return prettyToolName(rawName);
+
+  if (rawName.includes("-")) {
+    const dash = rawName.indexOf("-");
+    const server = rawName.slice(0, dash);
+    let rest = rawName.slice(dash + 1);
+
+    // Drop redundant "<server>_" prefix on the tool side
+    // (Copilot CLI prefixes MCP tools with the server name, and we also
+    //  prefix each tool function with the server name — strip the dupe.)
+    const dupePrefix = `${server}_`;
+    if (rest.toLowerCase().startsWith(dupePrefix.toLowerCase())) {
+      rest = rest.slice(dupePrefix.length);
+    }
+
+    rest = stripFillerSuffix(rest);
+
+    if (!rest.includes("_") && !rest.includes("-")) {
+      // kebab-skill-style after the dash (e.g. "account-briefing")
+      return prettyToolName(`${server}_${rest}`).replace(/^([\w]+) /, "$1 · ");
+    }
+    return `${prettyToolName(server)} · ${prettyToolName(rest)}`;
+  }
+
+  return prettyToolName(rawName);
+}
+
 /** Colour palette for tool status badges */
 const STATUS_COLORS = {
   started: { bg: "bg-primary-50", text: "text-primary-600", border: "border-primary-200", dot: "bg-primary-400" },
@@ -41,12 +117,48 @@ const STATUS_COLORS = {
   failed: { bg: "bg-red-50", text: "text-red-600", border: "border-red-200", dot: "bg-red-400" },
 } as const;
 
-function ToolPill({ tc }: { tc: ToolCallInfo }) {
-  const colors = STATUS_COLORS[tc.status] || STATUS_COLORS.completed;
+/** Colour palette by tool *kind* (used when a tool completes successfully).
+ *  Failed/started states still override these via STATUS_COLORS so the
+ *  liveness signal stays clear.
+ */
+const KIND_COLORS: Record<ToolKind, { bg: string; text: string; border: string; dot: string; label: string }> = {
+  mcp: {
+    bg: "bg-sky-50 dark:bg-sky-500/[0.08]",
+    text: "text-sky-700 dark:text-sky-300",
+    border: "border-sky-200 dark:border-sky-500/30",
+    dot: "bg-sky-500",
+    label: "MCP",
+  },
+  skill: {
+    bg: "bg-violet-50 dark:bg-violet-500/[0.08]",
+    text: "text-violet-700 dark:text-violet-300",
+    border: "border-violet-200 dark:border-violet-500/30",
+    dot: "bg-violet-500",
+    label: "Skill",
+  },
+  builtin: {
+    bg: "bg-slate-100 dark:bg-white/[0.05]",
+    text: "text-slate-600 dark:text-slate-300",
+    border: "border-slate-200 dark:border-white/[0.08]",
+    dot: "bg-slate-400",
+    label: "Built-in",
+  },
+};
+
+function ToolPill({ tc, count }: { tc: ToolCallInfo; count?: number }) {
   const isRunning = tc.status === "started";
+  const isFailed = tc.status === "failed";
+  const kind = classifyTool(tc.skillName);
+  const kindStyle = KIND_COLORS[kind];
+
+  // Failure overrides everything; running uses the muted status palette so it
+  // reads as "in flight"; completed adopts the kind colour.
+  const colors = isFailed ? STATUS_COLORS.failed : isRunning ? STATUS_COLORS.started : kindStyle;
+  const label = formatToolLabel(tc.skillName);
 
   return (
     <span
+      title={`${kindStyle.label} · ${tc.skillName}${count && count > 1 ? ` × ${count}` : ""}`}
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${colors.bg} ${colors.text} ${colors.border} transition-all duration-200`}
     >
       {isRunning ? (
@@ -57,7 +169,10 @@ function ToolPill({ tc }: { tc: ToolCallInfo }) {
       ) : (
         <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
       )}
-      {prettyToolName(tc.skillName)}
+      {label}
+      {count && count > 1 ? (
+        <span className="opacity-60 font-mono text-[10px]">×{count}</span>
+      ) : null}
       <SourceBadge source={tc.source} />
       {!isRunning && tc.durationMs !== undefined && tc.durationMs > 0 && (
         <span className="opacity-50 font-mono text-[10px]">{formatDuration(tc.durationMs)}</span>
@@ -241,8 +356,10 @@ export function ThoughtChain({
   const hasContent = thoughts.length > 0 || toolCalls.length > 0 || runStats;
   if (!hasContent) return null;
 
-  // Deduplicate: keep only the latest event per resolved tool name
+  // Deduplicate: keep only the latest event per resolved tool name,
+  // and tally how many times each tool was invoked.
   const toolMap = new Map<string, ToolCallInfo>();
+  const callCount = new Map<string, number>();
   for (const tc of toolCalls) {
     const resolvedName = resolveSkillName(tc);
     const resolved = { ...tc, skillName: resolvedName };
@@ -250,14 +367,40 @@ export function ThoughtChain({
     if (!existing || tc.status !== "started") {
       toolMap.set(resolvedName, resolved);
     }
+    if (tc.status === "completed" || tc.status === "failed") {
+      callCount.set(resolvedName, (callCount.get(resolvedName) ?? 0) + 1);
+    }
   }
   const uniqueTools = Array.from(toolMap.values());
 
   const completedTools = uniqueTools.filter((t) => t.status === "completed").length;
   const totalTools = uniqueTools.length;
 
+  // Latest thought drives the live ticker shown above the pills while streaming.
+  const latestThought = thoughts.length > 0 ? thoughts[thoughts.length - 1] : null;
+
+  // Which kinds are present — used to render a small legend so the colour
+  // semantics are discoverable.
+  const kindsPresent = new Set<ToolKind>(uniqueTools.map((t) => classifyTool(t.skillName)));
+
   return (
     <div className="space-y-2 animate-fade-in">
+      {/* Live thinking ticker — visible while the agent is streaming */}
+      {isStreaming && latestThought && (
+        <div
+          key={latestThought}
+          className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 animate-fade-in"
+        >
+          <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-70" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-500" />
+          </span>
+          <span className="italic truncate">
+            Thinking · {collapseAdjacentDuplicateWords(prettyToolName(latestThought))}…
+          </span>
+        </div>
+      )}
+
       {/* Tool pills — always visible */}
       {uniqueTools.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
@@ -265,13 +408,25 @@ export function ThoughtChain({
             <div className="w-4 h-4 rounded-full border-2 border-primary-500 border-t-transparent animate-spin flex-shrink-0" />
           )}
           {uniqueTools.map((tc, i) => (
-            <ToolPill key={`${tc.skillName}-${i}`} tc={tc} />
+            <ToolPill key={`${tc.skillName}-${i}`} tc={tc} count={callCount.get(tc.skillName)} />
           ))}
           {totalTools > 0 && !isStreaming && (
             <span className="text-[11px] text-slate-400 ml-1 font-medium">
               {completedTools}/{totalTools} tools
             </span>
           )}
+        </div>
+      )}
+
+      {/* Legend — only shown once tools have completed and >1 kind is present */}
+      {!isStreaming && kindsPresent.size > 1 && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-400 dark:text-slate-500">
+          {(Array.from(kindsPresent) as ToolKind[]).map((k) => (
+            <span key={k} className="inline-flex items-center gap-1">
+              <span className={`w-2 h-2 rounded-full ${KIND_COLORS[k].dot}`} />
+              {KIND_COLORS[k].label}
+            </span>
+          ))}
         </div>
       )}
 
@@ -338,7 +493,7 @@ export function ThoughtChain({
                     {thoughts.map((thought, i) => (
                       <span key={i} className="inline-flex items-center gap-1">
                         {i > 0 && <span className="text-slate-300 dark:text-slate-600">&rarr;</span>}
-                        <span className="text-slate-600 dark:text-slate-300">{thought}</span>
+                        <span className="text-slate-600 dark:text-slate-300">{collapseAdjacentDuplicateWords(prettyToolName(thought))}</span>
                       </span>
                     ))}
                   </div>
