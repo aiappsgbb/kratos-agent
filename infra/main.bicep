@@ -34,6 +34,16 @@ param apimPublisherEmail string = 'admin@${environmentName}.com'
 @description('Path prefix for the agent API on the gateway (set during Foundry portal registration)')
 param agentApiPath string = 'kratos-agent'
 
+@description('Location for the Static Web App (must be one of: centralus, eastus2, westus2, westeurope, eastasia)')
+@allowed([
+  'centralus'
+  'eastus2'
+  'westus2'
+  'westeurope'
+  'eastasia'
+])
+param staticWebAppLocation string = 'westeurope'
+
 // ─── Resource Naming ───
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
@@ -223,7 +233,7 @@ module staticWebApp './modules/static-web-app.bicep' = {
   scope: rg
   params: {
     name: !empty(staticWebAppName) ? staticWebAppName : '${abbrs.webStaticSites}${resourceToken}'
-    location: location
+    location: staticWebAppLocation
     tags: tags
   }
 }
@@ -237,6 +247,7 @@ module roleAssignments './modules/role-assignments.bicep' = {
     cosmosDbAccountName: cosmosDb.outputs.name
     aiSearchName: aiSearch.outputs.name
     aiServicesName: aiFoundry.outputs.name
+    aiServicesPrincipalId: aiFoundry.outputs.principalId
     keyVaultName: keyVault.outputs.name
     storageAccountName: blobStorage.outputs.name
     appInsightsName: appInsights.outputs.name

@@ -73,3 +73,4 @@ output endpoint string = aiFoundry.properties.endpoint
 output modelDeploymentName string = modelDeployment.name
 output projectName string = project.name
 output projectEndpoint string = '${aiFoundry.properties.endpoint}api/projects/${project.name}'
+output principalId string = aiFoundry.identity.principalId

@@ -10,6 +10,9 @@ param aiSearchName string
 @description('Microsoft Foundry resource name')
 param aiServicesName string
 
+@description('Microsoft Foundry system-assigned principal ID (compile-time output from the ai-services module)')
+param aiServicesPrincipalId string
+
 @description('Key Vault name')
 param keyVaultName string
 
@@ -140,11 +143,11 @@ resource agentStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 
 // ─── AI Services (Hosted Agent) → Blob Storage ───
 resource aiServicesStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccount.id, aiServices.identity.principalId, storageBlobDataContributor)
+  name: guid(storageAccount.id, aiServicesPrincipalId, storageBlobDataContributor)
   scope: storageAccount
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributor)
-    principalId: aiServices.identity.principalId
+    principalId: aiServicesPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
