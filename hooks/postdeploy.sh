@@ -36,16 +36,23 @@ echo "║  Storage Account: $STORAGE_ACCOUNT"
 echo "║  Container:       $CONTAINER_NAME"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
-echo "Available use-cases:"
-echo ""
-for i in "${!USE_CASES[@]}"; do
-  echo "  $((i + 1)). ${USE_CASES[$i]}"
-done
-echo "  A. All use-cases"
-echo "  S. Skip (do not upload)"
-echo ""
 
-read -r -p "Select use-case(s) to upload (number, A for all, S to skip): " SELECTION
+# Non-interactive mode: KRATOS_AUTO_UPLOAD_USE_CASES=1 uploads ALL use-cases
+# without prompting. Required for CI / non-TTY runs.
+if [[ "${KRATOS_AUTO_UPLOAD_USE_CASES:-0}" == "1" ]]; then
+  echo "🤖 KRATOS_AUTO_UPLOAD_USE_CASES=1 set — uploading ALL use-cases non-interactively."
+  SELECTION="A"
+else
+  echo "Available use-cases:"
+  echo ""
+  for i in "${!USE_CASES[@]}"; do
+    echo "  $((i + 1)). ${USE_CASES[$i]}"
+  done
+  echo "  A. All use-cases"
+  echo "  S. Skip (do not upload)"
+  echo ""
+  read -r -p "Select use-case(s) to upload (number, A for all, S to skip): " SELECTION
+fi
 
 if [[ "$SELECTION" =~ ^[Ss]$ ]]; then
   echo "Skipping skills upload."
@@ -78,14 +85,31 @@ for use_case in "${SELECTED[@]}"; do
   echo ""
   echo "🔄 Uploading '$use_case' → blob://$CONTAINER_NAME/$use_case/ ..."
 
-  # Delete existing blobs for this use-case first (replace, not merge)
-  echo "   Clearing existing blobs under 'use-cases/$use_case/'..."
-  az storage blob delete-batch \
+  # Delete existing blobs for this use-case first (replace, not merge), BUT
+  # preserve eval run history under evals/runs/ — those are runtime artefacts
+  # written by the backend, not source-controlled inputs we ship from the repo.
+  # Without this guard, every postdeploy wipes the entire eval history and
+  # the e2e-smoke `04-evals` spec fails until a fresh validation run is queued.
+  echo "   Clearing existing blobs under 'use-cases/$use_case/' (preserving evals/runs/)..."
+  EXISTING_BLOBS="$(az storage blob list \
     --account-name "$STORAGE_ACCOUNT" \
-    --source "$CONTAINER_NAME" \
-    --pattern "use-cases/$use_case/*" \
+    --container-name "$CONTAINER_NAME" \
+    --prefix "use-cases/$use_case/" \
     --auth-mode login \
-    --only-show-errors 2>/dev/null || true
+    --query "[?!contains(name, '/evals/runs/')].name" \
+    --output tsv 2>/dev/null || true)"
+
+  if [ -n "$EXISTING_BLOBS" ]; then
+    echo "$EXISTING_BLOBS" | while IFS= read -r blob_name; do
+      [ -z "$blob_name" ] && continue
+      az storage blob delete \
+        --account-name "$STORAGE_ACCOUNT" \
+        --container-name "$CONTAINER_NAME" \
+        --name "$blob_name" \
+        --auth-mode login \
+        --only-show-errors 2>/dev/null || true
+    done
+  fi
 
   # Upload all files from the local use-case folder
   az storage blob upload-batch \

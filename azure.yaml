@@ -14,7 +14,12 @@ services:
         docker:
             path: ./Dockerfile
             context: ../..
-    hosted-agent:
+    # NOTE: service key MUST match the agent name in src/hosted-agent/agent.yaml
+    # (kratos-agent) — the azure.ai.agents extension's postdeploy hook looks up
+    # agents/<service-key>/versions/<n> using the service key verbatim, so a
+    # mismatch produces a scary RED 404 block at the tail of every azd deploy
+    # (false alarm, deploy actually succeeded). See README → Troubleshooting.
+    kratos-agent:
         project: ./src/hosted-agent
         host: azure.ai.agent
         language: docker
@@ -51,6 +56,20 @@ services:
                       echo "Injected config.json with apiUrl=${AGENT_SERVICE_URL}"
                     fi
 hooks:
+    # Bump KRATOS_BUILD_TS on every azd deploy so Foundry's create_version
+    # does NOT deduplicate against the previous version (env vars must differ
+    # even when the image digest changes). Lives here at the project scope
+    # because the azure.ai.agents extension strips service-level `hooks:`
+    # blocks during deploy. Idempotent; harmless when other services deploy.
+    # See foundry-hosted-agents skill → "create_version deduplication trap".
+    predeploy:
+        name: predeploy
+        kind: sh
+        shell: sh
+        run: |
+            BUILD_TS="$(date +%s)"
+            azd env set KRATOS_BUILD_TS "$BUILD_TS"
+            echo "KRATOS_BUILD_TS=$BUILD_TS (forces new hosted-agent version)"
     postdeploy:
         name: postdeploy
         kind: sh
