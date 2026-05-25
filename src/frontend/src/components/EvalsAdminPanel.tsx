@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   listEvalScenarios,
   upsertEvalScenario,
@@ -195,6 +195,88 @@ interface RunRollup {
   erroredCount: number;
 }
 
+// One agent tool invocation, derived by merging the started + completed events
+// the orchestrator emits for the same skill (matched FIFO by skillName).
+interface ToolCallView {
+  skillName: string;
+  status: "started" | "completed" | "failed";
+  input: string;
+  output: string;
+  durationMs: number;
+  source: string;
+}
+
+function _stringifyToolValue(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "string") return v;
+  try {
+    return JSON.stringify(v);
+  } catch {
+    return String(v);
+  }
+}
+
+// Collapse the orchestrator's `started` / `completed` event pairs into a single
+// row per call (matched FIFO by skillName). Falls back to a started-only row
+// if no completion event arrived (and vice versa).
+function collapseToolCalls(events: ScenarioResult["tool_calls"]): ToolCallView[] {
+  const out: ToolCallView[] = [];
+  // Index of the most recent open "started" entry per skill, awaiting its completion.
+  const openIdx: Map<string, number[]> = new Map();
+  for (const raw of events ?? []) {
+    const skill = (raw.skillName as string | undefined) || (raw.name as string | undefined) || "tool";
+    const status = (raw.status as string | undefined) || "completed";
+    const input = _stringifyToolValue(raw.input ?? raw.arguments);
+    const output = _stringifyToolValue(raw.output ?? raw.result);
+    const duration = Number(raw.durationMs ?? 0) || 0;
+    const source = (raw.source as string | undefined) || "";
+    if (status === "started" || status === "running") {
+      const view: ToolCallView = {
+        skillName: skill,
+        status: "started",
+        input,
+        output: "",
+        durationMs: 0,
+        source,
+      };
+      out.push(view);
+      const list = openIdx.get(skill) ?? [];
+      list.push(out.length - 1);
+      openIdx.set(skill, list);
+    } else if (status === "completed" || status === "failed" || status === "error") {
+      const list = openIdx.get(skill);
+      const idx = list && list.length > 0 ? list.shift()! : -1;
+      if (idx >= 0) {
+        const existing = out[idx];
+        existing.status = status === "completed" ? "completed" : "failed";
+        if (input && !existing.input) existing.input = input;
+        existing.output = output;
+        existing.durationMs = duration || existing.durationMs;
+        if (source && !existing.source) existing.source = source;
+      } else {
+        out.push({
+          skillName: skill,
+          status: status === "completed" ? "completed" : "failed",
+          input,
+          output,
+          durationMs: duration,
+          source,
+        });
+      }
+    } else {
+      out.push({
+        skillName: skill,
+        status: "completed",
+        input,
+        output,
+        durationMs: duration,
+        source,
+      });
+    }
+  }
+  return out;
+}
+
 function rollupRun(run: EvalRun): RunRollup {
   const evaluators = evaluatorStatsForRun(run);
   const scenarios = scenarioStatsForRun(run);
@@ -240,6 +322,7 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
   const [expanded, setExpanded] = useState(false);
 
   const scoreEntries = Object.entries(result.scores ?? {});
+  const toolCalls = useMemo(() => collapseToolCalls(result.tool_calls), [result.tool_calls]);
   const hasScores = stat.total > 0;
   const isAllPassed = hasScores ? stat.failed === 0 : !stat.errored;
   const isMajorFail = hasScores ? stat.passed < stat.total / 2 && stat.failed > 0 : stat.errored;
@@ -263,9 +346,9 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
         <span className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
           {result.scenario.replace(/_/g, " ")}
         </span>
-        {result.tool_calls.length > 0 && (
+        {toolCalls.length > 0 && (
           <span className="text-[10px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/60 dark:border-blue-500/20 rounded px-1.5 py-0.5 flex-shrink-0">
-            🔧 {result.tool_calls.length}
+            🔧 {toolCalls.length}
           </span>
         )}
         {result.duration_ms > 0 && (
@@ -314,18 +397,52 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Response</p>
             <p className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-white/[0.03] rounded-lg px-3 py-2 whitespace-pre-wrap max-h-40 overflow-y-auto">{result.response}</p>
           </div>
-          {result.tool_calls.length > 0 && (
+          {toolCalls.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">🔧 Tool Calls</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">🔧 Tool Calls ({toolCalls.length})</p>
               <div className="space-y-1.5">
-                {result.tool_calls.map((tc, i) => (
-                  <div key={i} className="flex items-start gap-2 bg-slate-50 dark:bg-white/[0.03] rounded-lg px-3 py-2">
-                    <span className="text-xs font-mono font-medium text-primary-600 dark:text-primary-400 flex-shrink-0">{tc.name}</span>
-                    {tc.arguments && (
-                      <span className="text-xs text-slate-500 font-mono truncate">{JSON.stringify(tc.arguments)}</span>
-                    )}
-                  </div>
-                ))}
+                {toolCalls.map((tc, i) => {
+                  const ok = tc.status === "completed";
+                  const failed = tc.status === "failed";
+                  const dotCls = ok ? "bg-emerald-500" : failed ? "bg-red-500" : "bg-slate-400";
+                  return (
+                    <div
+                      key={i}
+                      className="rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.05] overflow-hidden"
+                    >
+                      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-slate-200/60 dark:border-white/[0.05] bg-white/40 dark:bg-white/[0.02]">
+                        <span className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${dotCls}`} />
+                        <span className="text-xs font-mono font-medium text-primary-600 dark:text-primary-400 truncate">{tc.skillName}</span>
+                        {tc.source && (
+                          <span className="text-[10px] text-slate-400 font-mono">{tc.source}</span>
+                        )}
+                        <span className="flex-1" />
+                        {tc.durationMs > 0 && (
+                          <span className="text-[10px] text-slate-400 font-mono">{tc.durationMs}ms</span>
+                        )}
+                        <span className={`text-[10px] font-mono ${ok ? "text-emerald-600 dark:text-emerald-400" : failed ? "text-red-500 dark:text-red-400" : "text-slate-400"}`}>
+                          {tc.status}
+                        </span>
+                      </div>
+                      {(tc.input || tc.output) && (
+                        <div className="px-3 py-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                          {tc.input && (
+                            <div className="min-w-0">
+                              <p className="text-slate-400 uppercase tracking-wider mb-0.5 text-[9px]">Input</p>
+                              <pre className="font-mono text-slate-600 dark:text-slate-300 whitespace-pre-wrap break-words max-h-24 overflow-y-auto">{tc.input}</pre>
+                            </div>
+                          )}
+                          {tc.output && (
+                            <div className="min-w-0">
+                              <p className="text-slate-400 uppercase tracking-wider mb-0.5 text-[9px]">Output</p>
+                              <pre className="font-mono text-slate-600 dark:text-slate-300 whitespace-pre-wrap break-words max-h-24 overflow-y-auto">{tc.output}</pre>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -497,6 +614,9 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
       if (runList.length > 0) {
         const latest = runList[0];
         setLatestRun(latest);
+      } else {
+        // No runs for this persona — clear the stale ghost from a previous tab.
+        setLatestRun(null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load eval data");

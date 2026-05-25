@@ -314,7 +314,18 @@ export interface ScenarioResult {
   scenario: string;
   query: string;
   response: string;
-  tool_calls: Array<{ name: string; arguments?: Record<string, unknown>; result?: string }>;
+  tool_calls: Array<{
+    type?: string;
+    skillName?: string;
+    name?: string;
+    status?: string;
+    input?: string | Record<string, unknown>;
+    output?: string;
+    arguments?: Record<string, unknown>;
+    result?: string;
+    durationMs?: number;
+    source?: string;
+  }>;
   status: string;
   error: string;
   duration_ms: number;
