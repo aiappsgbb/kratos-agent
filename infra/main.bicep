@@ -251,6 +251,7 @@ module roleAssignments './modules/role-assignments.bicep' = {
     keyVaultName: keyVault.outputs.name
     storageAccountName: blobStorage.outputs.name
     appInsightsName: appInsights.outputs.name
+    containerRegistryName: containerRegistry.outputs.name
     principalId: principalId
   }
 }

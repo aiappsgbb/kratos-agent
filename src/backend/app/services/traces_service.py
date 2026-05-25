@@ -88,6 +88,14 @@ class TracesService:
 
         spans_tables = _extract_tables(span_resp)
         log_tables = _extract_tables(log_resp)
+        logger.info(
+            "traces query: filter=%r span_tables=%d span_rows=%d log_tables=%d log_rows=%d",
+            narrow_filter[:120],
+            len(spans_tables),
+            sum(len(getattr(t, "rows", []) or []) for t in spans_tables),
+            len(log_tables),
+            sum(len(getattr(t, "rows", []) or []) for t in log_tables),
+        )
 
         log_map = _parse_logs(log_tables)
         operations = _parse_spans(spans_tables, log_map, max_operations)
@@ -216,13 +224,24 @@ traces
 
 
 def _extract_tables(resp: Any) -> list:
-    """Extract table list from a LogsQueryResult, tolerating partial data."""
+    """Extract table list from a LogsQueryResult, tolerating partial data.
+
+    The azure-monitor-query SDK returns either a `LogsQueryResult` (status=SUCCESS,
+    tables populated) or a `LogsQueryPartialResult` (partial_data populated,
+    partial_error set). Either way, we want the tables — only return [] if
+    neither shape has any data.
+    """
     if resp is None:
         return []
+    # SUCCESS path
     if getattr(resp, "status", None) == LogsQueryStatus.SUCCESS:
         return resp.tables or []
+    # PARTIAL path
     if hasattr(resp, "partial_data") and resp.partial_data:
         return resp.partial_data
+    # Some SDK versions return tables on the object regardless of status
+    if getattr(resp, "tables", None):
+        return resp.tables
     return []
 
 
@@ -353,11 +372,6 @@ def _parse_spans(
             default=0.0,
         )
 
-        # Skip operations with only stray HTTP / platform / other spans
-        categories = {s.category for s in spans}
-        if categories <= {"http", "other", "platform"}:
-            continue
-
         # Collect kratos metadata from the first span that has it
         use_case = ""
         conversation_id = ""
@@ -369,6 +383,12 @@ def _parse_spans(
                 conversation_id = str(s["kratos_conversation_id"])
             if not eval_run_id and s.get("kratos_eval_run_id"):
                 eval_run_id = str(s["kratos_eval_run_id"])
+
+        # Skip cosmetic admin-API hits: drop operations that have no kratos
+        # use-case attribution AND consist only of HTTP/platform/other spans.
+        categories = {s.category for s in spans}
+        if not use_case and categories <= {"http", "other", "platform"}:
+            continue
 
         op_ts = str(raw_spans[0].get("timestamp") or "") if raw_spans else ""
         logs = log_map.get(op_id, [])[:30]
@@ -413,6 +433,12 @@ def _classify_span(s: dict[str, Any]) -> str:
 
     # Agent root invocation
     if role == "agent_framework":
+        return "agent"
+
+    # Kratos agent chat endpoint = top-level agent operation
+    if role == "kratos-agent-service" and (
+        name == "post /api/agent/chat" or "/api/agent/chat" in name.lower()
+    ):
         return "agent"
 
     # Internal agent spans

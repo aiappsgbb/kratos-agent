@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.43.8.12551",
-      "templateHash": "11292237164153611962"
+      "templateHash": "12984131636732918112"
     }
   },
   "parameters": {
@@ -2421,6 +2421,9 @@
           "appInsightsName": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights'), '2025-04-01').outputs.name.value]"
           },
+          "containerRegistryName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'container-registry'), '2025-04-01').outputs.name.value]"
+          },
           "principalId": {
             "value": "[parameters('principalId')]"
           }
@@ -2432,7 +2435,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.43.8.12551",
-              "templateHash": "10775664444361835591"
+              "templateHash": "17740582200090452759"
             }
           },
           "parameters": {
@@ -2485,6 +2488,13 @@
                 "description": "Application Insights resource name (for Monitoring Reader RBAC)"
               }
             },
+            "containerRegistryName": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Container Registry name (for AcrPull grant to the Foundry hosted-agent MI)"
+              }
+            },
             "principalId": {
               "type": "string",
               "defaultValue": "",
@@ -2502,7 +2512,8 @@
             "azureAIDeveloper": "64702f94-c441-49e6-a78b-ef80e0188fee",
             "cognitiveServicesUser": "a97b65f3-24c7-4388-baec-2e87135dc908",
             "storageBlobDataContributor": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
-            "monitoringReader": "43d0d8ad-25c7-4714-9337-8ba259a9fe05"
+            "monitoringReader": "43d0d8ad-25c7-4714-9337-8ba259a9fe05",
+            "acrPull": "7f951dda-4ed3-4680-a7ca-43fe172d538d"
           },
           "resources": [
             {
@@ -2605,6 +2616,18 @@
               }
             },
             {
+              "condition": "[not(empty(parameters('containerRegistryName')))]",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('containerRegistryName'))]",
+              "name": "[guid(resourceId('Microsoft.ContainerRegistry/registries', parameters('containerRegistryName')), parameters('aiServicesPrincipalId'), variables('acrPull'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('acrPull'))]",
+                "principalId": "[parameters('aiServicesPrincipalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            },
+            {
               "condition": "[not(empty(parameters('principalId')))]",
               "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
               "apiVersion": "2024-02-15-preview",
@@ -2684,6 +2707,7 @@
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-search')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'blob-storage')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'container-registry')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'cosmos-db')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'key-vault')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', format('rg-{0}', parameters('environmentName')))]"

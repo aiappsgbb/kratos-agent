@@ -39,3 +39,7 @@ environment_variables:
   # Environment tag
   - name: ENVIRONMENT
     value: production
+  # Force a new agent version per deploy (Foundry deduplicates create_version
+  # when env vars are identical — see foundry-hosted-agents skill).
+  - name: _BUILD_TS
+    value: ${KRATOS_BUILD_TS}

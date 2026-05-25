@@ -146,7 +146,7 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize Eval storage + service (per-use-case scenarios, runs, results)
     eval_storage = EvalStorage(blob_skill_service, local_base_dir=settings.apm_use_cases_root)
     application.state.eval_storage = eval_storage
-    eval_service = EvalService(settings, eval_storage, registries)
+    eval_service = EvalService(settings, eval_storage, registries, foundry_proxy=foundry_proxy)
     application.state.eval_service = eval_service
 
     # Initialize Traces service (App Insights waterfall queries)

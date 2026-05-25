@@ -34,6 +34,7 @@ from app.models import (
     ScenarioResult,
 )
 from app.services.eval_storage import EvalStorage
+from app.services.foundry_agent_proxy import FoundryAgentProxy
 from app.services.skill_registry import SkillRegistry
 
 logger = logging.getLogger(__name__)
@@ -278,11 +279,63 @@ class EvalService:
         settings: Settings,
         storage: EvalStorage,
         registries: dict[str, SkillRegistry],
+        foundry_proxy: FoundryAgentProxy | None = None,
     ) -> None:
         self._settings = settings
         self._storage = storage
         self._registries = registries
+        self._foundry_proxy = foundry_proxy
         self._tasks: dict[tuple[str, str], asyncio.Task[None]] = {}
+
+    # ── Hosted-agent invocation helper (uses Invocations protocol via FoundryAgentProxy) ──
+
+    async def _invoke_hosted_agent(
+        self,
+        message: str,
+        conversation_id: str,
+        use_case: str,
+        run_id: str | None = None,
+        timeout: float = _REQUEST_TIMEOUT,
+    ) -> tuple[str, list[dict[str, Any]], str | None]:
+        """Invoke the hosted agent once and aggregate the SSE stream.
+
+        Returns ``(response_text, tool_calls, error_message)``. ``error_message``
+        is non-empty when the agent stream emitted an error event.
+        """
+        if self._foundry_proxy is None:
+            raise RuntimeError(
+                "EvalService: foundry_proxy is not configured — cannot invoke hosted agent."
+            )
+
+        chunks: list[str] = []
+        tool_calls: list[dict[str, Any]] = []
+        error_msg: str | None = None
+
+        async def _drain() -> None:
+            nonlocal error_msg
+            async for ev in self._foundry_proxy.invoke(
+                message=message,
+                conversation_id=conversation_id,
+                use_case=use_case,
+                eval_run_id=run_id,
+            ):
+                etype = ev.get("event") or ev.get("type") or ""
+                data = ev.get("data") or {}
+                if etype == "content":
+                    txt = data.get("content") or data.get("text") or ""
+                    if txt:
+                        chunks.append(str(txt))
+                elif etype == "tool_call":
+                    tool_calls.append(data if isinstance(data, dict) else {"raw": str(data)})
+                elif etype == "error":
+                    error_msg = str(data.get("message") or data)
+
+        try:
+            await asyncio.wait_for(_drain(), timeout=timeout)
+        except TimeoutError:
+            error_msg = error_msg or f"Hosted agent invocation timed out after {timeout}s"
+
+        return "".join(chunks), tool_calls, error_msg
 
     # ── Public API ────────────────────────────────────────────────────────
 
@@ -450,25 +503,36 @@ class EvalService:
         run.status = EvalRunStatus.INVOKING
         await self._storage.save_run(run)
 
-        # Build Foundry OpenAI client
-        oai = _build_foundry_oai_client(settings)
+        # Build Foundry OpenAI client (used later for scoring evaluators in FOUNDRY mode)
+        oai = _build_foundry_oai_client(settings) if run.mode == EvalMode.FOUNDRY else None
 
-        # Warmup loop — handles scale-from-zero hosted agents
+        # Warmup loop — handles scale-from-zero hosted agents (uses Invocations protocol)
         logger.info("[eval %s] warmup start (max %d attempts)", run_id, _WARMUP_ATTEMPTS)
         backoff = _WARMUP_BACKOFF_S
         for attempt in range(1, _WARMUP_ATTEMPTS + 1):
             try:
-                r = await asyncio.get_event_loop().run_in_executor(
-                    None,
-                    lambda: oai.responses.create(input="ping", stream=False),
+                wtext, _, werr = await self._invoke_hosted_agent(
+                    message="ping",
+                    conversation_id=f"warmup-{run_id}-{attempt}",
+                    use_case=use_case,
+                    run_id=run_id,
+                    timeout=60.0,
                 )
-                status = getattr(r, "status", "unknown")
-                logger.info("[eval %s] warmup attempt=%d status=%s", run_id, attempt, status)
-                if status == "completed":
-                    logger.info("[eval %s] warmup READY", run_id)
+                if werr:
+                    logger.warning(
+                        "[eval %s] warmup attempt=%d error: %s", run_id, attempt, werr[:160]
+                    )
+                elif wtext:
+                    logger.info(
+                        "[eval %s] warmup READY (chars=%d)", run_id, len(wtext)
+                    )
                     break
+                else:
+                    logger.warning(
+                        "[eval %s] warmup attempt=%d empty response", run_id, attempt
+                    )
             except Exception as exc:
-                logger.warning("[eval %s] warmup attempt=%d exc: %s", run_id, attempt, str(exc)[:120])
+                logger.warning("[eval %s] warmup attempt=%d exc: %s", run_id, attempt, str(exc)[:160])
             if attempt < _WARMUP_ATTEMPTS:
                 await asyncio.sleep(backoff)
                 backoff = min(backoff * 2, 60.0)
@@ -482,47 +546,42 @@ class EvalService:
         for idx, scenario in enumerate(scenarios_to_run):
             t_start = time.monotonic()
             try:
-                response = await asyncio.get_event_loop().run_in_executor(
-                    None,
-                    lambda sc=scenario: oai.responses.create(
-                        input=sc.input_message,
-                        stream=False,
-                        extra_headers={
-                            "x-kratos-eval-run-id": run_id,
-                            "x-kratos-use-case": use_case,
-                        },
-                        timeout=_REQUEST_TIMEOUT,
-                    ),
+                resp_text, raw_tool_calls, err = await self._invoke_hosted_agent(
+                    message=scenario.input_message,
+                    conversation_id=f"eval-{run_id}-{scenario.name}",
+                    use_case=use_case,
+                    run_id=run_id,
+                    timeout=_REQUEST_TIMEOUT,
                 )
-                resp_text = _extract_response_text(response)
-                # Retry once on empty response
-                if not resp_text:
+                # Retry once on empty response (and no explicit error)
+                if not resp_text and not err:
                     await asyncio.sleep(3)
-                    response = await asyncio.get_event_loop().run_in_executor(
-                        None,
-                        lambda sc=scenario: oai.responses.create(
-                            input=sc.input_message,
-                            stream=False,
-                            extra_headers={
-                                "x-kratos-eval-run-id": run_id,
-                                "x-kratos-use-case": use_case,
-                            },
-                            timeout=_REQUEST_TIMEOUT,
-                        ),
+                    resp_text, raw_tool_calls, err = await self._invoke_hosted_agent(
+                        message=scenario.input_message,
+                        conversation_id=f"eval-{run_id}-{scenario.name}-retry",
+                        use_case=use_case,
+                        run_id=run_id,
+                        timeout=_REQUEST_TIMEOUT,
                     )
-                    resp_text = _extract_response_text(response)
-
-                raw_tool_calls = _extract_tool_calls(response)
                 duration_ms = int((time.monotonic() - t_start) * 1000)
 
-                result = ScenarioResult(
-                    scenario=scenario.name,
-                    query=scenario.input_message,
-                    response=resp_text,
-                    tool_calls=raw_tool_calls,
-                    status="completed",
-                    duration_ms=duration_ms,
-                )
+                if err and not resp_text:
+                    result = ScenarioResult(
+                        scenario=scenario.name,
+                        query=scenario.input_message,
+                        status="error",
+                        error=err,
+                        duration_ms=duration_ms,
+                    )
+                else:
+                    result = ScenarioResult(
+                        scenario=scenario.name,
+                        query=scenario.input_message,
+                        response=resp_text,
+                        tool_calls=raw_tool_calls,
+                        status="completed",
+                        duration_ms=duration_ms,
+                    )
             except Exception as exc:
                 duration_ms = int((time.monotonic() - t_start) * 1000)
                 logger.warning("[eval %s] scenario '%s' failed: %s", run_id, scenario.name, exc)
