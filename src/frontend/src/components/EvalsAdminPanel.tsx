@@ -22,6 +22,14 @@ const FOUNDRY_PORTAL_URL =
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_FOUNDRY_PORTAL_URL) ||
   "https://ai.azure.com";
 
+const PERSONA_LABELS: Record<string, string> = {
+  generic: "Generalist",
+  insurance: "Insurance Claim Specialist",
+  "retail-banking": "Retail Banking Advisor",
+  "wealth-management": "Wealth Management Advisor",
+  "sales-account-review": "Sales Account Reviewer",
+};
+
 const categoryColors: Record<string, string> = {
   standard: "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20",
   edge_case: "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20",
@@ -38,29 +46,212 @@ const statusConfig: Record<EvalRunStatus, { label: string; color: string }> = {
   failed: { label: "Failed", color: "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400" },
 };
 
-function computeOverallScore(run: EvalRun): string {
-  if (run.foundry?.per_testing_criteria_results && run.foundry.per_testing_criteria_results.length > 0) {
-    const criteria = run.foundry.per_testing_criteria_results as Array<Record<string, unknown>>;
-    const rates = criteria.map((c) => {
-      const pass = typeof c.pass === "number" ? c.pass : 0;
-      const total = (typeof c.pass === "number" ? c.pass : 0) + (typeof c.fail === "number" ? c.fail : 0);
-      return total > 0 ? pass / total : 0;
-    });
-    if (rates.length > 0) {
-      const avg = rates.reduce((a, b) => a + b, 0) / rates.length;
-      return `${Math.round(avg * 100)}%`;
-    }
-  }
-  const total = run.results.length;
-  const passed = run.results.filter((r) => r.status === "pass" || r.status === "passed").length;
-  if (total === 0) return "—";
-  return `${passed}/${total}`;
+// ── Per-evaluator + per-scenario aggregation helpers ────────────────────────
+// Works against the union of:
+//   - run.results[].scores  (validation runs scored locally via azure-ai-evaluation)
+//   - run.foundry.per_testing_criteria_results  (foundry / hosted aggregate)
+
+interface PerEvaluatorStat {
+  name: string;
+  passed: number;
+  total: number;
+  rate: number; // 0–100
 }
 
-function ScenarioResultRow({ result }: { result: ScenarioResult }) {
+interface PerScenarioStat {
+  scenario: string;
+  passed: number;
+  total: number;
+  failed: number;
+  errored: boolean;
+  failedEvaluators: string[];
+}
+
+function _toSnake(name: string): string {
+  // "TaskAdherence" → "task_adherence", "ToolCallAccuracy" → "tool_call_accuracy"
+  return name.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+}
+
+const _METADATA_SUFFIXES = [
+  "_threshold", "_prompt_tokens", "_completion_tokens", "_total_tokens",
+  "_finish_reason", "_model", "_sample_input", "_sample_output", "_details",
+];
+
+function _isMetadataKey(k: string): boolean {
+  return _METADATA_SUFFIXES.some((suffix) => k.endsWith(suffix));
+}
+
+function _extractScoreValue(s: Record<string, unknown>, evaluatorName: string): number | null {
+  // Prefer the canonical snake_case key (e.g. "task_adherence", "tool_call_accuracy")
+  const snake = _toSnake(evaluatorName);
+  if (typeof s[snake] === "number") return s[snake] as number;
+  const gptKey = `gpt_${snake}`;
+  if (typeof s[gptKey] === "number") return s[gptKey] as number;
+  // Otherwise pick the first numeric non-metadata field
+  const numericKey = Object.keys(s).find(
+    (k) => typeof s[k] === "number" && !_isMetadataKey(k),
+  );
+  return numericKey ? (s[numericKey] as number) : null;
+}
+
+function _extractReason(s: Record<string, unknown>, evaluatorName: string): string {
+  const snake = _toSnake(evaluatorName);
+  const direct = s[`${snake}_reason`] ?? s.reason ?? s.explanation;
+  return typeof direct === "string" ? direct : "";
+}
+
+function _extractThreshold(s: Record<string, unknown>, evaluatorName: string): number | null {
+  const snake = _toSnake(evaluatorName);
+  const direct = s[`${snake}_threshold`] ?? s.threshold;
+  return typeof direct === "number" ? direct : null;
+}
+
+function _scoreIsPass(s: Record<string, unknown>, evaluatorName = ""): boolean | null {
+  if (s == null || typeof s !== "object") return null;
+  // 1. Explicit boolean (validation flow added it on some evaluators)
+  if (typeof s.passed === "boolean") return s.passed;
+  if (typeof s.passed === "string") {
+    const v = s.passed.toLowerCase();
+    return v === "true" || v === "pass";
+  }
+  // 2. azure-ai-evaluation snake_case "<name>_result": "pass"|"fail"
+  const snake = _toSnake(evaluatorName);
+  const resultKey = `${snake}_result`;
+  if (typeof s[resultKey] === "string") return /pass|true/i.test(s[resultKey] as string);
+  if (typeof s.result === "string") return /pass|true/i.test(s.result);
+  // 3. Fall back to numeric ≥ threshold
+  const val = _extractScoreValue(s, evaluatorName);
+  const threshold = _extractThreshold(s, evaluatorName) ?? 3;
+  if (val !== null) return val >= threshold;
+  return null;
+}
+
+function evaluatorStatsForRun(run: EvalRun): PerEvaluatorStat[] {
+  // Prefer foundry aggregate when present
+  const fc = run.foundry?.per_testing_criteria_results as Array<Record<string, unknown>> | undefined;
+  if (fc && fc.length > 0) {
+    return fc.map((c, i) => {
+      const name = String(c.criterion ?? c.name ?? `Criterion ${i + 1}`);
+      const passed = typeof c.passed === "number" ? c.passed : typeof c.pass === "number" ? c.pass : 0;
+      const failed = typeof c.failed === "number" ? c.failed : typeof c.fail === "number" ? c.fail : 0;
+      const total = passed + failed;
+      return { name, passed, total, rate: total > 0 ? Math.round((passed / total) * 100) : 0 };
+    });
+  }
+  // Fall back: aggregate per-result scores
+  const totals: Record<string, { passed: number; total: number }> = {};
+  for (const r of run.results) {
+    const scores = r.scores ?? {};
+    for (const [name, raw] of Object.entries(scores)) {
+      const s = raw as Record<string, unknown>;
+      if (s && (s as { error?: unknown }).error) continue;
+      const passed = _scoreIsPass(s, name);
+      if (passed === null) continue;
+      if (!totals[name]) totals[name] = { passed: 0, total: 0 };
+      totals[name].total += 1;
+      if (passed) totals[name].passed += 1;
+    }
+  }
+  return Object.entries(totals).map(([name, t]) => ({
+    name, passed: t.passed, total: t.total,
+    rate: t.total > 0 ? Math.round((t.passed / t.total) * 100) : 0,
+  }));
+}
+
+function scenarioStatsForRun(run: EvalRun): PerScenarioStat[] {
+  return run.results.map((r) => {
+    const scores = r.scores ?? {};
+    const entries = Object.entries(scores);
+    let passed = 0;
+    let total = 0;
+    const failedEvaluators: string[] = [];
+    for (const [name, raw] of entries) {
+      const s = raw as Record<string, unknown>;
+      if (s && (s as { error?: unknown }).error) continue;
+      const p = _scoreIsPass(s, name);
+      if (p === null) continue;
+      total += 1;
+      if (p) passed += 1;
+      else failedEvaluators.push(name);
+    }
+    return {
+      scenario: r.scenario,
+      passed,
+      total,
+      failed: total - passed,
+      errored: r.status === "error" || r.status === "failed",
+      failedEvaluators,
+    };
+  });
+}
+
+interface RunRollup {
+  evaluators: PerEvaluatorStat[];
+  scenarios: PerScenarioStat[];
+  overallScore: number; // 0–100
+  allPassedCount: number;
+  partialCount: number;
+  majorFailCount: number;
+  erroredCount: number;
+}
+
+function rollupRun(run: EvalRun): RunRollup {
+  const evaluators = evaluatorStatsForRun(run);
+  const scenarios = scenarioStatsForRun(run);
+  const hasPerEvalScores = scenarios.some((s) => s.total > 0);
+
+  const overallScore = evaluators.length > 0
+    ? Math.round(evaluators.reduce((acc, e) => acc + e.rate, 0) / evaluators.length)
+    : hasPerEvalScores
+    ? Math.round((scenarios.filter((s) => s.total > 0 && s.failed === 0).length / scenarios.length) * 100)
+    : 0;
+
+  const allPassedCount = hasPerEvalScores
+    ? scenarios.filter((s) => s.total > 0 && s.failed === 0).length
+    : scenarios.filter((s) => !s.errored).length;
+  const partialCount = hasPerEvalScores
+    ? scenarios.filter((s) => s.failed > 0 && s.passed >= s.total / 2).length
+    : 0;
+  const majorFailCount = hasPerEvalScores
+    ? scenarios.filter((s) => s.total > 0 && s.passed < s.total / 2 && s.failed > 0).length
+    : scenarios.filter((s) => s.errored).length;
+  const erroredCount = scenarios.filter((s) => s.errored).length;
+
+  return { evaluators, scenarios, overallScore, allPassedCount, partialCount, majorFailCount, erroredCount };
+}
+
+function formatEvaluatorName(name: string): string {
+  return name.replace(/_/g, " ").replace(/([A-Z])/g, " $1").trim().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function scoreColor(rate: number): string {
+  if (rate >= 70) return "text-emerald-600 dark:text-emerald-400";
+  if (rate >= 40) return "text-amber-500 dark:text-amber-400";
+  return "text-red-500 dark:text-red-400";
+}
+
+function scoreBarColor(rate: number): string {
+  if (rate >= 70) return "bg-emerald-500";
+  if (rate >= 40) return "bg-amber-500";
+  return "bg-red-500";
+}
+
+function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: PerScenarioStat }) {
   const [expanded, setExpanded] = useState(false);
 
   const scoreEntries = Object.entries(result.scores ?? {});
+  const hasScores = stat.total > 0;
+  const isAllPassed = hasScores ? stat.failed === 0 : !stat.errored;
+  const isMajorFail = hasScores ? stat.passed < stat.total / 2 && stat.failed > 0 : stat.errored;
+  const isPartial = hasScores && stat.failed > 0 && stat.passed >= stat.total / 2;
+  const statusDotCls = isAllPassed ? "bg-emerald-500" : isMajorFail ? "bg-red-500" : isPartial ? "bg-amber-500" : "bg-slate-400";
+  const chipTone = isAllPassed
+    ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-500/30"
+    : isMajorFail
+    ? "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200/60 dark:border-red-500/30"
+    : isPartial
+    ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-500/30"
+    : "bg-slate-50 dark:bg-white/[0.05] text-slate-500 border-slate-200/60 dark:border-white/[0.08]";
 
   return (
     <div className="border border-slate-200 dark:border-white/[0.06] rounded-xl overflow-hidden">
@@ -68,10 +259,25 @@ function ScenarioResultRow({ result }: { result: ScenarioResult }) {
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50/50 dark:bg-white/[0.02] hover:bg-slate-100/80 dark:hover:bg-white/[0.04] transition-colors text-left"
       >
-        <span className={`flex-shrink-0 w-2 h-2 rounded-full ${result.status === "pass" || result.status === "passed" ? "bg-emerald-500" : result.status === "fail" || result.status === "failed" ? "bg-red-400" : "bg-slate-400"}`} />
-        <span className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{result.scenario}</span>
+        <span className={`flex-shrink-0 w-2 h-2 rounded-full ${statusDotCls}`} />
+        <span className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
+          {result.scenario.replace(/_/g, " ")}
+        </span>
+        {result.tool_calls.length > 0 && (
+          <span className="text-[10px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/60 dark:border-blue-500/20 rounded px-1.5 py-0.5 flex-shrink-0">
+            🔧 {result.tool_calls.length}
+          </span>
+        )}
         {result.duration_ms > 0 && (
           <span className="text-xs text-slate-400 font-mono flex-shrink-0">{result.duration_ms}ms</span>
+        )}
+        {hasScores && (
+          <span className={`text-[11px] font-mono border rounded-full px-2 py-0.5 flex-shrink-0 font-medium tabular-nums ${chipTone}`}>
+            {stat.passed}/{stat.total}
+          </span>
+        )}
+        {!hasScores && stat.errored && (
+          <span className={`text-[11px] border rounded-full px-2 py-0.5 flex-shrink-0 font-medium ${chipTone}`}>error</span>
         )}
         <svg
           className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ${expanded ? "rotate-180" : ""}`}
@@ -80,6 +286,21 @@ function ScenarioResultRow({ result }: { result: ScenarioResult }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
+
+      {/* Failed-evaluator badges visible even when collapsed */}
+      {!expanded && stat.failedEvaluators.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-4 pb-2 pt-1 -mt-1 bg-slate-50/50 dark:bg-white/[0.02]">
+          {stat.failedEvaluators.map((name) => (
+            <span
+              key={name}
+              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${isMajorFail ? "bg-red-500/10 text-red-600 dark:text-red-400" : "bg-amber-500/10 text-amber-600 dark:text-amber-400"}`}
+            >
+              ✗ {formatEvaluatorName(name)}
+            </span>
+          ))}
+        </div>
+      )}
+
       {expanded && (
         <div className="px-4 py-4 space-y-3 border-t border-slate-100 dark:border-white/[0.04]">
           {result.error && (
@@ -95,7 +316,7 @@ function ScenarioResultRow({ result }: { result: ScenarioResult }) {
           </div>
           {result.tool_calls.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tool Calls</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">🔧 Tool Calls</p>
               <div className="space-y-1.5">
                 {result.tool_calls.map((tc, i) => (
                   <div key={i} className="flex items-start gap-2 bg-slate-50 dark:bg-white/[0.03] rounded-lg px-3 py-2">
@@ -110,17 +331,34 @@ function ScenarioResultRow({ result }: { result: ScenarioResult }) {
           )}
           {scoreEntries.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Scores</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Evaluator Scores</p>
               <div className="grid grid-cols-2 gap-2">
                 {scoreEntries.map(([criterion, score]) => {
                   const scoreObj = score as Record<string, unknown>;
-                  const passed = scoreObj.passed ?? scoreObj.result ?? scoreObj.score;
+                  const passed = _scoreIsPass(scoreObj, criterion);
+                  const reason = _extractReason(scoreObj, criterion);
+                  const numericVal = _extractScoreValue(scoreObj, criterion);
+                  const threshold = _extractThreshold(scoreObj, criterion);
+                  const err = (scoreObj.error ?? "") as string;
                   return (
-                    <div key={criterion} className="flex items-center justify-between bg-slate-50 dark:bg-white/[0.03] rounded-lg px-3 py-1.5">
-                      <span className="text-xs text-slate-600 dark:text-slate-400">{criterion}</span>
-                      <span className={`text-xs font-medium ${passed === true || passed === "pass" ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
-                        {String(passed)}
-                      </span>
+                    <div key={criterion} className="bg-slate-50 dark:bg-white/[0.03] rounded-lg px-3 py-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium truncate">{formatEvaluatorName(criterion)}</span>
+                        <span className={`text-xs font-mono font-medium ${passed === true ? "text-emerald-600 dark:text-emerald-400" : passed === false ? "text-red-500 dark:text-red-400" : "text-slate-500"}`}>
+                          {err ? "err" : passed === true ? "✓" : passed === false ? "✗" : "—"}
+                          {numericVal !== null && (
+                            <span className="ml-1 text-slate-400">
+                              {numericVal}{threshold !== null ? `/${threshold}` : ""}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      {reason && (
+                        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{reason}</p>
+                      )}
+                      {err && (
+                        <p className="mt-1 text-[11px] text-red-500 dark:text-red-400 font-mono line-clamp-2">{err}</p>
+                      )}
                     </div>
                   );
                 })}
@@ -363,8 +601,8 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
   };
 
   const foundryUrl = latestRun?.foundry?.report_url || FOUNDRY_PORTAL_URL;
-
-  const criteriaResults = latestRun?.foundry?.per_testing_criteria_results as Array<Record<string, unknown>> | undefined;
+  const rollup = latestRun ? rollupRun(latestRun) : null;
+  const personaLabel = PERSONA_LABELS[useCase] ?? useCase;
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -534,10 +772,11 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
           </div>
 
           {/* Latest run */}
-          {latestRun && (
+          {latestRun && rollup && (
             <div className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-2xl overflow-hidden">
+              {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.06]">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Latest Run</h3>
                   <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusConfig[latestRun.status].color}`}>
                     {statusConfig[latestRun.status].label}
@@ -546,9 +785,11 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
                     )}
                   </span>
                   <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 rounded-full uppercase font-medium">{latestRun.mode}</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Persona: <span className="font-medium text-slate-700 dark:text-slate-300">{personaLabel}</span>
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{computeOverallScore(latestRun)}</span>
                   <span className="text-xs text-slate-400">{new Date(latestRun.created_at).toLocaleString()}</span>
                 </div>
               </div>
@@ -565,31 +806,80 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
                 </div>
               )}
 
-              {/* Per-criterion chart */}
-              {criteriaResults && criteriaResults.length > 0 && (
-                <div className="px-5 py-4 border-b border-slate-100 dark:border-white/[0.06] space-y-3">
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">By Criterion</h4>
-                  {criteriaResults.map((c, idx) => {
-                    const name = String(c.criterion ?? c.name ?? `Criterion ${idx + 1}`);
-                    const pass = typeof c.pass === "number" ? c.pass : 0;
-                    const fail = typeof c.fail === "number" ? c.fail : 0;
-                    const total = pass + fail;
-                    const rate = total > 0 ? pass / total : 0;
-                    return (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-600 dark:text-slate-400 font-medium">{name}</span>
-                          <span className="text-slate-500 font-mono">{pass}/{total} ({Math.round(rate * 100)}%)</span>
-                        </div>
-                        <div className="h-2 bg-slate-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                            style={{ width: `${rate * 100}%` }}
-                          />
-                        </div>
+              {/* KPI cards + overall score + per-evaluator bars */}
+              {latestRun.results.length > 0 && (
+                <div className="px-5 py-4 space-y-4 border-b border-slate-100 dark:border-white/[0.06]">
+                  {/* KPI cards */}
+                  <div className={`grid gap-3 ${rollup.erroredCount > 0 ? "grid-cols-4" : "grid-cols-3"}`}>
+                    <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-3 text-center">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">All Passed</p>
+                      <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{rollup.allPassedCount}</p>
+                      <p className="text-[10px] text-slate-400">{rollup.evaluators.length > 0 ? `${rollup.evaluators.length}/${rollup.evaluators.length} evaluators` : "completed"}</p>
+                    </div>
+                    <div className="rounded-xl bg-amber-500/5 border border-amber-500/20 p-3 text-center">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Partial</p>
+                      <p className="text-2xl font-bold text-amber-500 dark:text-amber-400 tabular-nums">{rollup.partialCount}</p>
+                      <p className="text-[10px] text-slate-400">minor issues</p>
+                    </div>
+                    <div className="rounded-xl bg-red-500/5 border border-red-500/20 p-3 text-center">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Failed</p>
+                      <p className="text-2xl font-bold text-red-600 dark:text-red-400 tabular-nums">{rollup.majorFailCount}</p>
+                      <p className="text-[10px] text-slate-400">majority fail</p>
+                    </div>
+                    {rollup.erroredCount > 0 && (
+                      <div className="rounded-xl bg-slate-500/5 border border-slate-200 dark:border-slate-500/20 p-3 text-center">
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Errored</p>
+                        <p className="text-2xl font-bold text-slate-700 dark:text-slate-300 tabular-nums">{rollup.erroredCount}</p>
+                        <p className="text-[10px] text-slate-400">runtime</p>
                       </div>
-                    );
-                  })}
+                    )}
+                  </div>
+
+                  {/* Overall score + stacked status bar */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">Overall quality score</span>
+                      <span className={`font-bold tabular-nums ${scoreColor(rollup.overallScore)}`}>{rollup.overallScore}%</span>
+                    </div>
+                    <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden flex">
+                      {rollup.allPassedCount > 0 && (
+                        <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${(rollup.allPassedCount / rollup.scenarios.length) * 100}%` }} />
+                      )}
+                      {rollup.partialCount > 0 && (
+                        <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${(rollup.partialCount / rollup.scenarios.length) * 100}%` }} />
+                      )}
+                      {rollup.majorFailCount > 0 && (
+                        <div className="h-full bg-red-500 transition-all duration-500" style={{ width: `${(rollup.majorFailCount / rollup.scenarios.length) * 100}%` }} />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Per-evaluator breakdown */}
+                  {rollup.evaluators.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Per Evaluator</p>
+                      <div className="space-y-1.5">
+                        {rollup.evaluators.map((ev) => (
+                          <div key={ev.name} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04]">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className={`text-sm flex-shrink-0 ${scoreColor(ev.rate)}`}>
+                                {ev.rate >= 70 ? "✓" : ev.rate >= 40 ? "⚠" : "✗"}
+                              </span>
+                              <span className="text-sm text-slate-700 dark:text-slate-300 truncate">{formatEvaluatorName(ev.name)}</span>
+                            </div>
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                              <div className="w-24 h-1.5 rounded-full bg-slate-200 dark:bg-white/[0.06] overflow-hidden">
+                                <div className={`h-full rounded-full transition-all duration-500 ${scoreBarColor(ev.rate)}`} style={{ width: `${ev.rate}%` }} />
+                              </div>
+                              <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400 w-20 text-right font-mono">
+                                {ev.passed}/{ev.total} ({ev.rate}%)
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -597,10 +887,10 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
               {latestRun.results.length > 0 && (
                 <div className="px-5 py-4 space-y-2">
                   <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                    Samples ({latestRun.results.length})
+                    Per Scenario ({latestRun.results.length} samples)
                   </h4>
                   {latestRun.results.map((result, idx) => (
-                    <ScenarioResultRow key={`${result.scenario}-${idx}`} result={result} />
+                    <ScenarioResultRow key={`${result.scenario}-${idx}`} result={result} stat={rollup.scenarios[idx]} />
                   ))}
                 </div>
               )}

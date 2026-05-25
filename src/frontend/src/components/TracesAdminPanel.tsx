@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { listTraceOperations, getTraceOperation } from "@/lib/api";
 import type { SpanCategory, TraceList, TraceOperation, TraceSpan } from "@/types";
 
@@ -32,48 +32,59 @@ const spanCategoryTextColors: Record<SpanCategory, string> = {
   other: "text-slate-500 dark:text-slate-400",
 };
 
+const spanCategoryEmoji: Record<SpanCategory, string> = {
+  llm: "🧠",
+  agent: "✨",
+  agent_internal: "✨",
+  tool: "🔧",
+  skill: "📋",
+  http: "🌐",
+  platform: "⚙️",
+  error: "⚠️",
+  other: "•",
+};
+
+// Attributes we surface in a labeled grid (in order). Anything not in this list
+// falls into the "Other" raw-attribute section.
+const SPAN_HIGHLIGHT_KEYS: Array<{ key: string; label: string }> = [
+  { key: "gen_ai.response.model", label: "Model" },
+  { key: "gen_ai.operation.name", label: "Operation" },
+  { key: "gen_ai.usage.input_tokens", label: "Input tokens" },
+  { key: "gen_ai.usage.output_tokens", label: "Output tokens" },
+  { key: "gen_ai.tool.name", label: "Tool" },
+  { key: "gen_ai.tool.kind", label: "Tool kind" },
+  { key: "kratos.skill.name", label: "Skill" },
+  { key: "kratos.use_case", label: "Use case" },
+  { key: "kratos.conversation_id", label: "Conversation" },
+  { key: "kratos.eval_run_id", label: "Eval run" },
+  { key: "error.type", label: "Error" },
+];
+
+function _attr(span: TraceSpan, key: string): string {
+  const v = span.attributes?.[key];
+  if (v === undefined || v === null || v === "") return "";
+  return String(v);
+}
+
+function _attrNum(span: TraceSpan, key: string): number {
+  const v = span.attributes?.[key];
+  if (typeof v === "number") return v;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function _fmtTokens(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
 function SpanIcon({ category }: { category: SpanCategory }) {
-  const cls = `w-3.5 h-3.5 flex-shrink-0 ${spanCategoryTextColors[category] ?? "text-slate-400"}`;
-  switch (category) {
-    case "llm":
-      return (
-        <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-        </svg>
-      );
-    case "tool":
-    case "skill":
-      return (
-        <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
-        </svg>
-      );
-    case "agent":
-    case "agent_internal":
-      return (
-        <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-        </svg>
-      );
-    case "http":
-      return (
-        <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-        </svg>
-      );
-    case "error":
-      return (
-        <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-        </svg>
-      );
-    default:
-      return (
-        <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
-        </svg>
-      );
-  }
+  return (
+    <span className={`text-sm flex-shrink-0 ${spanCategoryTextColors[category] ?? "text-slate-400"}`} aria-hidden>
+      {spanCategoryEmoji[category] ?? "•"}
+    </span>
+  );
 }
 
 function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
@@ -82,7 +93,16 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
   const left = maxEndMs > 0 ? (span.offset_ms / maxEndMs) * 100 : 0;
   const width = maxEndMs > 0 ? Math.max((span.duration_ms / maxEndMs) * 100, 0.5) : 0.5;
   const barColor = spanCategoryColors[span.category] ?? "bg-slate-400";
-  const attrEntries = Object.entries(span.attributes ?? {});
+
+  const model = _attr(span, "gen_ai.response.model");
+  const toolName = _attr(span, "gen_ai.tool.name") || _attr(span, "kratos.skill.name");
+  const inTok = _attrNum(span, "gen_ai.usage.input_tokens");
+  const outTok = _attrNum(span, "gen_ai.usage.output_tokens");
+  const errType = _attr(span, "error.type");
+
+  const highlights = SPAN_HIGHLIGHT_KEYS.filter((h) => _attr(span, h.key) !== "");
+  const highlightKeySet = new Set(highlights.map((h) => h.key));
+  const otherAttrs = Object.entries(span.attributes ?? {}).filter(([k]) => !highlightKeySet.has(k));
 
   return (
     <div>
@@ -90,14 +110,34 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-center gap-2 px-4 py-2 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors text-left group"
       >
-        {/* Depth indent */}
         <div style={{ width: indent, flexShrink: 0 }} />
         <SpanIcon category={span.category} />
-        <span className="text-xs text-slate-700 dark:text-slate-300 truncate flex-shrink-0" style={{ maxWidth: "200px" }}>
+        <span className="text-xs text-slate-700 dark:text-slate-300 truncate flex-shrink-0 font-medium" style={{ maxWidth: "200px" }}>
           {span.name}
         </span>
+        {/* Inline gen_ai chips */}
+        {toolName && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-mono flex-shrink-0 border border-emerald-200/60 dark:border-emerald-500/20">
+            {toolName}
+          </span>
+        )}
+        {model && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 font-mono flex-shrink-0 border border-blue-200/60 dark:border-blue-500/20">
+            {model}
+          </span>
+        )}
+        {(inTok > 0 || outTok > 0) && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 font-mono flex-shrink-0">
+            {_fmtTokens(inTok)} → {_fmtTokens(outTok)} tok
+          </span>
+        )}
+        {errType && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-mono flex-shrink-0 border border-red-200/60 dark:border-red-500/20">
+            {errType}
+          </span>
+        )}
         {/* Waterfall bar */}
-        <div className="flex-1 relative h-4 bg-slate-100 dark:bg-white/[0.04] rounded overflow-hidden mx-2">
+        <div className="flex-1 relative h-4 bg-slate-100 dark:bg-white/[0.04] rounded overflow-hidden mx-2 min-w-[40px]">
           <div
             className={`absolute top-0 h-full ${barColor} rounded opacity-80`}
             style={{ left: `${left}%`, width: `${width}%` }}
@@ -110,24 +150,83 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
           <span className="text-[10px] text-red-500 flex-shrink-0">✗</span>
         )}
       </button>
-      {expanded && attrEntries.length > 0 && (
-        <div className="mx-4 mb-2 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04] px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-1.5" style={{ marginLeft: indent + 32 }}>
-          {attrEntries.map(([k, v]) => (
-            <div key={k} className="flex items-start gap-2">
-              <span className="text-[10px] font-mono text-slate-400 flex-shrink-0 pt-0.5 truncate max-w-[120px]">{k}</span>
-              <span className="text-[10px] text-slate-600 dark:text-slate-400 break-all">{String(v)}</span>
+      {expanded && (
+        <div className="mx-4 mb-2 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04] px-4 py-3 space-y-3" style={{ marginLeft: indent + 32 }}>
+          {highlights.length > 0 && (
+            <div>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Span Details</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                {highlights.map((h) => (
+                  <div key={h.key} className="flex items-start gap-2">
+                    <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 flex-shrink-0 pt-0.5 w-28 truncate">{h.label}</span>
+                    <span className="text-[11px] text-slate-700 dark:text-slate-300 font-mono break-all">{_attr(span, h.key)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          )}
+          {otherAttrs.length > 0 && (
+            <div>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Other Attributes</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                {otherAttrs.map(([k, v]) => (
+                  <div key={k} className="flex items-start gap-2">
+                    <span className="text-[10px] font-mono text-slate-400 flex-shrink-0 pt-0.5 truncate max-w-[120px]">{k}</span>
+                    <span className="text-[10px] text-slate-600 dark:text-slate-400 break-all">{String(v)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {highlights.length === 0 && otherAttrs.length === 0 && (
+            <p className="text-[11px] text-slate-400 italic">No attributes</p>
+          )}
         </div>
       )}
     </div>
   );
 }
 
+interface OperationStats {
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  modelsTouched: string[];
+  toolCount: number;
+  errorCount: number;
+  categoryCounts: Partial<Record<SpanCategory, number>>;
+}
+
+function computeOperationStats(spans: TraceSpan[]): OperationStats {
+  let inTok = 0;
+  let outTok = 0;
+  const models = new Set<string>();
+  let toolCount = 0;
+  let errorCount = 0;
+  const cats: Partial<Record<SpanCategory, number>> = {};
+  for (const sp of spans) {
+    inTok += _attrNum(sp, "gen_ai.usage.input_tokens");
+    outTok += _attrNum(sp, "gen_ai.usage.output_tokens");
+    const m = _attr(sp, "gen_ai.response.model");
+    if (m) models.add(m);
+    if (sp.category === "tool" || sp.category === "skill") toolCount += 1;
+    if (!sp.success || _attr(sp, "error.type")) errorCount += 1;
+    cats[sp.category] = (cats[sp.category] ?? 0) + 1;
+  }
+  return {
+    totalInputTokens: inTok,
+    totalOutputTokens: outTok,
+    modelsTouched: [...models],
+    toolCount,
+    errorCount,
+    categoryCounts: cats,
+  };
+}
+
 function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours: number }) {
   const [expanded, setExpanded] = useState(false);
   const [detail, setDetail] = useState<TraceOperation | null>(null);
   const [loading, setLoading] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<SpanCategory | null>(null);
 
   const handleExpand = async () => {
     const next = !expanded;
@@ -146,8 +245,10 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
   };
 
   const opData = detail ?? op;
-  const spans: TraceSpan[] = opData.spans ?? [];
-  const maxEndMs = spans.reduce((m, s) => Math.max(m, s.offset_ms + s.duration_ms), 0);
+  const allSpans: TraceSpan[] = opData.spans ?? [];
+  const stats = useMemo(() => computeOperationStats(allSpans), [allSpans]);
+  const spans = activeFilter ? allSpans.filter((s) => s.category === activeFilter) : allSpans;
+  const maxEndMs = allSpans.reduce((m, s) => Math.max(m, s.offset_ms + s.duration_ms), 0);
 
   const now = Date.now();
   const opDate = new Date(op.timestamp);
@@ -200,6 +301,75 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
             </div>
           ) : (
             <>
+              {/* Per-operation summary header */}
+              {allSpans.length > 0 && (
+                <div className="px-5 py-3 border-b border-slate-100 dark:border-white/[0.04] space-y-3">
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
+                    {(stats.totalInputTokens > 0 || stats.totalOutputTokens > 0) && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-400">Tokens</span>
+                        <span className="font-mono text-slate-700 dark:text-slate-200 font-medium">
+                          {_fmtTokens(stats.totalInputTokens)} → {_fmtTokens(stats.totalOutputTokens)}
+                        </span>
+                      </div>
+                    )}
+                    {stats.modelsTouched.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-slate-400">Models</span>
+                        {stats.modelsTouched.map((m) => (
+                          <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 font-mono border border-blue-200/60 dark:border-blue-500/20">
+                            {m}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {stats.toolCount > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-400">🔧 Tools</span>
+                        <span className="font-mono text-emerald-700 dark:text-emerald-400 font-medium">{stats.toolCount}</span>
+                      </div>
+                    )}
+                    {stats.errorCount > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-400">Errors</span>
+                        <span className="font-mono text-red-600 dark:text-red-400 font-medium">{stats.errorCount}</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Category filter chips */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <button
+                      onClick={() => setActiveFilter(null)}
+                      className={`text-[10px] px-2 py-1 rounded-full font-medium transition-colors border ${
+                        activeFilter === null
+                          ? "bg-primary-50 dark:bg-primary-500/15 text-primary-700 dark:text-primary-300 border-primary-200 dark:border-primary-500/30"
+                          : "bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/[0.08] hover:border-slate-300"
+                      }`}
+                    >
+                      all · {allSpans.length}
+                    </button>
+                    {(Object.entries(stats.categoryCounts) as [SpanCategory, number][])
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([cat, cnt]) => (
+                        <button
+                          key={cat}
+                          onClick={() => setActiveFilter((cur) => (cur === cat ? null : cat))}
+                          className={`text-[10px] px-2 py-1 rounded-full font-medium transition-colors flex items-center gap-1 border ${
+                            activeFilter === cat
+                              ? "bg-primary-50 dark:bg-primary-500/15 text-primary-700 dark:text-primary-300 border-primary-200 dark:border-primary-500/30"
+                              : "bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/[0.08] hover:border-slate-300"
+                          }`}
+                        >
+                          <span>{spanCategoryEmoji[cat]}</span>
+                          <span>{cat}</span>
+                          <span className="font-mono text-slate-400">·</span>
+                          <span className="font-mono">{cnt}</span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               {/* Spans waterfall */}
               {spans.length > 0 ? (
                 <div className="py-2">
@@ -207,6 +377,8 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
                     <SpanRow key={span.id} span={span} maxEndMs={maxEndMs} />
                   ))}
                 </div>
+              ) : allSpans.length > 0 ? (
+                <p className="text-xs text-slate-400 text-center py-6">No spans match the active filter</p>
               ) : (
                 <p className="text-xs text-slate-400 text-center py-6">No span data available</p>
               )}

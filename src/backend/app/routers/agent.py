@@ -7,6 +7,7 @@ import re
 import time
 import uuid
 from datetime import datetime, timezone
+from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -24,6 +25,7 @@ from app.models import (
 from app.services.follow_up_service import generate_follow_ups
 
 logger = logging.getLogger(__name__)
+_tracer = trace.get_tracer("kratos.agent.proxy")
 
 router = APIRouter()
 
@@ -107,6 +109,22 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
             proxy_done: dict = {}
             gateway_session_id: str | None = None
 
+            # Replay tool/usage events as OTel child spans so the traces tab
+            # can render meaningful waterfalls. The hosted Foundry agent emits
+            # its own gen_ai spans to its private AppInsights — these manual
+            # spans surface the same signal in the kratos-side trace tree.
+            common_attrs = {
+                "kratos.use_case": str(body.useCase) if body.useCase else "",
+                "kratos.conversation_id": str(body.conversationId),
+            }
+            if eval_run_id:
+                common_attrs["kratos.eval_run_id"] = eval_run_id
+            open_tool_spans: dict[str, Any] = {}
+            # When the SSE event doesn't carry a unique call_id, use a per-skill
+            # FIFO queue so started→completed pairs match by arrival order.
+            started_queue: dict[str, list[str]] = {}
+            synthetic_seq = 0
+
             async for event_dict in foundry_proxy.invoke(
                 message=body.message,
                 conversation_id=body.conversationId,
@@ -122,11 +140,82 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                     collected_thoughts.append(event_data.get("content", ""))
                     yield {"event": "thought", "data": json.dumps(event_data)}
                 elif event_name == "tool_call":
-                    if event_data.get("status") == "completed":
+                    status = event_data.get("status")
+                    tool_name = (
+                        event_data.get("skillName")
+                        or event_data.get("skill_name")
+                        or event_data.get("name")
+                        or event_data.get("tool_name")
+                        or event_data.get("tool")
+                        or "tool"
+                    )
+                    real_call_id = (
+                        event_data.get("id")
+                        or event_data.get("call_id")
+                        or event_data.get("tool_call_id")
+                    )
+                    if status in (None, "started", "running"):
+                        if real_call_id:
+                            call_id = str(real_call_id)
+                        else:
+                            synthetic_seq += 1
+                            call_id = f"{tool_name}:{synthetic_seq}"
+                            started_queue.setdefault(tool_name, []).append(call_id)
+                        sp = _tracer.start_span(
+                            f"tool.{tool_name}",
+                            kind=trace.SpanKind.INTERNAL,
+                            attributes={
+                                **common_attrs,
+                                "gen_ai.tool.name": str(tool_name),
+                                "kratos.skill.name": str(tool_name),
+                                "gen_ai.tool.kind": "skill",
+                            },
+                        )
+                        open_tool_spans[call_id] = sp
+                    elif status in ("completed", "failed", "error"):
+                        if real_call_id:
+                            call_id = str(real_call_id)
+                        else:
+                            queue = started_queue.get(tool_name) or []
+                            call_id = queue.pop(0) if queue else f"{tool_name}:orphan"
+                        sp = open_tool_spans.pop(call_id, None)
+                        if sp is None:
+                            # tool_call arrived only on completion — synthesise a span
+                            sp = _tracer.start_span(
+                                f"tool.{tool_name}",
+                                kind=trace.SpanKind.INTERNAL,
+                                attributes={
+                                    **common_attrs,
+                                    "gen_ai.tool.name": str(tool_name),
+                                    "kratos.skill.name": str(tool_name),
+                                    "gen_ai.tool.kind": "skill",
+                                },
+                            )
+                        if status in ("failed", "error"):
+                            sp.set_attribute("error.type", str(event_data.get("error", "tool_failed")))
+                            sp.set_status(trace.Status(trace.StatusCode.ERROR))
+                        sp.end()
                         total_tool_calls += 1
                     collected_tool_calls.append(event_data)
                     yield {"event": "tool_call", "data": json.dumps(event_data)}
                 elif event_name == "usage":
+                    # Replay usage as an LLM span so traces tab shows model + tokens
+                    llm_sp = _tracer.start_span(
+                        "chat.completions",
+                        kind=trace.SpanKind.CLIENT,
+                        attributes={
+                            **common_attrs,
+                            "gen_ai.operation.name": "chat",
+                            "gen_ai.response.model": str(
+                                event_data.get("model")
+                                or event_data.get("modelName")
+                                or proxy_done.get("model", "")
+                            ),
+                            "gen_ai.usage.input_tokens": int(event_data.get("promptTokens") or 0),
+                            "gen_ai.usage.output_tokens": int(event_data.get("completionTokens") or 0),
+                        },
+                    )
+                    llm_sp.end()
                     yield {"event": "usage", "data": json.dumps(event_data)}
                 elif event_name == "content":
                     assistant_content_parts.append(event_data.get("content", ""))
@@ -143,6 +232,14 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                     proxy_done = event_data
                 elif event_name == "_gateway_session":
                     gateway_session_id = event_data.get("agentSessionId")
+
+            # Close any tool spans that never received a completion
+            for call_id, sp in list(open_tool_spans.items()):
+                try:
+                    sp.end()
+                except Exception:
+                    pass
+            open_tool_spans.clear()
 
             # Persist gateway session ID so subsequent messages reuse the
             # same hosted agent container (preserving CopilotClient state).

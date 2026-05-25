@@ -162,11 +162,18 @@ def _build_foundry_oai_client(settings: Settings) -> Any:
 def _build_model_config(settings: Settings) -> dict[str, Any]:
     """Return the model config dict for azure-ai-evaluation evaluators."""
     azure_endpoint = settings.foundry_endpoint.rstrip("/")
-    model = settings.eval_model or "gpt-4.1"
+    # Prefer the actual deployment name (e.g. ``gpt-54``) — ``eval_model``'s
+    # default of ``gpt-4.1`` is only used if the runtime model isn't set.
+    model = (
+        settings.foundry_model_deployment
+        or settings.eval_model
+        or "gpt-4.1"
+    )
     api_key = os.environ.get("FOUNDRY_API_KEY", "").strip()
     config: dict[str, Any] = {
         "azure_endpoint": azure_endpoint,
         "azure_deployment": model,
+        "api_version": "2024-12-01-preview",
     }
     if api_key:
         config["api_key"] = api_key
@@ -176,14 +183,19 @@ def _build_model_config(settings: Settings) -> dict[str, Any]:
 
 
 def _apply_validate_model_config_patch() -> None:
-    """Patch azure-ai-evaluation's validate_model_config for Python 3.13 compat.
+    """Patch azure-ai-evaluation's validate_model_config.
 
-    Python 3.13 changed isinstance(v, typing.Any) to raise TypeError; this
-    breaks the credential-field check inside azure-ai-evaluation.  The patch
-    short-circuits when the config already has ``azure_endpoint``.
+    Two reasons this must run on ALL Python versions:
+
+    1. Python 3.13 changed ``isinstance(v, typing.Any)`` to raise TypeError;
+       this breaks the credential-field check inside azure-ai-evaluation.
+    2. azure-ai-evaluation's TypedDict for AzureOpenAIModelConfiguration does
+       NOT accept ``credential`` (only ``api_key`` / ``api_version``), so a
+       managed-identity-flavored dict fails strict validation on 3.11 too.
+
+    The patch short-circuits validation when the config already has
+    ``azure_endpoint`` — the only field we actually need to be well-formed.
     """
-    if sys.version_info < (3, 13):
-        return
     try:
         import azure.ai.evaluation._common.utils as _eval_utils
         import azure.ai.evaluation._evaluators._common._base_prompty_eval as _bpe
@@ -260,12 +272,60 @@ def _filter_tool_calls(tool_calls: list[dict[str, Any]]) -> list[dict[str, Any]]
 
 
 def _build_tool_definitions(expected_tool_calls: list[str]) -> list[dict[str, Any]]:
-    """Build the tool_definitions list for evaluators from expected tool names."""
+    """Build the tool_definitions list for evaluators from expected tool names.
+
+    ToolCallAccuracyEvaluator requires each definition to carry a ``parameters``
+    field (JSON Schema shape). We don't know the real schema of expected tools,
+    so emit an empty-object schema which matches the evaluator's contract while
+    staying generic.
+    """
     filtered = [t for t in expected_tool_calls if t not in _INTERNAL_TOOLS]
     return [
-        {"name": t if t.startswith(_MCP_PREFIX) else _MCP_PREFIX + t}
+        {
+            "name": t if t.startswith(_MCP_PREFIX) else _MCP_PREFIX + t,
+            "description": f"Skill: {t}",
+            "parameters": {"type": "object", "properties": {}},
+        }
         for t in filtered
     ]
+
+
+def _apply_openai_max_tokens_patch() -> None:
+    """Translate ``max_tokens`` → ``max_completion_tokens`` on OpenAI calls.
+
+    gpt-5.x / o1-* models reject ``max_tokens`` and require the new
+    ``max_completion_tokens`` parameter. azure-ai-evaluation's prompty
+    templates still hardcode ``max_tokens``, so we monkey-patch the OpenAI
+    chat-completions ``create`` method to rewrite the parameter at call time.
+    Idempotent.
+    """
+    try:
+        from openai.resources.chat import completions as _cc  # noqa: PLC0415
+
+        for cls_name in ("Completions", "AsyncCompletions"):
+            cls = getattr(_cc, cls_name, None)
+            if cls is None:
+                continue
+            orig = cls.create
+            if getattr(orig, "_kratos_max_tokens_patched", False):
+                continue
+
+            if cls_name == "AsyncCompletions":
+                async def _patched_async(self, *args, _orig=orig, **kwargs):  # type: ignore[no-untyped-def]
+                    if "max_tokens" in kwargs and "max_completion_tokens" not in kwargs:
+                        kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
+                    return await _orig(self, *args, **kwargs)
+                _patched_async._kratos_max_tokens_patched = True  # type: ignore[attr-defined]
+                cls.create = _patched_async  # type: ignore[assignment]
+            else:
+                def _patched_sync(self, *args, _orig=orig, **kwargs):  # type: ignore[no-untyped-def]
+                    if "max_tokens" in kwargs and "max_completion_tokens" not in kwargs:
+                        kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
+                    return _orig(self, *args, **kwargs)
+                _patched_sync._kratos_max_tokens_patched = True  # type: ignore[attr-defined]
+                cls.create = _patched_sync  # type: ignore[assignment]
+    except Exception:
+        pass
 
 
 # ── EvalService ───────────────────────────────────────────────────────────────
@@ -618,9 +678,17 @@ class EvalService:
             if idx < total - 1:
                 await asyncio.sleep(5)
 
-        # ── Phase 2: SCORING (FOUNDRY mode only) ─────────────────────────
-        if run.mode == EvalMode.FOUNDRY:
+        # ── Phase 2: SCORING (both validation + foundry modes) ──────────
+        # The mode label is purely a pacing/strictness hint — both flows
+        # benefit from per-evaluator scores. Without this, results[].scores
+        # is empty and the eval panel can't render per-evaluator bars.
+        # Scoring is best-effort enrichment; never let a scoring failure
+        # mark the whole run as failed when invocations succeeded.
+        try:
             await self._score_run(run, scenarios_to_run, use_case, run_id)
+        except Exception as exc:
+            logger.exception("[eval %s] scoring failed (invocations OK)", run_id)
+            run.error = f"Scoring failed: {exc}"
 
         # ── Phase 3: Write report ─────────────────────────────────────────
         report = self._build_report(run, use_case)
@@ -645,6 +713,7 @@ class EvalService:
 
         # Lazy import — azure-ai-evaluation may not be installed
         _apply_validate_model_config_patch()
+        _apply_openai_max_tokens_patch()
         try:
             from azure.ai.evaluation import (  # noqa: PLC0415
                 CoherenceEvaluator,
@@ -658,13 +727,24 @@ class EvalService:
             return
 
         model_config = _build_model_config(self._settings)
-        evaluators = {
-            "TaskAdherence": TaskAdherenceEvaluator(model_config=model_config),
-            "IntentResolution": IntentResolutionEvaluator(model_config=model_config),
-            "Coherence": CoherenceEvaluator(model_config=model_config),
-            "Relevance": RelevanceEvaluator(model_config=model_config),
-            "ToolCallAccuracy": ToolCallAccuracyEvaluator(model_config=model_config),
+        # Lazy per-evaluator instantiation — if one evaluator class fails to
+        # construct (e.g. version-specific validation), the rest still run.
+        evaluator_classes = {
+            "TaskAdherence": TaskAdherenceEvaluator,
+            "IntentResolution": IntentResolutionEvaluator,
+            "Coherence": CoherenceEvaluator,
+            "Relevance": RelevanceEvaluator,
+            "ToolCallAccuracy": ToolCallAccuracyEvaluator,
         }
+        evaluators: dict[str, Any] = {}
+        for name, cls in evaluator_classes.items():
+            try:
+                evaluators[name] = cls(model_config=model_config)
+            except Exception as exc:
+                logger.warning("[eval %s] evaluator %s init failed: %s", run_id, name, exc)
+        if not evaluators:
+            logger.error("[eval %s] no evaluators could be instantiated", run_id)
+            return
 
         scenario_map: dict[str, EvalScenario] = {s.name: s for s in scenarios}
         criteria_totals: dict[str, dict[str, int]] = {}
