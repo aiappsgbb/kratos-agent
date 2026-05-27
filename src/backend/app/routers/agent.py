@@ -3,6 +3,7 @@
 import base64
 import json
 import logging
+import os
 import re
 import time
 import uuid
@@ -29,21 +30,30 @@ _tracer = trace.get_tracer("kratos.agent.proxy")
 
 router = APIRouter()
 
-_SAFE_FILENAME_RE = re.compile(r"^[\w\-. ]+$")
+_SAFE_RELPATH_RE = re.compile(r"^[\w\-. /]+$")
 
 
 def _save_streamed_file(event_data: dict) -> None:
-    """Save a file streamed from the hosted agent to /tmp."""
+    """Save a file streamed from the hosted agent to /tmp.
+
+    The filename field may contain a relative path with subdirectories
+    (e.g. 'pete_report/file.pdf'). Subdirectories are created as needed.
+    """
     filename = event_data.get("filename", "")
     content_b64 = event_data.get("content", "")
     if not filename or not content_b64:
         return
-    if not _SAFE_FILENAME_RE.match(filename):
+    if not _SAFE_RELPATH_RE.match(filename):
         logger.warning("Ignoring streamed file with unsafe name: %s", filename)
+        return
+    # Prevent path traversal (e.g. '../' or absolute paths)
+    if ".." in filename or filename.startswith("/"):
+        logger.warning("Ignoring streamed file with path traversal: %s", filename)
         return
     try:
         data = base64.b64decode(content_b64)
         path = f"/tmp/{filename}"  # noqa: S108
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "wb") as f:
             f.write(data)
         logger.info("Saved streamed file: %s (%d bytes)", path, len(data))

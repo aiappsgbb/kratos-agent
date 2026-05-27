@@ -189,13 +189,14 @@ async def _shutdown() -> None:
 
 # ─── Invocation Handler ─────────────────────────────────────────────────────
 
-_TMP_FILE_PATTERN = re.compile(r"/tmp/([\w.\- ]+\.[a-zA-Z0-9]{1,10})")
+_TMP_FILE_PATTERN = re.compile(r"/tmp/([\w.\- /]+\.[a-zA-Z0-9]{1,10})")
 
 
 def _collect_generated_files(response_text: str) -> list[tuple[str, bytes]]:
     """Scan the agent response for /tmp/ file paths and collect their contents.
 
-    Returns a list of (filename, file_bytes) tuples for files that exist locally.
+    Returns a list of (relative_path, file_bytes) tuples for files that exist locally.
+    relative_path may include subdirectories (e.g. 'pete_report/file.pdf').
     These will be streamed to the backend proxy via SSE events.
     """
     matches = _TMP_FILE_PATTERN.findall(response_text)
@@ -203,18 +204,18 @@ def _collect_generated_files(response_text: str) -> list[tuple[str, bytes]]:
         return []
 
     files: list[tuple[str, bytes]] = []
-    for filename in set(matches):
-        local_path = f"/tmp/{filename}"
+    for rel_path in set(matches):
+        local_path = f"/tmp/{rel_path}"
         if not os.path.isfile(local_path):
             logger.warning("Referenced file not found locally: %s", local_path)
             continue
         try:
             with open(local_path, "rb") as f:
                 data = f.read()
-            files.append((filename, data))
-            logger.info("Collected generated file: %s (%d bytes)", filename, len(data))
+            files.append((rel_path, data))
+            logger.info("Collected generated file: %s (%d bytes)", local_path, len(data))
         except Exception:
-            logger.warning("Failed to read generated file %s", filename, exc_info=True)
+            logger.warning("Failed to read generated file %s", local_path, exc_info=True)
     return files
 
 
