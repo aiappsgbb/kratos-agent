@@ -1,0 +1,8 @@
+[
+  { "id": "PAY-4001", "employee_id": "EMP-2001", "pay_period_start": "2026-05-01", "pay_period_end": "2026-05-15", "gross_usd": 7917, "net_usd": 5142, "deductions_usd": 2775, "taxes_usd": 2100, "benefits_usd": 675, "paid_on": "2026-05-20" },
+  { "id": "PAY-4002", "employee_id": "EMP-2002", "pay_period_start": "2026-05-01", "pay_period_end": "2026-05-15", "gross_usd": 7500, "net_usd": 4875, "deductions_usd": 2625, "taxes_usd": 1988, "benefits_usd": 637, "paid_on": "2026-05-20" },
+  { "id": "PAY-4003", "employee_id": "EMP-2003", "pay_period_start": "2026-05-01", "pay_period_end": "2026-05-15", "gross_usd": 6292, "net_usd": 4088, "deductions_usd": 2204, "taxes_usd": 1668, "benefits_usd": 536, "paid_on": "2026-05-20" },
+  { "id": "PAY-4004", "employee_id": "EMP-2101", "pay_period_start": "2026-05-01", "pay_period_end": "2026-05-15", "gross_usd": 7083, "net_usd": 4604, "deductions_usd": 2479, "taxes_usd": 1878, "benefits_usd": 601, "paid_on": "2026-05-20" },
+  { "id": "PAY-4005", "employee_id": "EMP-2102", "pay_period_start": "2026-05-01", "pay_period_end": "2026-05-15", "gross_usd": 6875, "net_usd": 4469, "deductions_usd": 2406, "taxes_usd": 1823, "benefits_usd": 583, "paid_on": "2026-05-20" },
+  { "id": "PAY-4006", "employee_id": "EMP-2201", "pay_period_start": "2026-05-01", "pay_period_end": "2026-05-15", "gross_usd": 3833, "net_usd": 2491, "deductions_usd": 1342, "taxes_usd": 1016, "benefits_usd": 326, "paid_on": "2026-05-20" }
+]

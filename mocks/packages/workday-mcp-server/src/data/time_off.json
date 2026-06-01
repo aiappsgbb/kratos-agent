@@ -1,0 +1,8 @@
+[
+  { "id": "PTO-3001", "employee_id": "EMP-2003", "type": "Parental Leave",     "start_date": "2026-05-10", "end_date": "2026-08-09", "days": 65,  "status": "Approved",  "approver_id": "EMP-1011", "submitted_at": "2026-03-20", "reason": "Welcoming new child" },
+  { "id": "PTO-3002", "employee_id": "EMP-2002", "type": "Vacation",           "start_date": "2026-06-23", "end_date": "2026-07-03", "days": 9,   "status": "Approved",  "approver_id": "EMP-1011", "submitted_at": "2026-04-02", "reason": "Family trip" },
+  { "id": "PTO-3003", "employee_id": "EMP-2001", "type": "Vacation",           "start_date": "2026-07-14", "end_date": "2026-07-18", "days": 5,   "status": "Pending",   "approver_id": "EMP-1011", "submitted_at": "2026-05-28", "reason": "Wedding" },
+  { "id": "PTO-3004", "employee_id": "EMP-2102", "type": "Sick Leave",         "start_date": "2026-05-30", "end_date": "2026-05-31", "days": 2,   "status": "Approved",  "approver_id": "EMP-1021", "submitted_at": "2026-05-30", "reason": "Flu" },
+  { "id": "PTO-3005", "employee_id": "EMP-2202", "type": "Vacation",           "start_date": "2026-06-15", "end_date": "2026-06-20", "days": 5,   "status": "Pending",   "approver_id": "EMP-2201", "submitted_at": "2026-05-22", "reason": "Family visit" },
+  { "id": "PTO-3006", "employee_id": "EMP-2101", "type": "Conference",         "start_date": "2026-09-08", "end_date": "2026-09-11", "days": 4,   "status": "Approved",  "approver_id": "EMP-1021", "submitted_at": "2026-04-15", "reason": "Industry conference attendance" }
+]
