@@ -30,20 +30,25 @@ def test_copilot_agent_init(copilot_agent, settings):
 
 
 @pytest.mark.asyncio
-async def test_copilot_agent_start_stop(copilot_agent):
+async def test_copilot_agent_start_stop(settings):
     """Test CopilotClient start and stop lifecycle."""
+    # Force cloud mode so the Azure credential is actually created and closed;
+    # in local mode start()/stop() intentionally skip the credential entirely.
+    cloud_agent = CopilotAgent(settings.model_copy(update={"local_mode": False}))
     mock_client = AsyncMock()
     mock_credential = AsyncMock()
-    with patch("app.services.copilot_agent.CopilotClient", return_value=mock_client), \
-         patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=mock_credential), \
-         patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False), \
-         patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"):
-        await copilot_agent.start()
+    with (
+        patch("app.services.copilot_agent.CopilotClient", return_value=mock_client),
+        patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=mock_credential),
+        patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False),
+        patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"),
+    ):
+        await cloud_agent.start()
 
-        assert copilot_agent._client is mock_client
+        assert cloud_agent._client is mock_client
         mock_client.start.assert_awaited_once()
 
-        await copilot_agent.stop()
+        await cloud_agent.stop()
         mock_client.stop.assert_awaited_once()
         mock_credential.close.assert_awaited_once()
 
@@ -71,10 +76,12 @@ async def test_copilot_agent_run_streams_content(copilot_agent):
     mock_session.on = fake_on
     mock_session.send = AsyncMock()
 
-    with patch("app.services.copilot_agent.CopilotClient", return_value=mock_client), \
-         patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()), \
-         patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False), \
-         patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"):
+    with (
+        patch("app.services.copilot_agent.CopilotClient", return_value=mock_client),
+        patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()),
+        patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False),
+        patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"),
+    ):
         await copilot_agent.start()
 
         events = []
@@ -127,10 +134,12 @@ async def test_copilot_agent_run_streams_tool_events(copilot_agent):
     mock_session.on = fake_on
     mock_session.send = AsyncMock()
 
-    with patch("app.services.copilot_agent.CopilotClient", return_value=mock_client), \
-         patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()), \
-         patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False), \
-         patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"):
+    with (
+        patch("app.services.copilot_agent.CopilotClient", return_value=mock_client),
+        patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()),
+        patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False),
+        patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"),
+    ):
         await copilot_agent.start()
 
         events = []
@@ -168,10 +177,12 @@ async def test_copilot_agent_run_handles_error(copilot_agent):
     mock_session.on = fake_on
     mock_session.send = AsyncMock()
 
-    with patch("app.services.copilot_agent.CopilotClient", return_value=mock_client), \
-         patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()), \
-         patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False), \
-         patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"):
+    with (
+        patch("app.services.copilot_agent.CopilotClient", return_value=mock_client),
+        patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()),
+        patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False),
+        patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"),
+    ):
         await copilot_agent.start()
 
         events = []
@@ -194,18 +205,28 @@ async def test_copilot_agent_session_reuse(copilot_agent):
     mock_client = AsyncMock()
     mock_client.create_session = AsyncMock(return_value=mock_session)
 
+    # The agent registers the event handler ONCE per session, so model a
+    # persistent SDK stream: capture the callback on registration and deliver a
+    # `session.idle` event on every send() (including the reuse turn).
+    captured: dict = {}
+
     def fake_on(callback):
+        captured["callback"] = callback
+
+    async def fake_send(*args, **kwargs):
         idle_event = MagicMock()
         idle_event.type.value = "session.idle"
-        callback(idle_event)
+        captured["callback"](idle_event)
 
     mock_session.on = fake_on
-    mock_session.send = AsyncMock()
+    mock_session.send = fake_send
 
-    with patch("app.services.copilot_agent.CopilotClient", return_value=mock_client), \
-         patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()), \
-         patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False), \
-         patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"):
+    with (
+        patch("app.services.copilot_agent.CopilotClient", return_value=mock_client),
+        patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()),
+        patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False),
+        patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"),
+    ):
         await copilot_agent.start()
 
         # First call creates a session
@@ -225,10 +246,12 @@ async def test_copilot_agent_exception_drops_session(copilot_agent):
     mock_client = AsyncMock()
     mock_client.create_session = AsyncMock(side_effect=Exception("connection failed"))
 
-    with patch("app.services.copilot_agent.CopilotClient", return_value=mock_client), \
-         patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()), \
-         patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False), \
-         patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"):
+    with (
+        patch("app.services.copilot_agent.CopilotClient", return_value=mock_client),
+        patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()),
+        patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False),
+        patch("app.services.copilot_agent.get_bearer_token_provider", return_value=lambda: "token"),
+    ):
         await copilot_agent.start()
 
         events = []

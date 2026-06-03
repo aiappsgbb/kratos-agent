@@ -92,6 +92,7 @@ Rules:
 
 class AnalysisRequest(BaseModel):
     """Optional overrides for the analysis."""
+
     includeDisabled: bool = Field(default=True, description="Include disabled skills in the analysis")
 
 
@@ -114,6 +115,7 @@ class AnalysisResponse(BaseModel):
 
 class ApplyFixRequest(BaseModel):
     """Describes the issue to fix."""
+
     category: str
     title: str
     description: str
@@ -123,6 +125,7 @@ class ApplyFixRequest(BaseModel):
 
 class FixChange(BaseModel):
     """A single change that was applied."""
+
     target: str  # "system-prompt" or skill name
     changeType: str  # "modified" or "disabled"
     summary: str
@@ -130,6 +133,7 @@ class FixChange(BaseModel):
 
 class ApplyFixResponse(BaseModel):
     """Result of applying a fix."""
+
     success: bool
     changes: list[FixChange] = Field(default_factory=list)
     error: str = ""
@@ -159,7 +163,7 @@ def _build_analysis_content(registry: SkillRegistry, include_disabled: bool) -> 
     # Strip YAML frontmatter for analysis
     m = re.match(r"^---\s*\n.*?\n---\s*\n?", prompt, re.DOTALL)
     if m:
-        prompt = prompt[m.end():].strip()
+        prompt = prompt[m.end() :].strip()
     parts.append("=== SYSTEM PROMPT ===\n")
     parts.append(prompt)
     parts.append("\n\n")
@@ -180,7 +184,7 @@ def _build_analysis_content(registry: SkillRegistry, include_disabled: bool) -> 
             instr = skill.instructions
             m = re.match(r"^---\s*\n.*?\n---\s*\n?", instr, re.DOTALL)
             if m:
-                instr = instr[m.end():].strip()
+                instr = instr[m.end() :].strip()
             parts.append(f"Instructions:\n{instr}")
         else:
             parts.append("Instructions: (none)")
@@ -302,11 +306,13 @@ async def apply_fix(
             skill = registry.get_skill(skill_name)
             if skill and skill.enabled:
                 await registry.update_skill(skill_name, {"enabled": False})
-                changes.append(FixChange(
-                    target=skill_name,
-                    changeType="disabled",
-                    summary=f"Disabled unused skill '{skill_name}'",
-                ))
+                changes.append(
+                    FixChange(
+                        target=skill_name,
+                        changeType="disabled",
+                        summary=f"Disabled unused skill '{skill_name}'",
+                    )
+                )
         if changes:
             _reset_sessions(request)
             return ApplyFixResponse(success=True, changes=changes)
@@ -338,17 +344,21 @@ async def apply_fix(
             if fixed and fixed != prompt:
                 # Update in Cosmos and registry
                 cosmos = request.app.state.cosmos_service
-                await cosmos.upsert_setting({
-                    "id": "system-prompt",
-                    "category": "system",
-                    "content": fixed,
-                })
+                await cosmos.upsert_setting(
+                    {
+                        "id": "system-prompt",
+                        "category": "system",
+                        "content": fixed,
+                    }
+                )
                 registry.system_prompt = fixed
-                changes.append(FixChange(
-                    target="system-prompt",
-                    changeType="modified",
-                    summary="Updated system prompt to address the issue",
-                ))
+                changes.append(
+                    FixChange(
+                        target="system-prompt",
+                        changeType="modified",
+                        summary="Updated system prompt to address the issue",
+                    )
+                )
 
     # ── Fix affected skills ──
     for skill_name in targets_skills:
@@ -356,7 +366,9 @@ async def apply_fix(
         if not skill or not skill.instructions:
             continue
 
-        user_msg = f"=== ISSUE ===\n{issue_text}\n\n=== CURRENT SKILL INSTRUCTIONS ({skill_name}) ===\n{skill.instructions}"
+        user_msg = (
+            f"=== ISSUE ===\n{issue_text}\n\n=== CURRENT SKILL INSTRUCTIONS ({skill_name}) ===\n{skill.instructions}"
+        )
         fixed = await _call_llm(FIX_SYSTEM_PROMPT, user_msg)
         fixed = fixed.strip()
         if fixed.startswith("```"):
@@ -365,11 +377,13 @@ async def apply_fix(
 
         if fixed and fixed != skill.instructions:
             await registry.update_skill(skill_name, {"instructions": fixed})
-            changes.append(FixChange(
-                target=skill_name,
-                changeType="modified",
-                summary=f"Updated instructions for skill '{skill_name}'",
-            ))
+            changes.append(
+                FixChange(
+                    target=skill_name,
+                    changeType="modified",
+                    summary=f"Updated instructions for skill '{skill_name}'",
+                )
+            )
 
     if changes:
         _reset_sessions(request)

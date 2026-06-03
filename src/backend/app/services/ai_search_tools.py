@@ -39,9 +39,11 @@ logger = logging.getLogger(__name__)
 
 # Folder where PDFs to ingest are located — override via env var
 # Default resolves to <repo-root>/use-cases/insurance/sample-data
-#CHANGE the folder name to ingest sample-data accordingly   
+# CHANGE the folder name to ingest sample-data accordingly
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
-PDF_INGEST_FOLDER = os.environ.get("PDF_INGEST_FOLDER", str(_REPO_ROOT / "use-cases" / "wealth-management" / "sample-data"))
+PDF_INGEST_FOLDER = os.environ.get(
+    "PDF_INGEST_FOLDER", str(_REPO_ROOT / "use-cases" / "wealth-management" / "sample-data")
+)
 
 # Embedding model deployment name on Foundry/OpenAI (set to empty to skip vectors)
 EMBEDDING_DEPLOYMENT = os.environ.get("EMBEDDING_DEPLOYMENT", "text-embedding-ada-002")
@@ -287,14 +289,16 @@ def ingest_pdfs(index_name: str, pdf_folder: str | None = None) -> dict:
                 # so re-runs update existing docs instead of creating duplicates
                 id_seed = f"{pdf_path.name}:{page['page_number']}:{chunk_idx}"
                 doc_id = hashlib.sha256(id_seed.encode()).hexdigest()[:32]
-                documents.append({
-                    "id": doc_id,
-                    "content": chunk,
-                    "title": pdf_path.stem,
-                    "source": pdf_path.name,
-                    "page_number": page["page_number"],
-                    "chunk_index": chunk_idx,
-                })
+                documents.append(
+                    {
+                        "id": doc_id,
+                        "content": chunk,
+                        "title": pdf_path.stem,
+                        "source": pdf_path.name,
+                        "page_number": page["page_number"],
+                        "chunk_index": chunk_idx,
+                    }
+                )
 
     if not documents:
         return {"status": "error", "message": "No text content extracted from PDFs"}
@@ -307,7 +311,7 @@ def ingest_pdfs(index_name: str, pdf_folder: str | None = None) -> dict:
             texts = [doc["content"] for doc in documents]
             embeddings = _generate_embeddings(texts, credential)
             if embeddings and len(embeddings) == len(documents):
-                for doc, emb in zip(documents, embeddings):
+                for doc, emb in zip(documents, embeddings, strict=False):
                     doc["content_vector"] = emb
             else:
                 logger.warning("Embedding count mismatch — uploading without vectors")
@@ -337,7 +341,12 @@ def ingest_pdfs(index_name: str, pdf_folder: str | None = None) -> dict:
 
     logger.info(
         "Ingestion complete — index=%s pdfs=%d chunks=%d uploaded=%d failed=%d vectors=%s",
-        index_name, len(pdf_files), len(documents), total_uploaded, total_failed, include_vector,
+        index_name,
+        len(pdf_files),
+        len(documents),
+        total_uploaded,
+        total_failed,
+        include_vector,
     )
 
     return {

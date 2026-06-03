@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture
 def client():
     """Create a test client without lifespan (no Azure dependencies)."""
-    from unittest.mock import AsyncMock, MagicMock
+    from unittest.mock import MagicMock
 
     from app.main import app
 

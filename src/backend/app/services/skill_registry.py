@@ -45,7 +45,7 @@ def _parse_frontmatter(text: str) -> tuple[dict, str]:
         fm = yaml.safe_load(match.group(1)) or {}
     except yaml.YAMLError:
         return {}, text
-    body = text[match.end():]
+    body = text[match.end() :]
     return fm, body
 
 
@@ -259,9 +259,7 @@ class SkillRegistry:
         try:
             servers = await apm_service.list_mcp_servers(self.use_case)
         except Exception:  # noqa: BLE001 — APM failures must not break MCP loading
-            logger.exception(
-                "Failed to list APM MCP servers for use-case '%s'", self.use_case
-            )
+            logger.exception("Failed to list APM MCP servers for use-case '%s'", self.use_case)
             return
 
         merged = 0
@@ -429,9 +427,7 @@ class SkillRegistry:
 
         # Persist SKILL.md to blob
         if self._blob_service and self._blob_service.is_available:
-            await self._blob_service.upload_skill_file(
-                self.use_case, name, "SKILL.md", skill.instructions.encode()
-            )
+            await self._blob_service.upload_skill_file(self.use_case, name, "SKILL.md", skill.instructions.encode())
 
         # Update local copy
         if skill.local_path:

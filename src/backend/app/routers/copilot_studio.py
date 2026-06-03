@@ -8,15 +8,15 @@ Copilot Studio REST API plugin model requires.
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Request
 
 from app.models import (
-    CopilotStudioRequest,
-    CopilotStudioResponse,
     Conversation,
     ConversationStatus,
+    CopilotStudioRequest,
+    CopilotStudioResponse,
     Message,
     MessageRole,
 )
@@ -41,7 +41,7 @@ async def copilot_studio_chat(
     # Resolve or create conversation
     conversation_id = body.conversationId
     if not conversation_id:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         conversation = Conversation(
             id=str(uuid.uuid4()),
             userId="copilot-studio",
@@ -60,7 +60,7 @@ async def copilot_studio_chat(
         conversationId=conversation_id,
         role=MessageRole.USER,
         content=body.message,
-        createdAt=datetime.now(timezone.utc),
+        createdAt=datetime.now(UTC),
     )
     await cosmos.upsert_message(user_msg)
 
@@ -86,7 +86,7 @@ async def copilot_studio_chat(
         conversationId=conversation_id,
         role=MessageRole.ASSISTANT,
         content=full_reply,
-        createdAt=datetime.now(timezone.utc),
+        createdAt=datetime.now(UTC),
     )
     await cosmos.upsert_message(assistant_msg)
 

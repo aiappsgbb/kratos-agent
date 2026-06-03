@@ -265,9 +265,7 @@ class CosmosService:
         start = time.monotonic()
         query = "SELECT * FROM c WHERE c.conversationId = @cid ORDER BY c.createdAt ASC"
         params: list[dict[str, str]] = [{"name": "@cid", "value": conversation_id}]
-        items = self._messages_container.query_items(
-            query=query, parameters=params, partition_key=conversation_id
-        )
+        items = self._messages_container.query_items(query=query, parameters=params, partition_key=conversation_id)
         results = [Message(**item) async for item in items]
         elapsed_ms = (time.monotonic() - start) * 1000
         if elapsed_ms > _SLOW_OPERATION_THRESHOLD_MS:

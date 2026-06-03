@@ -98,11 +98,10 @@ async def upsert_scenario(
     request: Request,
 ) -> EvalScenario:
     _ensure_use_case(request, use_case)
-    if scenario.name != name:
-        # Allow renaming if the path name doesn't match — prefer body name
-        # but reject obvious mismatches that suggest a client bug.
-        if not scenario.name:
-            scenario = scenario.model_copy(update={"name": name})
+    # Allow renaming if the path name doesn't match — prefer body name
+    # but reject obvious mismatches that suggest a client bug.
+    if scenario.name != name and not scenario.name:
+        scenario = scenario.model_copy(update={"name": name})
     storage = _get_storage(request)
     await storage.upsert_scenario(use_case, scenario)
     return scenario

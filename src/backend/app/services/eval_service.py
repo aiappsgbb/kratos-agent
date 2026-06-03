@@ -14,10 +14,9 @@ import asyncio
 import json
 import logging
 import os
-import sys
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +64,7 @@ _SCENARIO_COUNT_MAX = 24
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _load_canon(use_case: str) -> str:
@@ -89,8 +88,7 @@ def _build_generator_system_prompt(
 ) -> str:
     """Build the system prompt for the LLM scenario generator."""
     skill_bullets = "\n".join(
-        f"- **{s.name}** (enabled={s.enabled}): {s.description}"
-        for s in registry.skills.values()
+        f"- **{s.name}** (enabled={s.enabled}): {s.description}" for s in registry.skills.values()
     )
 
     canon = _load_canon(use_case)
@@ -166,11 +164,7 @@ def _build_model_config(settings: Settings) -> dict[str, Any]:
     azure_endpoint = settings.foundry_endpoint.rstrip("/")
     # Prefer the actual deployment name (e.g. ``gpt-54``) — ``eval_model``'s
     # default of ``gpt-4.1`` is only used if the runtime model isn't set.
-    model = (
-        settings.foundry_model_deployment
-        or settings.eval_model
-        or "gpt-4.1"
-    )
+    model = settings.foundry_model_deployment or settings.eval_model or "gpt-4.1"
     api_key = os.environ.get("FOUNDRY_API_KEY", "").strip()
     config: dict[str, Any] = {
         "azure_endpoint": azure_endpoint,
@@ -313,17 +307,21 @@ def _apply_openai_max_tokens_patch() -> None:
                 continue
 
             if cls_name == "AsyncCompletions":
+
                 async def _patched_async(self, *args, _orig=orig, **kwargs):  # type: ignore[no-untyped-def]
                     if "max_tokens" in kwargs and "max_completion_tokens" not in kwargs:
                         kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
                     return await _orig(self, *args, **kwargs)
+
                 _patched_async._kratos_max_tokens_patched = True  # type: ignore[attr-defined]
                 cls.create = _patched_async  # type: ignore[assignment]
             else:
+
                 def _patched_sync(self, *args, _orig=orig, **kwargs):  # type: ignore[no-untyped-def]
                     if "max_tokens" in kwargs and "max_completion_tokens" not in kwargs:
                         kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
                     return _orig(self, *args, **kwargs)
+
                 _patched_sync._kratos_max_tokens_patched = True  # type: ignore[attr-defined]
                 cls.create = _patched_sync  # type: ignore[assignment]
     except Exception:
@@ -365,9 +363,7 @@ class EvalService:
         is non-empty when the agent stream emitted an error event.
         """
         if self._foundry_proxy is None:
-            raise RuntimeError(
-                "EvalService: foundry_proxy is not configured — cannot invoke hosted agent."
-            )
+            raise RuntimeError("EvalService: foundry_proxy is not configured — cannot invoke hosted agent.")
 
         chunks: list[str] = []
         tool_calls: list[dict[str, Any]] = []
@@ -566,7 +562,7 @@ class EvalService:
         await self._storage.save_run(run)
 
         # Build Foundry OpenAI client (used later for scoring evaluators in FOUNDRY mode)
-        oai = _build_foundry_oai_client(settings) if run.mode == EvalMode.FOUNDRY else None
+        _oai = _build_foundry_oai_client(settings) if run.mode == EvalMode.FOUNDRY else None
 
         # Warmup loop — handles scale-from-zero hosted agents (uses Invocations protocol)
         logger.info("[eval %s] warmup start (max %d attempts)", run_id, _WARMUP_ATTEMPTS)
@@ -581,27 +577,19 @@ class EvalService:
                     timeout=60.0,
                 )
                 if werr:
-                    logger.warning(
-                        "[eval %s] warmup attempt=%d error: %s", run_id, attempt, werr[:160]
-                    )
+                    logger.warning("[eval %s] warmup attempt=%d error: %s", run_id, attempt, werr[:160])
                 elif wtext:
-                    logger.info(
-                        "[eval %s] warmup READY (chars=%d)", run_id, len(wtext)
-                    )
+                    logger.info("[eval %s] warmup READY (chars=%d)", run_id, len(wtext))
                     break
                 else:
-                    logger.warning(
-                        "[eval %s] warmup attempt=%d empty response", run_id, attempt
-                    )
+                    logger.warning("[eval %s] warmup attempt=%d empty response", run_id, attempt)
             except Exception as exc:
                 logger.warning("[eval %s] warmup attempt=%d exc: %s", run_id, attempt, str(exc)[:160])
             if attempt < _WARMUP_ATTEMPTS:
                 await asyncio.sleep(backoff)
                 backoff = min(backoff * 2, 60.0)
         else:
-            raise RuntimeError(
-                f"Hosted agent failed to warm up after {_WARMUP_ATTEMPTS} attempts."
-            )
+            raise RuntimeError(f"Hosted agent failed to warm up after {_WARMUP_ATTEMPTS} attempts.")
 
         # Sequential invocation
         total = len(scenarios_to_run)
@@ -759,11 +747,7 @@ class EvalService:
             expected_behavior = sc.expected_behavior if sc else ""
             expected_tools = sc.expected_tool_calls if sc else []
 
-            eval_query = (
-                f"{result.query}\n\nExpected: {expected_behavior}"
-                if expected_behavior
-                else result.query
-            )
+            eval_query = f"{result.query}\n\nExpected: {expected_behavior}" if expected_behavior else result.query
 
             filtered_tool_calls = _filter_tool_calls(result.tool_calls)
             tool_defs = _build_tool_definitions(expected_tools)
@@ -786,7 +770,10 @@ class EvalService:
                 except Exception as exc:
                     logger.warning(
                         "[eval %s] evaluator %s failed for '%s': %s",
-                        run_id, eval_name, result.scenario, exc,
+                        run_id,
+                        eval_name,
+                        result.scenario,
+                        exc,
                     )
                     scores[eval_name] = {"error": str(exc)}
 
@@ -827,9 +814,7 @@ class EvalService:
             else:
                 failed_count += 1
 
-        per_criteria: list[dict[str, Any]] = [
-            {"criterion": k, **v} for k, v in criteria_totals.items()
-        ]
+        per_criteria: list[dict[str, Any]] = [{"criterion": k, **v} for k, v in criteria_totals.items()]
         run.foundry = FoundryEvalSummary(
             eval_id="",
             eval_run_id="",

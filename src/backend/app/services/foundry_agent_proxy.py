@@ -31,8 +31,7 @@ class FoundryAgentProxy:
             agent_name = settings.foundry_agent_name
             api_version = settings.foundry_api_version
             self._endpoint = (
-                f"{project_ep.rstrip('/')}/agents/{agent_name}"
-                f"/endpoint/protocols/invocations?api-version={api_version}"
+                f"{project_ep.rstrip('/')}/agents/{agent_name}/endpoint/protocols/invocations?api-version={api_version}"
             )
 
         # In local mode the hosted agent is an unauthenticated localhost stub;
@@ -88,13 +87,8 @@ class FoundryAgentProxy:
         if use_case and use_case != "generic":
             preamble_parts.append(f"<use_case>{use_case}</use_case>")
         if system_prompt:
-            preamble_parts.append(
-                f"<system_instructions>\n{system_prompt}\n</system_instructions>"
-            )
-        if preamble_parts:
-            input_text = "\n\n".join(preamble_parts) + f"\n\n{message}"
-        else:
-            input_text = message
+            preamble_parts.append(f"<system_instructions>\n{system_prompt}\n</system_instructions>")
+        input_text = "\n\n".join(preamble_parts) + f"\n\n{message}" if preamble_parts else message
 
         token = await self._get_token()
         headers = {

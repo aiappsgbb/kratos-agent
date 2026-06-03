@@ -8,8 +8,9 @@ as Pydantic models matching ``app.models.TraceList / TraceOperation``.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
-from datetime import timedelta
+from datetime import UTC, timedelta
 from typing import Any
 
 from azure.identity import DefaultAzureCredential
@@ -52,13 +53,9 @@ class TracesService:
         if use_case:
             filter_parts.append(f"tostring(customDimensions['kratos.use_case']) == '{use_case}'")
         if conversation_id:
-            filter_parts.append(
-                f"tostring(customDimensions['kratos.conversation_id']) == '{conversation_id}'"
-            )
+            filter_parts.append(f"tostring(customDimensions['kratos.conversation_id']) == '{conversation_id}'")
         if eval_run_id:
-            filter_parts.append(
-                f"tostring(customDimensions['kratos.eval_run_id']) == '{eval_run_id}'"
-            )
+            filter_parts.append(f"tostring(customDimensions['kratos.eval_run_id']) == '{eval_run_id}'")
 
         if filter_parts:
             narrow_filter = " and ".join(filter_parts)
@@ -136,10 +133,8 @@ class TracesService:
 
     async def close(self) -> None:
         """Release SDK resources."""
-        try:
+        with contextlib.suppress(Exception):
             self._client.close()
-        except Exception:
-            pass
 
     # ─── Internal ────────────────────────────────────────────────────────────
 
@@ -256,7 +251,7 @@ def _parse_logs(tables: list) -> dict[str, list[TraceLog]]:
     table = tables[0]
     columns = [c if isinstance(c, str) else c.name for c in table.columns]
     for row in table.rows:
-        d = dict(zip(columns, row))
+        d = dict(zip(columns, row, strict=False))
         op_id = d.get("operation_Id", "")
         msg = str(d.get("message", ""))
         if not op_id or not msg:
@@ -287,7 +282,7 @@ def _parse_spans(
     # Group raw rows by operation_Id
     ops_raw: dict[str, list[dict[str, Any]]] = {}
     for row in table.rows:
-        d = dict(zip(columns, row))
+        d = dict(zip(columns, row, strict=False))
         op_id = str(d.get("operation_Id") or "")
         if not op_id:
             continue
@@ -320,15 +315,11 @@ def _parse_spans(
             if s.get("op_name"):
                 attributes["gen_ai.operation.name"] = str(s["op_name"])
             if s.get("input_tokens") is not None:
-                try:
+                with contextlib.suppress(ValueError, TypeError):
                     attributes["gen_ai.usage.input_tokens"] = int(s["input_tokens"])
-                except (ValueError, TypeError):
-                    pass
             if s.get("output_tokens") is not None:
-                try:
+                with contextlib.suppress(ValueError, TypeError):
                     attributes["gen_ai.usage.output_tokens"] = int(s["output_tokens"])
-                except (ValueError, TypeError):
-                    pass
             if s.get("tool_name"):
                 attributes["gen_ai.tool.name"] = str(s["tool_name"])
             if s.get("error_type"):
@@ -436,9 +427,7 @@ def _classify_span(s: dict[str, Any]) -> str:
         return "agent"
 
     # Kratos agent chat endpoint = top-level agent operation
-    if role == "kratos-agent-service" and (
-        name == "post /api/agent/chat" or "/api/agent/chat" in name.lower()
-    ):
+    if role == "kratos-agent-service" and (name == "post /api/agent/chat" or "/api/agent/chat" in name.lower()):
         return "agent"
 
     # Internal agent spans
@@ -523,7 +512,7 @@ def _build_summary(operations: list[TraceOperation]) -> TraceSummary:
 
 def _ts_to_ms(ts_str: str) -> float | None:
     """Parse an ISO timestamp string to epoch milliseconds, or None on failure."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     if not ts_str:
         return None
@@ -533,7 +522,7 @@ def _ts_to_ms(ts_str: str) -> float | None:
             s += "+00:00"
         dt = datetime.fromisoformat(s)
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
+            dt = dt.replace(tzinfo=UTC)
         return dt.timestamp() * 1000
     except (ValueError, TypeError):
         return None

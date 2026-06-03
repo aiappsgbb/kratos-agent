@@ -93,7 +93,9 @@ async def create_skill(body: SkillCreate, request: Request, use_case: str = Quer
 
 
 @router.patch("/{skill_name}", response_model=SkillResponse)
-async def update_skill(skill_name: str, body: SkillUpdate, request: Request, use_case: str = Query("generic")) -> SkillResponse:
+async def update_skill(
+    skill_name: str, body: SkillUpdate, request: Request, use_case: str = Query("generic")
+) -> SkillResponse:
     """Update an existing skill (partial update)."""
     registry = _get_registry(request, use_case)
 
@@ -124,6 +126,7 @@ async def delete_skill(skill_name: str, request: Request, use_case: str = Query(
 
 
 # ─── Skill file management ────────────────────────────────────────────────────
+
 
 def _validate_file_path(file_path: str) -> None:
     """Reject paths with directory traversal or absolute components."""

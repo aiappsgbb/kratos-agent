@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -46,9 +46,7 @@ def _runs_prefix(use_case: str) -> str:
 
 def _validate_name(name: str) -> str:
     if not _NAME_PATTERN.match(name):
-        raise ValueError(
-            f"Invalid scenario name '{name}'. Must match {_NAME_PATTERN.pattern}"
-        )
+        raise ValueError(f"Invalid scenario name '{name}'. Must match {_NAME_PATTERN.pattern}")
     return name
 
 
@@ -135,9 +133,7 @@ class EvalStorage:
         _validate_name(scenario.name)
         payload = scenario.model_dump_json(indent=2).encode("utf-8")
         if self._blob.is_available:
-            await self._blob.upload_file(
-                f"{_scenarios_prefix(use_case)}{scenario.name}.json", payload
-            )
+            await self._blob.upload_file(f"{_scenarios_prefix(use_case)}{scenario.name}.json", payload)
         # Always mirror to local filesystem so devs see the file in their tree
         local_dir = self._local_scenarios_dir(use_case)
         local_dir.mkdir(parents=True, exist_ok=True)
@@ -198,21 +194,17 @@ class EvalStorage:
     # ── Runs ─────────────────────────────────────────────────────────────
 
     async def save_run(self, run: EvalRun) -> None:
-        run.updated_at = datetime.now(timezone.utc)
+        run.updated_at = datetime.now(UTC)
         payload = run.model_dump_json(indent=2).encode("utf-8")
         if self._blob.is_available:
-            await self._blob.upload_file(
-                f"{_runs_prefix(run.use_case)}{run.run_id}/_meta.json", payload
-            )
+            await self._blob.upload_file(f"{_runs_prefix(run.use_case)}{run.run_id}/_meta.json", payload)
         local_dir = self._local_runs_dir(run.use_case) / run.run_id
         local_dir.mkdir(parents=True, exist_ok=True)
         (local_dir / "_meta.json").write_bytes(payload)
 
     async def load_run(self, use_case: str, run_id: str) -> EvalRun | None:
         if self._blob.is_available:
-            raw = await self._blob.download_blob(
-                f"{_runs_prefix(use_case)}{run_id}/_meta.json"
-            )
+            raw = await self._blob.download_blob(f"{_runs_prefix(use_case)}{run_id}/_meta.json")
             if raw:
                 try:
                     return EvalRun.model_validate_json(raw.decode("utf-8"))
@@ -264,16 +256,12 @@ class EvalStorage:
         if self._blob.is_available:
             # Blob append: re-upload the whole file (small per-run, no contention)
             content = local_path.read_bytes()
-            await self._blob.upload_file(
-                f"{_runs_prefix(use_case)}{run_id}/run_results.jsonl", content
-            )
+            await self._blob.upload_file(f"{_runs_prefix(use_case)}{run_id}/run_results.jsonl", content)
 
     async def write_report(self, use_case: str, run_id: str, report: dict[str, Any]) -> None:
         payload = json.dumps(report, indent=2, default=str).encode("utf-8")
         if self._blob.is_available:
-            await self._blob.upload_file(
-                f"{_runs_prefix(use_case)}{run_id}/eval_report.json", payload
-            )
+            await self._blob.upload_file(f"{_runs_prefix(use_case)}{run_id}/eval_report.json", payload)
         local_dir = self._local_runs_dir(use_case) / run_id
         local_dir.mkdir(parents=True, exist_ok=True)
         (local_dir / "eval_report.json").write_bytes(payload)

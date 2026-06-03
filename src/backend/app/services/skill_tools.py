@@ -13,14 +13,13 @@ from contextvars import ContextVar
 from pathlib import Path
 
 import httpx
-
-logger = logging.getLogger(__name__)
 from azure.identity.aio import DefaultAzureCredential
 from azure.search.documents.aio import SearchClient
 from copilot.tools import define_tool
 from opentelemetry import trace
 from pydantic import BaseModel, Field
 
+logger = logging.getLogger(__name__)
 tracer = trace.get_tracer(__name__)
 
 # ─── Kratos context vars — set by copilot_agent.run() so tool spans carry the ─
@@ -42,6 +41,7 @@ def _set_kratos_attrs(span: trace.Span) -> None:
     eval_run_id = _ctx_eval_run_id.get()
     if eval_run_id:
         span.set_attribute("kratos.eval_run_id", eval_run_id)
+
 
 # ─── Shared singletons — avoid recreating expensive objects on every tool call ─
 
@@ -132,15 +132,19 @@ async def web_search(params: WebSearchParams) -> dict:
                         text = content.get("text", "")
                         for ann in content.get("annotations", []):
                             if ann.get("type") == "url_citation":
-                                citations.append({
-                                    "title": ann.get("title", ""),
-                                    "url": ann.get("url", ""),
-                                })
+                                citations.append(
+                                    {
+                                        "title": ann.get("title", ""),
+                                        "url": ann.get("url", ""),
+                                    }
+                                )
 
         logger.info(
             "web_search returned %d citations for query=%s auth_ms=%.0f search_ms=%.0f",
-            len(citations), query,
-            (t1 - t0) * 1000, (time.monotonic() - t1) * 1000,
+            len(citations),
+            query,
+            (t1 - t0) * 1000,
+            (time.monotonic() - t1) * 1000,
         )
         return {"text": text, "citations": citations, "query": query}
 
@@ -150,7 +154,10 @@ async def web_search(params: WebSearchParams) -> dict:
 
 class RAGSearchParams(BaseModel):
     query: str = Field(description="The query to search in the knowledge base")
-    index_name: str = Field(default="", description="The Azure AI Search index name to query. Each use case has its own index (e.g. 'wm-knowledge-base' for wealth management, 'ins-knowledge-base' for insurance).")
+    index_name: str = Field(
+        default="",
+        description="The Azure AI Search index name to query. Each use case has its own index (e.g. 'wm-knowledge-base' for wealth management, 'ins-knowledge-base' for insurance).",
+    )
     top: int = Field(default=5, description="Number of results to return")
 
 
@@ -180,13 +187,15 @@ async def rag_search(params: RAGSearchParams) -> dict:
             )
             docs = []
             async for result in results:
-                docs.append({
-                    "content": str(result.get("content", ""))[:500],
-                    "title": result.get("title", ""),
-                    "source": result.get("source", ""),
-                    "page": result.get("page_number", ""),
-                    "score": result.get("@search.score", 0),
-                })
+                docs.append(
+                    {
+                        "content": str(result.get("content", ""))[:500],
+                        "title": result.get("title", ""),
+                        "source": result.get("source", ""),
+                        "page": result.get("page_number", ""),
+                        "score": result.get("@search.score", 0),
+                    }
+                )
             return {"results": docs, "query": params.query}
 
 
@@ -294,10 +303,20 @@ def _sanitize_crm_client(client: dict) -> dict:
     """Return client dict with portfolio summary (without full positions list)."""
     result = {}
     for key in (
-        "clientID", "status", "fullName", "firstName", "lastName",
-        "dateOfBirth", "nationality", "contactDetails", "address",
-        "financialInformation", "investmentProfile", "pep_status",
-        "documents_provided", "name_screening_result",
+        "clientID",
+        "status",
+        "fullName",
+        "firstName",
+        "lastName",
+        "dateOfBirth",
+        "nationality",
+        "contactDetails",
+        "address",
+        "financialInformation",
+        "investmentProfile",
+        "pep_status",
+        "documents_provided",
+        "name_screening_result",
     ):
         if key in client:
             result[key] = client[key]
@@ -318,8 +337,15 @@ def _sanitize_insurance_client(client: dict) -> dict:
     """Return insurance customer dict with a compact policy summary."""
     result = {}
     for key in (
-        "id", "clientID", "fullName", "firstName", "lastName",
-        "dateOfBirth", "nationality", "contactDetails", "address",
+        "id",
+        "clientID",
+        "fullName",
+        "firstName",
+        "lastName",
+        "dateOfBirth",
+        "nationality",
+        "contactDetails",
+        "address",
     ):
         if key in client:
             result[key] = client[key]
@@ -363,7 +389,9 @@ class CRMParams(BaseModel):
     )
 
 
-@define_tool(description="Search and retrieve wealth-management or insurance customer profiles and holdings from the CRM system")
+@define_tool(
+    description="Search and retrieve wealth-management or insurance customer profiles and holdings from the CRM system"
+)
 async def crm(params: CRMParams) -> dict:
     """CRM lookup for wealth-management clients or insurance customers."""
     with tracer.start_as_current_span("skill.crm") as span:
@@ -384,7 +412,12 @@ async def crm(params: CRMParams) -> dict:
                     }
                     for client in clients
                 ]
-                return {"status": "success", "domain": "wealth-management", "count": len(summaries), "clients": summaries}
+                return {
+                    "status": "success",
+                    "domain": "wealth-management",
+                    "count": len(summaries),
+                    "clients": summaries,
+                }
 
             if action == "search_name":
                 if not query:
@@ -406,7 +439,11 @@ async def crm(params: CRMParams) -> dict:
                     return {"status": "error", "message": "query (client ID) is required for search_id"}
                 for client in clients:
                     if client.get("clientID") == query or client.get("id") == query:
-                        return {"status": "success", "domain": "wealth-management", "client": _sanitize_crm_client(client)}
+                        return {
+                            "status": "success",
+                            "domain": "wealth-management",
+                            "client": _sanitize_crm_client(client),
+                        }
                 return {"status": "not_found", "message": f"No client found with ID '{query}'"}
 
             if action == "portfolio":
@@ -423,7 +460,10 @@ async def crm(params: CRMParams) -> dict:
                         }
                 return {"status": "not_found", "message": f"No client found with ID '{query}'"}
 
-            return {"status": "error", "message": f"Unknown action '{action}' for wealth-management. Use: search_name, search_id, portfolio, list"}
+            return {
+                "status": "error",
+                "message": f"Unknown action '{action}' for wealth-management. Use: search_name, search_id, portfolio, list",
+            }
 
         if domain in {"insurance", "ins"}:
             clients = _load_insurance_crm_clients()
@@ -432,7 +472,11 @@ async def crm(params: CRMParams) -> dict:
                     {
                         "clientID": client.get("clientID"),
                         "fullName": client.get("fullName"),
-                        "activePolicyCount": sum(1 for policy in client.get("policies", []) if str(policy.get("PolicyStatus", "")).lower() == "active"),
+                        "activePolicyCount": sum(
+                            1
+                            for policy in client.get("policies", [])
+                            if str(policy.get("PolicyStatus", "")).lower() == "active"
+                        ),
                     }
                     for client in clients
                 ]
@@ -458,7 +502,11 @@ async def crm(params: CRMParams) -> dict:
                     return {"status": "error", "message": "query (customer ID) is required for search_id"}
                 for client in clients:
                     if client.get("clientID") == query or client.get("id") == query:
-                        return {"status": "success", "domain": "insurance", "client": _sanitize_insurance_client(client)}
+                        return {
+                            "status": "success",
+                            "domain": "insurance",
+                            "client": _sanitize_insurance_client(client),
+                        }
                 return {"status": "not_found", "message": f"No insurance customer found with ID '{query}'"}
 
             if action == "policies":
@@ -475,9 +523,15 @@ async def crm(params: CRMParams) -> dict:
                         }
                 return {"status": "not_found", "message": f"No insurance customer found with ID '{query}'"}
 
-            return {"status": "error", "message": f"Unknown action '{action}' for insurance. Use: search_name, search_id, policies, list"}
+            return {
+                "status": "error",
+                "message": f"Unknown action '{action}' for insurance. Use: search_name, search_id, policies, list",
+            }
 
-        return {"status": "error", "message": f"Unknown CRM domain '{params.domain}'. Use: wealth-management or insurance"}
+        return {
+            "status": "error",
+            "message": f"Unknown CRM domain '{params.domain}'. Use: wealth-management or insurance",
+        }
 
 
 # ─── Tool registry ────────────────────────────────────────────────────────────

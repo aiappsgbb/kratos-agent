@@ -38,7 +38,9 @@ async def get_system_prompt(request: Request, use_case: str = Query("generic")) 
 
 
 @router.put("", response_model=SystemPromptResponse)
-async def update_system_prompt(body: SystemPromptUpdate, request: Request, use_case: str = Query("generic")) -> SystemPromptResponse:
+async def update_system_prompt(
+    body: SystemPromptUpdate, request: Request, use_case: str = Query("generic")
+) -> SystemPromptResponse:
     """Update the system prompt for a use-case. Persists to Blob Storage / local disk."""
     registry = _get_registry(request, use_case)
 
@@ -51,6 +53,7 @@ async def update_system_prompt(body: SystemPromptUpdate, request: Request, use_c
         await blob_service.upload_file(blob_path, body.content.encode())
     else:
         from pathlib import Path
+
         prompt_path = Path("use-cases") / use_case / "SYSTEM_PROMPT.md"
         prompt_path.parent.mkdir(parents=True, exist_ok=True)
         prompt_path.write_text(body.content)

@@ -204,9 +204,7 @@ class ApmService:
                 env=proc_env,
             )
         except FileNotFoundError as exc:
-            raise ApmError(
-                f"apm binary '{self.settings.apm_binary}' not found on PATH: {exc}"
-            ) from exc
+            raise ApmError(f"apm binary '{self.settings.apm_binary}' not found on PATH: {exc}") from exc
 
         stdout_b, stderr_b = await proc.communicate()
         duration_ms = (time.perf_counter() - start) * 1000.0
@@ -518,9 +516,7 @@ class ApmService:
                 patched = True
                 break
         if patched:
-            manifest_path.write_text(
-                yaml.safe_dump(data, sort_keys=False), encoding="utf-8"
-            )
+            manifest_path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
 
     def _remove_mcp_from_manifest(self, uc_dir: Path, name: str) -> None:
         """Drop the MCP entry matching ``name`` from ``apm.yml``."""
@@ -715,7 +711,6 @@ class ApmService:
                 if name and sha:
                     resolved[str(name)] = str(sha)
         return resolved
-
 
     @staticmethod
     def _load_lock_mcp_configs(lock_path: Path) -> dict[str, dict]:

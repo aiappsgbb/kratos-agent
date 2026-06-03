@@ -37,8 +37,8 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=5.0",
-    "ruff>=0.5.0",
-    "mypy>=1.10.0",
+    "ruff==0.15.15",
+    "mypy==1.18.2",
 ]
 
 [tool.setuptools.packages.find]
@@ -50,7 +50,30 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "S", "B", "A", "C4", "SIM"]
-ignore = ["S101"]
+ignore = [
+    "S101",  # assert is fine (used in tests)
+    "N815",  # camelCase fields are intentional API/DTO contracts shared with the frontend
+    "E501",  # line length is enforced by `ruff format`; long string literals/prompts are intentional
+    "UP042", # keep explicit (str, Enum) base to preserve enum str() formatting behavior
+    "S108",  # intentional use of /tmp for transient file downloads
+    "S110",  # best-effort telemetry/cleanup paths intentionally swallow exceptions
+    "S112",  # best-effort loops intentionally continue on error
+    "S603",  # subprocess calls target trusted local tooling (npm/apm)
+    "S607",  # partial executable paths resolve trusted tools (npm/apm) on PATH
+]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency-injection helpers are intended to be used as argument defaults
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Form",
+    "fastapi.File",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -58,4 +81,56 @@ testpaths = ["tests"]
 
 [tool.mypy]
 python_version = "3.11"
-strict = true
+# Pragmatic baseline rather than full `strict`: catch genuine bugs without
+# requiring exhaustive annotations across a codebase that depends on many
+# untyped third-party SDKs (Azure, Copilot, FastAPI). Strict can be revisited
+# incrementally as the code is annotated.
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_redundant_casts = true
+disable_error_code = [
+    "type-arg",       # bare generics (dict/list) are pervasive and low-risk
+    "no-any-return",  # untyped SDK calls routinely return Any
+    "no-untyped-def", # not every internal helper is annotated yet
+    "no-untyped-call",
+    "misc",           # subclassing untyped (pydantic/SDK) base classes
+    "unused-ignore",
+    "import-untyped",  # third-party libs (e.g. PyYAML) ship without stubs; not suppressed by --ignore-missing-imports
+]
+
+# The Copilot SDK integration layer relies on dynamically-typed event handlers
+# and object-typed payloads that mypy cannot model statically. It also lazily
+# initializes optional members that are guaranteed non-None by the lifecycle.
+[[tool.mypy.overrides]]
+module = "app.services.copilot_agent"
+disable_error_code = ["attr-defined", "no-redef", "arg-type", "assignment", "union-attr"]
+
+# Azure Search SDK exposes enum field types that mypy flags against its stubs.
+[[tool.mypy.overrides]]
+module = "app.services.ai_search_tools"
+disable_error_code = ["arg-type", "operator"]
+
+# OpenTelemetry attribute-value union is broader than the runtime usage.
+[[tool.mypy.overrides]]
+module = "app.observability"
+disable_error_code = ["union-attr"]
+
+# Azure Monitor / blob SDK call signatures differ from the installed stubs.
+[[tool.mypy.overrides]]
+module = "app.services.traces_service"
+disable_error_code = ["call-arg"]
+
+[[tool.mypy.overrides]]
+module = "app.services.skill_registry"
+disable_error_code = ["call-arg"]
+
+# Imports a private azure-ai-evaluation helper not re-exported by the package,
+# and accesses a lazily-initialized proxy guarded by the run lifecycle.
+[[tool.mypy.overrides]]
+module = "app.services.eval_service"
+disable_error_code = ["attr-defined", "union-attr"]
+
+# Lazily-initialized aiohttp session guarded by the proxy lifecycle.
+[[tool.mypy.overrides]]
+module = "app.services.foundry_agent_proxy"
+disable_error_code = ["union-attr"]

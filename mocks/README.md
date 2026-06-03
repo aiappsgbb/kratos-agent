@@ -13,6 +13,7 @@ same shape: a single binary on PATH, no HTTP, no auth, JSON-RPC over stdio.
 | Package | Mocks | Used by |
 |---|---|---|
 | `salesforce-mcp-server` | Salesforce CRM — accounts, opportunities, contacts, activities, cases | `use-cases/sales-account-review` |
+| `workday-mcp-server` | Workday HCM — orgs, positions, employees, time-off, payroll, shifts (+ write tools for create-employee and approve-time-off) | `use-cases/hr-onboarding` |
 | `servicenow-mcp-server` | ServiceNow ITSM — users, incidents/requests/change, work notes, KB articles, CMDB (+ write tools for create-incident, update-state, assign, add-work-note) | `use-cases/it-service-desk` |
 
 ## Build

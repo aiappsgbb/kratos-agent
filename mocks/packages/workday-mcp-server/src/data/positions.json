@@ -1,0 +1,24 @@
+[
+  { "id": "POS-1001", "title": "Chief Executive Officer",          "org_id": "ORG-001", "job_family": "Executive",        "level": "E5", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1001" },
+  { "id": "POS-1010", "title": "Chief Technology Officer",         "org_id": "ORG-010", "job_family": "Executive",        "level": "E4", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1010" },
+  { "id": "POS-1011", "title": "VP Platform Engineering",          "org_id": "ORG-011", "job_family": "Engineering Mgmt", "level": "M5", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1011" },
+  { "id": "POS-1012", "title": "VP Product Engineering",           "org_id": "ORG-012", "job_family": "Engineering Mgmt", "level": "M5", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1012" },
+  { "id": "POS-1020", "title": "Chief Revenue Officer",            "org_id": "ORG-020", "job_family": "Executive",        "level": "E4", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1020" },
+  { "id": "POS-1021", "title": "VP Sales — Americas",              "org_id": "ORG-021", "job_family": "Sales Mgmt",       "level": "M5", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1021" },
+  { "id": "POS-1030", "title": "Chief Operating Officer",          "org_id": "ORG-030", "job_family": "Executive",        "level": "E4", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1030" },
+  { "id": "POS-1031", "title": "Plant Manager — Cleveland",        "org_id": "ORG-031", "job_family": "Operations Mgmt",  "level": "M5", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1031" },
+  { "id": "POS-1040", "title": "Chief People Officer",             "org_id": "ORG-040", "job_family": "Executive",        "level": "E4", "fte": 1.0, "status": "Filled",     "filled_by": "EMP-1040" },
+
+  { "id": "POS-2001", "title": "Senior Platform Engineer",         "org_id": "ORG-011", "job_family": "Engineering",      "level": "IC4", "fte": 1.0, "status": "Filled",    "filled_by": "EMP-2001" },
+  { "id": "POS-2002", "title": "Senior Platform Engineer",         "org_id": "ORG-011", "job_family": "Engineering",      "level": "IC4", "fte": 1.0, "status": "Filled",    "filled_by": "EMP-2002" },
+  { "id": "POS-2003", "title": "Platform Engineer",                "org_id": "ORG-011", "job_family": "Engineering",      "level": "IC3", "fte": 1.0, "status": "Filled",    "filled_by": "EMP-2003" },
+  { "id": "POS-2004", "title": "Staff Platform Engineer",          "org_id": "ORG-011", "job_family": "Engineering",      "level": "IC5", "fte": 1.0, "status": "Open",      "filled_by": null,        "open_since": "2026-04-12", "target_start": "2026-06-30", "hiring_manager_id": "EMP-1011" },
+
+  { "id": "POS-2101", "title": "Account Executive",                "org_id": "ORG-021", "job_family": "Sales",            "level": "IC3", "fte": 1.0, "status": "Filled",    "filled_by": "EMP-2101" },
+  { "id": "POS-2102", "title": "Account Executive",                "org_id": "ORG-021", "job_family": "Sales",            "level": "IC3", "fte": 1.0, "status": "Filled",    "filled_by": "EMP-2102" },
+  { "id": "POS-2103", "title": "Solutions Engineer",               "org_id": "ORG-021", "job_family": "Pre-sales",        "level": "IC3", "fte": 1.0, "status": "Open",      "filled_by": null,        "open_since": "2026-05-01", "target_start": "2026-06-15", "hiring_manager_id": "EMP-1021" },
+
+  { "id": "POS-2201", "title": "Shift Supervisor",                 "org_id": "ORG-031", "job_family": "Operations",       "level": "M3", "fte": 1.0, "status": "Filled",    "filled_by": "EMP-2201" },
+  { "id": "POS-2202", "title": "Line Operator",                    "org_id": "ORG-031", "job_family": "Operations",       "level": "IC2", "fte": 1.0, "status": "Filled",    "filled_by": "EMP-2202" },
+  { "id": "POS-2203", "title": "Line Operator",                    "org_id": "ORG-031", "job_family": "Operations",       "level": "IC2", "fte": 1.0, "status": "Filled",    "filled_by": "EMP-2203" }
+]

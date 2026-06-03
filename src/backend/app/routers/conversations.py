@@ -2,7 +2,7 @@
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -44,7 +44,7 @@ async def create_conversation(body: ConversationCreate, request: Request) -> Con
         except Exception:
             logger.exception("Failed to re-sync use-case '%s' from blob — using cached version", body.useCase)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     conversation = Conversation(
         id=str(uuid.uuid4()),
         userId="default-user",  # Replaced by Entra ID user in production
@@ -92,7 +92,7 @@ async def update_conversation(conversation_id: str, body: ConversationUpdate, re
         raise HTTPException(status_code=404, detail="Conversation not found")
     if body.title is not None:
         conversation.title = body.title
-    conversation.updatedAt = datetime.now(timezone.utc)
+    conversation.updatedAt = datetime.now(UTC)
     await cosmos.upsert_conversation(conversation)
     return conversation
 

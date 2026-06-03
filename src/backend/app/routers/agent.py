@@ -1,13 +1,14 @@
 """Agent endpoint — forwards requests to the Foundry hosted agent and streams SSE."""
 
 import base64
+import contextlib
 import json
 import logging
 import os
 import re
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -98,7 +99,7 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                 conversationId=body.conversationId,
                 role=MessageRole.USER,
                 content=body.message,
-                createdAt=datetime.now(timezone.utc),
+                createdAt=datetime.now(UTC),
             )
             await cosmos.upsert_message(user_message)
 
@@ -110,7 +111,9 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
             # Look up existing gateway session ID so the hosted agent
             # container (and its in-process CopilotClient state) is reused.
             agent_session_id = await cosmos.get_session_mapping(body.conversationId)
-            logger.info("Session lookup for conversation=%s: agent_session_id=%s", body.conversationId, agent_session_id)
+            logger.info(
+                "Session lookup for conversation=%s: agent_session_id=%s", body.conversationId, agent_session_id
+            )
 
             # Stream events from the Foundry hosted agent
             assistant_content_parts: list[str] = []
@@ -159,11 +162,7 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                         or event_data.get("tool")
                         or "tool"
                     )
-                    real_call_id = (
-                        event_data.get("id")
-                        or event_data.get("call_id")
-                        or event_data.get("tool_call_id")
-                    )
+                    real_call_id = event_data.get("id") or event_data.get("call_id") or event_data.get("tool_call_id")
                     if status in (None, "started", "running"):
                         if real_call_id:
                             call_id = str(real_call_id)
@@ -217,9 +216,7 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                             **common_attrs,
                             "gen_ai.operation.name": "chat",
                             "gen_ai.response.model": str(
-                                event_data.get("model")
-                                or event_data.get("modelName")
-                                or proxy_done.get("model", "")
+                                event_data.get("model") or event_data.get("modelName") or proxy_done.get("model", "")
                             ),
                             "gen_ai.usage.input_tokens": int(event_data.get("promptTokens") or 0),
                             "gen_ai.usage.output_tokens": int(event_data.get("completionTokens") or 0),
@@ -244,11 +241,9 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                     gateway_session_id = event_data.get("agentSessionId")
 
             # Close any tool spans that never received a completion
-            for call_id, sp in list(open_tool_spans.items()):
-                try:
+            for _call_id, sp in list(open_tool_spans.items()):
+                with contextlib.suppress(Exception):
                     sp.end()
-                except Exception:
-                    pass
             open_tool_spans.clear()
 
             # Persist gateway session ID so subsequent messages reuse the
@@ -283,7 +278,7 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                     "toolCalls": collected_tool_calls,
                     "runStats": run_stats,
                 },
-                createdAt=datetime.now(timezone.utc),
+                createdAt=datetime.now(UTC),
             )
             await cosmos.upsert_message(assistant_message)
 
@@ -294,7 +289,10 @@ async def chat(body: AgentRequest, request: Request) -> EventSourceResponse:
                 skill_names = [s.name for s in registry.skills if s.enabled] if registry else []
                 follow_ups = await generate_follow_ups(body.message, full_response, skill_names)
                 if follow_ups:
-                    yield {"event": "follow_up_questions", "data": json.dumps(FollowUpQuestionsEvent(questions=follow_ups).model_dump())}
+                    yield {
+                        "event": "follow_up_questions",
+                        "data": json.dumps(FollowUpQuestionsEvent(questions=follow_ups).model_dump()),
+                    }
             except Exception:
                 logger.debug("Follow-up generation skipped", exc_info=True)
 

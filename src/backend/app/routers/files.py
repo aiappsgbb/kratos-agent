@@ -17,16 +17,18 @@ _ALLOWED_ROOTS = ("/tmp",)
 
 # MIME types allowed for inline (browser preview) serving.
 # All other types are forced to attachment (download) to prevent reflected-content attacks.
-_INLINE_ALLOWED_TYPES = frozenset({
-    "application/pdf",
-    "image/png",
-    "image/jpeg",
-    "image/gif",
-    "image/webp",
-    "image/svg+xml",
-    "text/plain",
-    "text/csv",
-})
+_INLINE_ALLOWED_TYPES = frozenset(
+    {
+        "application/pdf",
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/webp",
+        "image/svg+xml",
+        "text/plain",
+        "text/csv",
+    }
+)
 
 # Filename validation: alphanumeric, hyphens, underscores, dots only
 _SAFE_FILENAME_RE = re.compile(r"^[\w\-. ]+$")

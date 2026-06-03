@@ -1,0 +1,8 @@
+[
+  { "id": "SHIFT-5001", "employee_id": "EMP-2201", "date": "2026-06-01", "start_time": "06:00", "end_time": "14:00", "location": "Cleveland Plant — Floor 1", "role": "Shift Supervisor", "status": "Scheduled" },
+  { "id": "SHIFT-5002", "employee_id": "EMP-2202", "date": "2026-06-01", "start_time": "06:00", "end_time": "14:00", "location": "Cleveland Plant — Line 3",   "role": "Line Operator",   "status": "Scheduled" },
+  { "id": "SHIFT-5003", "employee_id": "EMP-2203", "date": "2026-06-01", "start_time": "06:00", "end_time": "14:00", "location": "Cleveland Plant — Line 3",   "role": "Line Operator",   "status": "Scheduled" },
+  { "id": "SHIFT-5004", "employee_id": "EMP-2201", "date": "2026-06-02", "start_time": "06:00", "end_time": "14:00", "location": "Cleveland Plant — Floor 1", "role": "Shift Supervisor", "status": "Scheduled" },
+  { "id": "SHIFT-5005", "employee_id": "EMP-2202", "date": "2026-06-02", "start_time": "06:00", "end_time": "14:00", "location": "Cleveland Plant — Line 3",   "role": "Line Operator",   "status": "Scheduled" },
+  { "id": "SHIFT-5006", "employee_id": "EMP-2203", "date": "2026-06-02", "start_time": "14:00", "end_time": "22:00", "location": "Cleveland Plant — Line 3",   "role": "Line Operator",   "status": "Scheduled" }
+]

@@ -1,0 +1,8 @@
+{
+  "workday": {
+    "type": "local",
+    "command": "workday-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  }
+}

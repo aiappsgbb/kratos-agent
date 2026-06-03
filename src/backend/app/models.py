@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 # ─── Enums ───
 
+
 class MessageRole(str, Enum):
     USER = "user"
     ASSISTANT = "assistant"
@@ -21,6 +22,7 @@ class ConversationStatus(str, Enum):
 
 
 # ─── Conversations ───
+
 
 class ConversationCreate(BaseModel):
     title: str = "New Conversation"
@@ -47,6 +49,7 @@ class ConversationList(BaseModel):
 
 # ─── Messages ───
 
+
 class Message(BaseModel):
     id: str
     conversationId: str
@@ -62,6 +65,7 @@ class MessageCreate(BaseModel):
 
 
 # ─── Attachments ───
+
 
 class FileAttachment(BaseModel):
     type: Literal["file"] = "file"
@@ -88,6 +92,7 @@ Attachment = FileAttachment | DirectoryAttachment | SelectionAttachment
 
 # ─── Agent ───
 
+
 class AgentRequest(BaseModel):
     conversationId: str
     message: str
@@ -97,6 +102,7 @@ class AgentRequest(BaseModel):
 
 class ToolCallEvent(BaseModel):
     """Streamed event for tool call progress."""
+
     type: str = "tool_call"
     skillName: str
     status: str  # "started", "completed", "failed"
@@ -108,6 +114,7 @@ class ToolCallEvent(BaseModel):
 
 class ThoughtEvent(BaseModel):
     """Streamed event for agent reasoning."""
+
     type: str = "thought"
     content: str
     iteration: int = 0
@@ -115,12 +122,14 @@ class ThoughtEvent(BaseModel):
 
 class ContentEvent(BaseModel):
     """Streamed event for response content."""
+
     type: str = "content"
     content: str
 
 
 class UsageEvent(BaseModel):
     """Streamed event for token usage from a model turn."""
+
     type: str = "usage"
     promptTokens: int = 0
     completionTokens: int = 0
@@ -130,6 +139,7 @@ class UsageEvent(BaseModel):
 
 class DoneEvent(BaseModel):
     """Streamed event signaling completion."""
+
     type: str = "done"
     conversationId: str
     totalDurationMs: int = 0
@@ -144,6 +154,7 @@ class DoneEvent(BaseModel):
 
 class ErrorEvent(BaseModel):
     """Streamed error event."""
+
     type: str = "error"
     message: str
     code: str = "UNKNOWN_ERROR"
@@ -151,12 +162,14 @@ class ErrorEvent(BaseModel):
 
 class FollowUpQuestionsEvent(BaseModel):
     """Streamed event with suggested follow-up questions."""
+
     type: str = "follow_up_questions"
     questions: list[str] = Field(default_factory=list)
 
 
 class UserInputRequestEvent(BaseModel):
     """Streamed event when the agent asks the user a question."""
+
     type: str = "user_input_request"
     requestId: str
     question: str
@@ -166,6 +179,7 @@ class UserInputRequestEvent(BaseModel):
 
 class UserInputResponseRequest(BaseModel):
     """Payload for responding to a user input request."""
+
     conversationId: str
     requestId: str
     answer: str
@@ -173,8 +187,10 @@ class UserInputResponseRequest(BaseModel):
 
 # ─── Copilot Studio (synchronous bridge) ───
 
+
 class CopilotStudioRequest(BaseModel):
     """Inbound message from Copilot Studio / Teams."""
+
     message: str = Field(..., description="User message text")
     conversationId: str = Field(
         default="",
@@ -185,20 +201,24 @@ class CopilotStudioRequest(BaseModel):
 
 class CopilotStudioResponse(BaseModel):
     """Response returned to Copilot Studio / Teams."""
+
     conversationId: str = Field(description="Conversation ID (new or existing)")
     reply: str = Field(description="Agent's complete response text")
 
 
 # ─── Settings ───
 
+
 class AIServiceSettings(BaseModel):
     """AI service configuration submitted by the user."""
+
     foundryEndpoint: str = Field(default="", description="Microsoft Foundry endpoint URL")
     foundryModelDeployment: str = Field(default="gpt-52", description="Model deployment name")
 
 
 class AIServiceStatus(BaseModel):
     """Current AI service config status."""
+
     configured: bool = False
     foundryEndpoint: str = ""
     foundryModelDeployment: str = ""
@@ -207,10 +227,12 @@ class AIServiceStatus(BaseModel):
 
 # ─── Skills Admin ───
 
+
 class SkillFile(BaseModel):
     """A file belonging to a skill (non-SKILL.md)."""
-    path: str   # relative path from skill root, e.g. "scripts/run.py"
-    name: str   # basename
+
+    path: str  # relative path from skill root, e.g. "scripts/run.py"
+    name: str  # basename
     content: str = ""
 
 
@@ -224,6 +246,7 @@ class SkillFileUpsert(BaseModel):
 
 class SkillResponse(BaseModel):
     """Skill as returned by the admin API."""
+
     name: str
     description: str
     enabled: bool = True
@@ -235,6 +258,7 @@ class SkillResponse(BaseModel):
 
 class SkillCreate(BaseModel):
     """Payload for creating a new skill."""
+
     name: str = Field(..., min_length=1, max_length=100, pattern=r"^[a-z0-9][a-z0-9\-]*$")
     description: str = Field(default="", max_length=500)
     enabled: bool = True
@@ -243,6 +267,7 @@ class SkillCreate(BaseModel):
 
 class SkillUpdate(BaseModel):
     """Payload for updating a skill. All fields optional."""
+
     description: str | None = Field(default=None, max_length=500)
     enabled: bool | None = None
     instructions: str | None = Field(default=None, max_length=10000)
@@ -250,13 +275,16 @@ class SkillUpdate(BaseModel):
 
 class SkillList(BaseModel):
     """List of skills."""
+
     skills: list[SkillResponse]
 
 
 # ─── System Prompt Admin ───
 
+
 class UseCaseInfo(BaseModel):
     """Use-case metadata as returned by the API."""
+
     name: str
     displayName: str = ""
     description: str = ""
@@ -266,30 +294,36 @@ class UseCaseInfo(BaseModel):
 
 class UseCaseList(BaseModel):
     """List of available use-cases."""
+
     useCases: list[UseCaseInfo]
 
 
 class SystemPromptResponse(BaseModel):
     """System prompt as returned by the admin API."""
+
     content: str
     isDefault: bool = False
 
 
 class SystemPromptUpdate(BaseModel):
     """Payload for updating the system prompt."""
+
     content: str = Field(..., min_length=1, max_length=50000)
 
 
 # ─── MCP Servers Admin ───
 
+
 class MCPConfigResponse(BaseModel):
     """MCP servers config as returned by the admin API."""
+
     servers: dict
     sources: dict[str, str] = {}
 
 
 class MCPConfigUpdate(BaseModel):
     """Payload for updating the MCP servers config."""
+
     servers: dict
 
 
@@ -331,6 +365,7 @@ class EvalScenarioList(BaseModel):
 
 class GenerateScenariosRequest(BaseModel):
     """Body for the LLM-generation endpoint."""
+
     count: int = Field(default=10, ge=1, le=24, description="Number of scenarios to draft")
     persist: bool = Field(default=False, description="When True, persist the generated scenarios to blob")
     instructions: str = Field(
@@ -349,7 +384,7 @@ class EvalMode(str, Enum):
     """Eval execution mode."""
 
     VALIDATION = "validation"  # in-process invoke only, no Foundry evaluators
-    FOUNDRY = "foundry"        # two-phase invoke + score via Foundry evaluators
+    FOUNDRY = "foundry"  # two-phase invoke + score via Foundry evaluators
 
 
 class EvalRunStatus(str, Enum):
@@ -362,6 +397,7 @@ class EvalRunStatus(str, Enum):
 
 class EvalRunRequest(BaseModel):
     """Body to start an eval run."""
+
     mode: EvalMode = EvalMode.VALIDATION
     scenarios: list[str] = Field(
         default_factory=list,
@@ -371,6 +407,7 @@ class EvalRunRequest(BaseModel):
 
 class ScenarioResult(BaseModel):
     """Per-scenario invocation + score record."""
+
     scenario: str
     query: str
     response: str = ""
@@ -383,6 +420,7 @@ class ScenarioResult(BaseModel):
 
 class FoundryEvalSummary(BaseModel):
     """Summary block from Foundry evaluators."""
+
     eval_id: str = ""
     eval_run_id: str = ""
     run_status: str = ""
@@ -394,6 +432,7 @@ class FoundryEvalSummary(BaseModel):
 
 class EvalRun(BaseModel):
     """An eval run record."""
+
     run_id: str
     use_case: str
     mode: EvalMode
@@ -417,6 +456,7 @@ class EvalRunList(BaseModel):
 
 class TraceSpan(BaseModel):
     """A single span in an operation waterfall."""
+
     id: str
     parent_id: str = ""
     name: str
@@ -441,6 +481,7 @@ class TraceLog(BaseModel):
 
 class TraceOperation(BaseModel):
     """One operation (root span + its descendants)."""
+
     operation_id: str
     timestamp: str = ""
     total_duration_ms: float = 0
