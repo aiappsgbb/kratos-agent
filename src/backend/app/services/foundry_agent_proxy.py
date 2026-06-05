@@ -5,6 +5,7 @@ to the Foundry-managed hosted agent container which runs the SDK.  The proxy
 streams SSE events back in the same format the frontend expects.
 """
 
+import asyncio
 import json
 import logging
 from collections.abc import AsyncGenerator
@@ -17,6 +18,12 @@ from app.config import Settings
 logger = logging.getLogger(__name__)
 
 _AI_SCOPE = "https://ai.azure.com/.default"
+
+# HTTP statuses returned by the hosted-agent gateway while the (scale-to-zero)
+# container is cold-starting or briefly overloaded. These are transient — the
+# container is warming up — so the invocation is retried.
+_COLD_START_STATUSES = frozenset({408, 425, 429, 503, 504})
+_MAX_INVOKE_ATTEMPTS = 3
 
 
 class FoundryAgentProxy:
@@ -116,45 +123,61 @@ class FoundryAgentProxy:
             endpoint = f"{endpoint}{sep}agent_session_id={agent_session_id}"
 
         try:
-            async with self._http_session.post(
-                endpoint,
-                headers=headers,
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=300),
-            ) as resp:
-                if resp.status != 200:
-                    body = await resp.text()
-                    logger.error("Hosted agent returned %d: %s", resp.status, body[:500])
-                    yield {
-                        "event": "error",
-                        "data": {"message": f"Hosted agent error: HTTP {resp.status}", "code": "PROXY_ERROR"},
-                    }
+            for attempt in range(1, _MAX_INVOKE_ATTEMPTS + 1):
+                async with self._http_session.post(
+                    endpoint,
+                    headers=headers,
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=300),
+                ) as resp:
+                    if resp.status != 200:
+                        body = await resp.text()
+                        logger.error("Hosted agent returned %d: %s", resp.status, body[:500])
+                        # Cold-start / transient overload — the container is
+                        # warming up, so retry with a short backoff before
+                        # surfacing an error to the user.
+                        if resp.status in _COLD_START_STATUSES and attempt < _MAX_INVOKE_ATTEMPTS:
+                            backoff = 3 * attempt
+                            logger.warning(
+                                "Hosted agent cold-start (HTTP %d); retrying in %ds (attempt %d/%d)",
+                                resp.status,
+                                backoff,
+                                attempt,
+                                _MAX_INVOKE_ATTEMPTS,
+                            )
+                            await asyncio.sleep(backoff)
+                            continue
+                        yield {
+                            "event": "error",
+                            "data": {"message": f"Hosted agent error: HTTP {resp.status}", "code": "PROXY_ERROR"},
+                        }
+                        return
+
+                    # Capture the gateway session ID from response headers
+                    gateway_session = resp.headers.get("x-agent-session-id")
+
+                    # Parse SSE stream
+                    buffer = ""
+                    async for chunk in resp.content.iter_any():
+                        buffer += chunk.decode("utf-8", errors="replace")
+
+                        while "\n\n" in buffer:
+                            event_block, buffer = buffer.split("\n\n", 1)
+                            parsed = self._parse_sse_block(event_block)
+                            if parsed is not None:
+                                if parsed.get("_protocol_done"):
+                                    # Yield the gateway session ID before ending
+                                    # so the router can persist it for future calls.
+                                    if gateway_session:
+                                        yield {"event": "_gateway_session", "data": {"agentSessionId": gateway_session}}
+                                    return
+                                yield parsed
+
+                    # Fallback: if stream ends without a protocol done event,
+                    # still yield the gateway session.
+                    if gateway_session:
+                        yield {"event": "_gateway_session", "data": {"agentSessionId": gateway_session}}
                     return
-
-                # Capture the gateway session ID from response headers
-                gateway_session = resp.headers.get("x-agent-session-id")
-
-                # Parse SSE stream
-                buffer = ""
-                async for chunk in resp.content.iter_any():
-                    buffer += chunk.decode("utf-8", errors="replace")
-
-                    while "\n\n" in buffer:
-                        event_block, buffer = buffer.split("\n\n", 1)
-                        parsed = self._parse_sse_block(event_block)
-                        if parsed is not None:
-                            if parsed.get("_protocol_done"):
-                                # Yield the gateway session ID before ending
-                                # so the router can persist it for future calls.
-                                if gateway_session:
-                                    yield {"event": "_gateway_session", "data": {"agentSessionId": gateway_session}}
-                                return
-                            yield parsed
-
-                # Fallback: if stream ends without a protocol done event,
-                # still yield the gateway session.
-                if gateway_session:
-                    yield {"event": "_gateway_session", "data": {"agentSessionId": gateway_session}}
 
         except aiohttp.ClientError:
             logger.exception("Failed to invoke hosted agent")

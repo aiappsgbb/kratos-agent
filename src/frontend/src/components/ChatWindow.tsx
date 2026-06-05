@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Conversation, ChatMessage, ToolCallInfo, RunStats, Attachment } from "@/types";
-import { streamAgentChat, respondToUserInput, getConversationMessages, updateConversation } from "@/lib/api";
+import { streamAgentChat, getConversationMessages, updateConversation } from "@/lib/api";
 import { MessageBubble } from "./MessageBubble";
 import { ThoughtChain } from "./ThoughtChain";
 
@@ -333,13 +333,13 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
 
   const handleUserInputSubmit = async (answer: string) => {
     if (!userInputPrompt) return;
-    try {
-      await respondToUserInput(conversation.id, userInputPrompt.requestId, answer);
-    } catch (err) {
-      console.error("Failed to respond to user input:", err);
-    }
+    // In hosted-agent mode there is no side-channel to push an answer into a
+    // running Foundry invocation, so the answer is sent as a normal follow-up
+    // message. The backend reuses the persisted gateway session for this
+    // conversation, which resumes the same hosted-agent container.
     setUserInputPrompt(null);
     setUserInputAnswer("");
+    await handleSend(answer);
   };
 
   return (
