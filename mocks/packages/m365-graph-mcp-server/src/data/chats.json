@@ -1,0 +1,128 @@
+[
+  {
+    "id": "CHAT-60001",
+    "topic": "Platform Eng — team",
+    "chatType": "channel",
+    "team": "Engineering",
+    "channel": "Platform",
+    "members": [
+      { "id": "EMP-1011", "displayName": "Aisha Okonkwo" },
+      { "id": "EMP-2001", "displayName": "Theo Nakamura" },
+      { "id": "EMP-2002", "displayName": "Elena Morales" },
+      { "id": "EMP-2003", "displayName": "Owen Brennan" }
+    ],
+    "lastUpdatedDateTime": "2026-06-05T11:42:08Z",
+    "messages": [
+      {
+        "id": "MSG-CHAT-60001-1",
+        "from": { "user": { "id": "EMP-2001", "displayName": "Theo Nakamura" } },
+        "createdDateTime": "2026-06-04T02:50:00Z",
+        "body": { "content": "All clear on the gateway rollback. Recovery confirmed across us-east-1a/1b/1c. Will write up the post-mortem in the morning." },
+        "mentions": []
+      },
+      {
+        "id": "MSG-CHAT-60001-2",
+        "from": { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" } },
+        "createdDateTime": "2026-06-04T03:15:00Z",
+        "body": { "content": "Thanks @Theo Nakamura. Booked the post-mortem for Thursday 15:00 ET — calendar invites on the way." },
+        "mentions": [ { "id": 0, "mentionText": "@Theo Nakamura", "mentioned": { "user": { "id": "EMP-2001" } } } ]
+      },
+      {
+        "id": "MSG-CHAT-60001-3",
+        "from": { "user": { "id": "EMP-2002", "displayName": "Elena Morales" } },
+        "createdDateTime": "2026-06-05T09:18:00Z",
+        "body": { "content": "@Owen Brennan handover doc is super clear — I've got the migration runbook covered. Hope the leave is restful 🌱" },
+        "mentions": [ { "id": 0, "mentionText": "@Owen Brennan", "mentioned": { "user": { "id": "EMP-2003" } } } ]
+      },
+      {
+        "id": "MSG-CHAT-60001-4",
+        "from": { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" } },
+        "createdDateTime": "2026-06-05T11:42:08Z",
+        "body": { "content": "Heads up team: Priya Subramaniam joins us as Senior SRE on 22 June. I'll put together a welcome plan + buddy assignment this week." },
+        "mentions": []
+      }
+    ]
+  },
+  {
+    "id": "CHAT-60002",
+    "topic": "Aisha + Hiroshi",
+    "chatType": "oneOnOne",
+    "members": [
+      { "id": "EMP-1011", "displayName": "Aisha Okonkwo" },
+      { "id": "EMP-1021", "displayName": "Hiroshi Tanaka" }
+    ],
+    "lastUpdatedDateTime": "2026-06-05T10:18:00Z",
+    "messages": [
+      {
+        "id": "MSG-CHAT-60002-1",
+        "from": { "user": { "id": "EMP-1021", "displayName": "Hiroshi Tanaka" } },
+        "createdDateTime": "2026-06-04T14:30:00Z",
+        "body": { "content": "Sent the variance reminder formally by email but flagging here too — CC-0011 is the one I really need before Mon EOD. Sofia will ask, I want to be ready." },
+        "mentions": []
+      },
+      {
+        "id": "MSG-CHAT-60002-2",
+        "from": { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" } },
+        "createdDateTime": "2026-06-05T10:18:00Z",
+        "body": { "content": "Sent — driver is the planned Sentinel uplift. Also: I'll accrue $42k for the Q2 invoice that doesn't land until 15 Jun. Want me to propose the JE directly in S/4 or send a request?" },
+        "mentions": []
+      }
+    ]
+  },
+  {
+    "id": "CHAT-60003",
+    "topic": "Service Desk — leads",
+    "chatType": "channel",
+    "team": "IT",
+    "channel": "Service Desk",
+    "members": [
+      { "id": "EMP-1031", "displayName": "Wesley Park" },
+      { "id": "EMP-2201", "displayName": "Frank Delgado" },
+      { "id": "EMP-2202", "displayName": "Lucia Romano" },
+      { "id": "EMP-2203", "displayName": "Devon Mwangi" }
+    ],
+    "lastUpdatedDateTime": "2026-06-05T13:02:00Z",
+    "messages": [
+      {
+        "id": "MSG-CHAT-60003-1",
+        "from": { "user": { "id": "EMP-2201", "displayName": "Frank Delgado" } },
+        "createdDateTime": "2026-06-05T08:30:00Z",
+        "body": { "content": "Munich VPN VIP queue — Lucia, are we still on for Fri cutover?" },
+        "mentions": []
+      },
+      {
+        "id": "MSG-CHAT-60003-2",
+        "from": { "user": { "id": "EMP-2202", "displayName": "Lucia Romano" } },
+        "createdDateTime": "2026-06-05T13:02:00Z",
+        "body": { "content": "Yes — vendor confirmed they ship the new appliance Wednesday. Cutover window booked Fri 09:00-12:00 Munich. Maya + Jamal already in the loop." },
+        "mentions": []
+      }
+    ]
+  },
+  {
+    "id": "CHAT-60004",
+    "topic": "Aisha + Beatrix",
+    "chatType": "oneOnOne",
+    "members": [
+      { "id": "EMP-1011", "displayName": "Aisha Okonkwo" },
+      { "id": "EMP-1030", "displayName": "Beatrix Holloway" }
+    ],
+    "lastUpdatedDateTime": "2026-06-02T12:08:00Z",
+    "messages": [
+      {
+        "id": "MSG-CHAT-60004-1",
+        "from": { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" } },
+        "createdDateTime": "2026-06-02T11:48:00Z",
+        "body": { "content": "Got the Priya confirmation — thanks Beatrix. Will book the welcome 1:1 today and brief Theo + Elena so we line up a buddy." },
+        "mentions": []
+      },
+      {
+        "id": "MSG-CHAT-60004-2",
+        "from": { "user": { "id": "EMP-1030", "displayName": "Beatrix Holloway" } },
+        "createdDateTime": "2026-06-02T12:08:00Z",
+        "body": { "content": "Perfect 🙏 — one ask: please flag if her access is missing anything on day 1; the IT side has been bumpy this quarter." },
+        "mentions": []
+      }
+    ]
+  }
+]

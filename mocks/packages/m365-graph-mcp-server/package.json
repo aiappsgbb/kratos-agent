@@ -1,0 +1,26 @@
+{
+  "name": "m365-graph-mcp-server",
+  "version": "0.1.0",
+  "description": "Mock Microsoft 365 (Graph API surface) as a stdio MCP server — users, presence, mail, calendar, OneDrive/SharePoint files, Teams chats. Cross-references workday EMP-* employee ids.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "m365-graph-mcp-server": "dist/server.js"
+  },
+  "files": [
+    "dist/",
+    "src/data/"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('dist/server.js', 0o755)\" && rm -rf dist/data && cp -R src/data dist/data",
+    "link": "npm link"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  }
+}

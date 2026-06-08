@@ -1,0 +1,13 @@
+{
+  "evaluation": {
+    "evaluators": [
+      "Relevance",
+      "Coherence",
+      "TaskAdherence",
+      "IntentResolution",
+      "ToolCallAccuracy"
+    ],
+    "judge_model_env": "EVAL_MODEL",
+    "judge_model_default": "gpt-4.1"
+  }
+}

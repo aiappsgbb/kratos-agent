@@ -1,0 +1,23 @@
+[
+  { "code": "1100",   "name": "Cash & Cash Equivalents",            "type": "Asset",    "normal_balance": "debit",  "ytd_actual_usd": 24820000,  "prior_year_usd": 21440000  },
+  { "code": "1200",   "name": "Accounts Receivable",                 "type": "Asset",    "normal_balance": "debit",  "ytd_actual_usd": 11820000,  "prior_year_usd": 8420000   },
+  { "code": "1300",   "name": "Inventory",                           "type": "Asset",    "normal_balance": "debit",  "ytd_actual_usd": 6840000,   "prior_year_usd": 5210000   },
+  { "code": "2100",   "name": "Accounts Payable — Clearing",         "type": "Liability","normal_balance": "credit", "ytd_actual_usd": -3210000,  "prior_year_usd": -2840000  },
+  { "code": "2200",   "name": "Accrued Liabilities",                 "type": "Liability","normal_balance": "credit", "ytd_actual_usd": -2480000,  "prior_year_usd": -2110000  },
+  { "code": "4000",   "name": "Revenue — Product",                  "type": "Revenue",  "normal_balance": "credit", "ytd_actual_usd": -68420000, "prior_year_usd": -52180000 },
+  { "code": "4100",   "name": "Revenue — Services",                 "type": "Revenue",  "normal_balance": "credit", "ytd_actual_usd": -12480000, "prior_year_usd": -9850000  },
+  { "code": "5000",   "name": "Cost of Goods Sold",                 "type": "COGS",     "normal_balance": "debit",  "ytd_actual_usd": 26340000,  "prior_year_usd": 20410000  },
+  { "code": "5100",   "name": "Materials — Direct",                  "type": "COGS",     "normal_balance": "debit",  "ytd_actual_usd": 18250000,  "prior_year_usd": 14620000  },
+  { "code": "5200",   "name": "Direct Labour",                      "type": "COGS",     "normal_balance": "debit",  "ytd_actual_usd": 5840000,   "prior_year_usd": 4920000   },
+  { "code": "6000",   "name": "Salaries & Wages",                   "type": "OpEx",     "normal_balance": "debit",  "ytd_actual_usd": 14820000,  "prior_year_usd": 13140000  },
+  { "code": "6100",   "name": "Employee Benefits",                  "type": "OpEx",     "normal_balance": "debit",  "ytd_actual_usd": 3120000,   "prior_year_usd": 2840000   },
+  { "code": "6200",   "name": "Travel & Entertainment",             "type": "OpEx",     "normal_balance": "debit",  "ytd_actual_usd": 1640000,   "prior_year_usd": 880000    },
+  { "code": "6300",   "name": "Professional Services",              "type": "OpEx",     "normal_balance": "debit",  "ytd_actual_usd": 2480000,   "prior_year_usd": 2210000   },
+  { "code": "6400",   "name": "Software & Subscriptions",           "type": "OpEx",     "normal_balance": "debit",  "ytd_actual_usd": 1820000,   "prior_year_usd": 1480000   },
+  { "code": "6500",   "name": "Marketing",                          "type": "OpEx",     "normal_balance": "debit",  "ytd_actual_usd": 980000,    "prior_year_usd": 1240000   },
+  { "code": "6700",   "name": "Repairs & Maintenance",              "type": "OpEx",     "normal_balance": "debit",  "ytd_actual_usd": 1240000,   "prior_year_usd": 980000    },
+  { "code": "7100",   "name": "Depreciation",                       "type": "OpEx",     "normal_balance": "debit",  "ytd_actual_usd": 3420000,   "prior_year_usd": 3180000   },
+  { "code": "7200",   "name": "Interest Expense",                   "type": "Other",    "normal_balance": "debit",  "ytd_actual_usd": 1280000,   "prior_year_usd": 1480000   },
+  { "code": "8500",   "name": "Vendor Rebates",                     "type": "Revenue",  "normal_balance": "credit", "ytd_actual_usd": -180000,   "prior_year_usd": -240000   },
+  { "code": "9000",   "name": "Tax Expense",                        "type": "Other",    "normal_balance": "debit",  "ytd_actual_usd": 2840000,   "prior_year_usd": 2240000   }
+]

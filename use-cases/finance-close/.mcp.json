@@ -1,0 +1,20 @@
+{
+  "sap-s4": {
+    "type": "local",
+    "command": "sap-s4-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  },
+  "workday": {
+    "type": "local",
+    "command": "workday-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  },
+  "m365-graph": {
+    "type": "local",
+    "command": "m365-graph-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  }
+}

@@ -1,0 +1,8 @@
+[
+  { "id": "MAT-001", "name": "Steel sheet, 2mm, grade 304",      "type": "Raw",        "uom": "kg",  "stock_qty": 12400,  "safety_stock_qty": 5000,  "preferred_vendor": "V-1001", "unit_cost_usd": 4.2 },
+  { "id": "MAT-002", "name": "Aluminum extrusion, 30mm channel", "type": "Raw",        "uom": "m",   "stock_qty": 880,    "safety_stock_qty": 600,   "preferred_vendor": "V-1001", "unit_cost_usd": 18.5 },
+  { "id": "MAT-101", "name": "Precision bearing, model PB-220",  "type": "Component",  "uom": "ea",  "stock_qty": 2400,   "safety_stock_qty": 1500,  "preferred_vendor": "V-1002", "unit_cost_usd": 32.0 },
+  { "id": "MAT-102", "name": "Control board v3.2",               "type": "Component",  "uom": "ea",  "stock_qty": 420,    "safety_stock_qty": 800,   "preferred_vendor": "V-1002", "unit_cost_usd": 145.0 },
+  { "id": "MAT-201", "name": "Finished assembly — Model A",      "type": "Finished",   "uom": "ea",  "stock_qty": 188,    "safety_stock_qty": 250,   "preferred_vendor": null,    "unit_cost_usd": 980.0 },
+  { "id": "MAT-202", "name": "Finished assembly — Model B",      "type": "Finished",   "uom": "ea",  "stock_qty": 322,    "safety_stock_qty": 400,   "preferred_vendor": null,    "unit_cost_usd": 1240.0 }
+]

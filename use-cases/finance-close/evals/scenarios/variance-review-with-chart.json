@@ -1,0 +1,13 @@
+{
+  "name": "variance-review-with-chart",
+  "category": "standard",
+  "description": "Headline read flow — pull May 2026 variance analysis, render a chart via the variance-analysis skill (code_interpreter), and join cost-centre owners from workday. Tests sap-s4 + workday + variance-analysis composition.",
+  "input_message": "Open the May 2026 close — give me the variance review with a chart, flag the cost centres that need owner commentary.",
+  "input_data": {
+    "period": "2026-05",
+    "expected_threshold_rule": "investigate >20%, watch 5-20%, normal <=5% per close-policy §5.1"
+  },
+  "expected_behavior": "Calls sap_get_variance_analysis for period 2026-05. Invokes the variance-analysis skill (code_interpreter executing scripts/variance_analysis.py) to render /tmp/variance-2026-05.png and /tmp/variance-2026-05.csv. For each investigate-flagged row, resolves the cost-centre owner by calling sap_get_cost_centre then workday_get_employee. References both file paths in the chat response so the file-sharing convention picks them up.",
+  "expected_tool_calls": ["sap-s4", "variance-analysis", "workday", "file-sharing"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

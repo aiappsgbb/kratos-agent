@@ -1,0 +1,6 @@
+[
+  { "id": "PO-9001", "plant_id": "P-CLE", "material_id": "MAT-201", "qty_ordered": 200, "qty_produced": 188, "qty_scrap": 12, "status": "In Process",  "scheduled_start": "2026-05-28", "scheduled_end": "2026-06-04", "actual_start": "2026-05-28", "line": "Line 1 — Assembly" },
+  { "id": "PO-9002", "plant_id": "P-CLE", "material_id": "MAT-202", "qty_ordered": 350, "qty_produced": 322, "qty_scrap": 28, "status": "In Process",  "scheduled_start": "2026-05-29", "scheduled_end": "2026-06-05", "actual_start": "2026-05-29", "line": "Line 2 — Assembly" },
+  { "id": "PO-9003", "plant_id": "P-CLE", "material_id": "MAT-201", "qty_ordered": 150, "qty_produced": 120, "qty_scrap": 30, "status": "Issue",       "scheduled_start": "2026-05-30", "scheduled_end": "2026-06-03", "actual_start": "2026-05-30", "line": "Line 3 — Precision", "issue": "Scrap rate 20% — investigating supplier V-1201 (Northbridge) lot quality" },
+  { "id": "PO-9004", "plant_id": "P-MUN", "material_id": "MAT-202", "qty_ordered": 240, "qty_produced": 240, "qty_scrap": 0,  "status": "Completed",   "scheduled_start": "2026-05-20", "scheduled_end": "2026-05-28", "actual_start": "2026-05-20", "actual_end": "2026-05-27", "line": "Line A — Casting" }
+]

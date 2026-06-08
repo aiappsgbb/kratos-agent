@@ -1,0 +1,11 @@
+[
+  { "id": "CC-0001", "name": "Olympus Industries — HQ",         "function": "Corporate",      "owner_user_id": "EMP-1001", "budget_usd": 25000000, "ytd_actual_usd": 11420000, "currency": "USD" },
+  { "id": "CC-0010", "name": "Engineering",                     "function": "Engineering",    "owner_user_id": "EMP-1010", "budget_usd": 18000000, "ytd_actual_usd": 8240000,  "currency": "USD" },
+  { "id": "CC-0011", "name": "Platform Engineering",            "function": "Engineering",    "owner_user_id": "EMP-1011", "budget_usd": 6500000,  "ytd_actual_usd": 3120000,  "currency": "USD" },
+  { "id": "CC-0012", "name": "Product Engineering",             "function": "Engineering",    "owner_user_id": "EMP-1012", "budget_usd": 4800000,  "ytd_actual_usd": 2210000,  "currency": "USD" },
+  { "id": "CC-0020", "name": "Sales",                           "function": "Revenue",        "owner_user_id": "EMP-1020", "budget_usd": 12000000, "ytd_actual_usd": 6400000,  "currency": "USD" },
+  { "id": "CC-0021", "name": "Field Sales — Americas",          "function": "Revenue",        "owner_user_id": "EMP-1021", "budget_usd": 5500000,  "ytd_actual_usd": 2980000,  "currency": "USD" },
+  { "id": "CC-0030", "name": "Operations",                      "function": "Operations",     "owner_user_id": "EMP-1030", "budget_usd": 32000000, "ytd_actual_usd": 14820000, "currency": "USD" },
+  { "id": "CC-0031", "name": "Plant Operations — Cleveland",    "function": "Operations",     "owner_user_id": "EMP-1031", "budget_usd": 14500000, "ytd_actual_usd": 7240000,  "currency": "USD" },
+  { "id": "CC-0040", "name": "People",                          "function": "G&A",            "owner_user_id": "EMP-1040", "budget_usd": 4200000,  "ytd_actual_usd": 1840000,  "currency": "USD" }
+]

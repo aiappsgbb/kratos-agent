@@ -1,0 +1,15 @@
+{
+  "name": "ooo-coverage-resolution",
+  "category": "cross-mcp",
+  "description": "Cross-MCP join across sap-s4 + workday + m365-graph — controller asks who owns a cost centre whose owner is OOO. Agent must surface the owner, detect the OOO state, read the OOO auto-reply for coverage, and propose chasing the coverer instead.",
+  "input_message": "Owen Brennan owns one of the platform cost-centre allocations and I need his sign-off on the May variance — has he replied?",
+  "input_data": {
+    "employee": "Owen Brennan (EMP-2003)",
+    "expected_status_via_workday": "On Leave",
+    "expected_ooo_via_m365_presence": true,
+    "expected_coverage_named_in_ooo_message": "Aisha Okonkwo"
+  },
+  "expected_behavior": "Resolves Owen Brennan via workday_search_employees_by_name or workday_get_employee — finds status 'On Leave'. Surfaces this to the user. Then calls m365_get_user_presence on EMP-2003, which returns ooo.enabled=true and the OOO message naming Aisha Okonkwo as cover. Calls m365_search_messages mailbox=EMP-2003 to see whether he replied before going on leave (he hasn't on the variance topic). Proposes the natural next step: chase Aisha (who's already covering) instead of Owen. Does NOT silently assume Owen is reachable.",
+  "expected_tool_calls": ["workday", "m365-graph"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

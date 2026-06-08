@@ -1,0 +1,23 @@
+{
+  "name": "close-pack-pdf-deliverable",
+  "category": "deliverable",
+  "description": "End-to-end deliverable — agent assembles the May 2026 close pack PDF per close-policy §8.1, references the generated /tmp path for download, and offers to draft the cover email (without sending).",
+  "input_message": "Build me the May 2026 close pack PDF — variance, JE queue, accruals — ready to send to Sofia.",
+  "input_data": {
+    "period": "2026-05",
+    "expected_output_path": "/tmp/close-pack-2026-05.pdf",
+    "expected_sections_in_order": [
+      "Cover",
+      "Executive summary",
+      "Variance review (with chart from variance-analysis)",
+      "Journal entry queue",
+      "Accruals booked this period",
+      "Vendor exceptions",
+      "Sign-off (Controller + CFO)"
+    ],
+    "should_send_email_in_this_turn": false
+  },
+  "expected_behavior": "Chains: (1) sap_get_variance_analysis to get rows, (2) variance-analysis skill to render /tmp/variance-2026-05.png + .csv, (3) sap_list_journal_entries period=2026-05 to get the JE queue, (4) for each investigate row, resolves owner via sap_get_cost_centre + workday_get_employee, (5) close-pack-pdf skill (code_interpreter executing scripts/render_close_pack.py) to render /tmp/close-pack-2026-05.pdf following §8.1 section order. References /tmp/close-pack-2026-05.pdf in the response so the file-sharing convention picks it up. Offers to draft the cover email to Sofia via variance-email but DOES NOT send.",
+  "expected_tool_calls": ["sap-s4", "variance-analysis", "workday", "close-pack-pdf", "file-sharing"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

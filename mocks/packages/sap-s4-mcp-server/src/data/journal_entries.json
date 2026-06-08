@@ -1,0 +1,26 @@
+[
+  { "id": "JE-30001", "posting_date": "2026-05-31", "period": "2026-05", "type": "Standard",  "status": "Posted",   "source": "MM",       "currency": "USD", "lines": [
+      { "gl_account": "5100", "cost_centre": "CC-0031", "debit_usd": 248000,  "credit_usd": 0,       "memo": "Raw material consumption — May" },
+      { "gl_account": "2100", "cost_centre": null,      "debit_usd": 0,       "credit_usd": 248000,  "memo": "Inventory clearing" }
+  ]},
+  { "id": "JE-30002", "posting_date": "2026-05-31", "period": "2026-05", "type": "Accrual",   "status": "Posted",   "source": "FI",       "currency": "USD", "lines": [
+      { "gl_account": "6000", "cost_centre": "CC-0011", "debit_usd": 520000,  "credit_usd": 0,       "memo": "May payroll accrual — Platform Eng" },
+      { "gl_account": "2200", "cost_centre": null,      "debit_usd": 0,       "credit_usd": 520000,  "memo": "Accrued payroll liability" }
+  ]},
+  { "id": "JE-30003", "posting_date": "2026-05-31", "period": "2026-05", "type": "Standard",  "status": "Posted",   "source": "AP",       "currency": "USD", "lines": [
+      { "gl_account": "6200", "cost_centre": "CC-0021", "debit_usd": 184000,  "credit_usd": 0,       "memo": "May T&E from Concur — AE team" },
+      { "gl_account": "2100", "cost_centre": null,      "debit_usd": 0,       "credit_usd": 184000,  "memo": "AP — Concur clearing" }
+  ]},
+  { "id": "JE-30004", "posting_date": "2026-05-29", "period": "2026-05", "type": "Reclass",   "status": "Posted",   "source": "FI",       "currency": "USD", "lines": [
+      { "gl_account": "6300", "cost_centre": "CC-0010", "debit_usd": 92000,   "credit_usd": 0,       "memo": "Reclass professional fees to Eng" },
+      { "gl_account": "6300", "cost_centre": "CC-0001", "debit_usd": 0,       "credit_usd": 92000,   "memo": "Reclass from HQ" }
+  ]},
+  { "id": "JE-30099", "posting_date": "2026-05-27", "period": "2026-05", "type": "Manual",    "status": "Posted",   "source": "FI",       "currency": "USD", "lines": [
+      { "gl_account": "6200", "cost_centre": "CC-0021", "debit_usd": 480000,  "credit_usd": 0,       "memo": "T&E adjustment — clearing prior period" },
+      { "gl_account": "2100", "cost_centre": null,      "debit_usd": 0,       "credit_usd": 480000,  "memo": "AP clearing" }
+  ]},
+  { "id": "JE-30100", "posting_date": "2026-06-01", "period": "2026-06", "type": "Standard",  "status": "Draft",    "source": "AP",       "currency": "USD", "lines": [
+      { "gl_account": "6400", "cost_centre": "CC-0011", "debit_usd": 38000,   "credit_usd": 0,       "memo": "Annual licence renewal — observability platform" },
+      { "gl_account": "2100", "cost_centre": null,      "debit_usd": 0,       "credit_usd": 38000,   "memo": "AP — vendor V-1102" }
+  ]}
+]

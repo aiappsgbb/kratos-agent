@@ -1,0 +1,4 @@
+[
+  { "id": "P-CLE", "name": "Cleveland Plant",  "country": "US", "city": "Cleveland, OH",   "lines": ["Line 1 — Assembly", "Line 2 — Assembly", "Line 3 — Precision"], "default_currency": "USD" },
+  { "id": "P-MUN", "name": "Munich Plant",     "country": "DE", "city": "Munich",          "lines": ["Line A — Casting",   "Line B — Machining"],                       "default_currency": "EUR" }
+]

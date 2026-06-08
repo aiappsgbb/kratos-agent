@@ -1,0 +1,177 @@
+[
+  {
+    "id": "FILE-50001",
+    "name": "owen-handover-2026-q2.docx",
+    "webUrl": "https://sharepoint.example.com/eng/platform/owen-handover-2026-q2.docx",
+    "drive": "sharepoint",
+    "site": "Engineering / Platform",
+    "path": "/eng/platform/owen-handover-2026-q2.docx",
+    "size": 84512,
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "createdBy": { "user": { "id": "EMP-2003", "displayName": "Owen Brennan" } },
+    "createdDateTime": "2026-06-04T22:15:08Z",
+    "lastModifiedBy": { "user": { "id": "EMP-2003", "displayName": "Owen Brennan" } },
+    "lastModifiedDateTime": "2026-06-05T08:48:21Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" }, "permission": "read-write" },
+      { "user": { "id": "EMP-2001", "displayName": "Theo Nakamura" }, "permission": "read-write" },
+      { "user": { "id": "EMP-2002", "displayName": "Elena Morales" }, "permission": "read-write" }
+    ],
+    "contentSummary": "Platform team handover for parental leave 8 Jun - 15 Jul 2026. Sections: on-call rotation owner (Theo), Redis cluster migration runbook (Elena owns), Q3 capacity review re-assignment, open PRs, known issues. References INC-30099 and Sentinel licence renewal."
+  },
+  {
+    "id": "FILE-50002",
+    "name": "variance-workbook-may-2026.xlsx",
+    "webUrl": "https://sharepoint.example.com/finance/close/may-2026/variance-workbook.xlsx",
+    "drive": "sharepoint",
+    "site": "Finance / Close",
+    "path": "/finance/close/may-2026/variance-workbook.xlsx",
+    "size": 412800,
+    "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "createdBy": { "user": { "id": "EMP-1021", "displayName": "Hiroshi Tanaka" } },
+    "createdDateTime": "2026-06-03T15:00:00Z",
+    "lastModifiedBy": { "user": { "id": "EMP-1021", "displayName": "Hiroshi Tanaka" } },
+    "lastModifiedDateTime": "2026-06-05T08:12:00Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-1020", "displayName": "Sofia Martinez" }, "permission": "read-write" },
+      { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" }, "permission": "read-write" },
+      { "user": { "id": "EMP-1012", "displayName": "Liam Bauer" }, "permission": "read-write" },
+      { "user": { "id": "EMP-1030", "displayName": "Beatrix Holloway" }, "permission": "read-write" }
+    ],
+    "contentSummary": "Per-cost-centre variance commentary workbook for May 2026 close. One sheet per cost centre. Each owner fills: driver (volume/price/mix/one-off), outlook, action. Pre-loaded with YTD actual vs prior year vs plan."
+  },
+  {
+    "id": "FILE-50003",
+    "name": "REQ-2009-offer-priya-subramaniam-signed.pdf",
+    "webUrl": "https://sharepoint.example.com/people/offers/REQ-2009-offer-priya-subramaniam-signed.pdf",
+    "drive": "sharepoint",
+    "site": "People / Offers",
+    "path": "/people/offers/REQ-2009-offer-priya-subramaniam-signed.pdf",
+    "size": 198120,
+    "mimeType": "application/pdf",
+    "createdBy": { "user": { "id": "EMP-1030", "displayName": "Beatrix Holloway" } },
+    "createdDateTime": "2026-05-28T16:42:00Z",
+    "lastModifiedBy": { "user": { "id": "EMP-1030", "displayName": "Beatrix Holloway" } },
+    "lastModifiedDateTime": "2026-05-29T11:08:00Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" }, "permission": "read" },
+      { "user": { "id": "EMP-1031", "displayName": "Wesley Park" }, "permission": "read" }
+    ],
+    "contentSummary": "Countersigned offer letter for Priya Subramaniam, Senior SRE, REQ-2009, start 22 Jun 2026, base $185k + 15% target bonus + standard equity grant. Position POS-2103."
+  },
+  {
+    "id": "FILE-50004",
+    "name": "platform-eng-onboarding-checklist.docx",
+    "webUrl": "https://sharepoint.example.com/eng/platform/onboarding/platform-eng-onboarding-checklist.docx",
+    "drive": "sharepoint",
+    "site": "Engineering / Platform",
+    "path": "/eng/platform/onboarding/platform-eng-onboarding-checklist.docx",
+    "size": 41280,
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "createdBy": { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" } },
+    "createdDateTime": "2025-09-12T14:00:00Z",
+    "lastModifiedBy": { "user": { "id": "EMP-2002", "displayName": "Elena Morales" } },
+    "lastModifiedDateTime": "2026-04-18T19:35:00Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-2001", "displayName": "Theo Nakamura" }, "permission": "read" },
+      { "user": { "id": "EMP-2002", "displayName": "Elena Morales" }, "permission": "read-write" },
+      { "user": { "id": "EMP-2003", "displayName": "Owen Brennan" }, "permission": "read" }
+    ],
+    "contentSummary": "Standing onboarding checklist for new Platform Engineering hires. Week 1: env setup, runbook tour, pair on a real ticket. Week 2-4: own a small feature. Week 5+: pager rotation. Buddy assigned in week 1."
+  },
+  {
+    "id": "FILE-50005",
+    "name": "sentinel-msa-SE-2025-118.pdf",
+    "webUrl": "https://sharepoint.example.com/procurement/contracts/sentinel-msa-SE-2025-118.pdf",
+    "drive": "sharepoint",
+    "site": "Procurement / Contracts",
+    "path": "/procurement/contracts/sentinel-msa-SE-2025-118.pdf",
+    "size": 612400,
+    "mimeType": "application/pdf",
+    "createdBy": { "user": { "id": "EMP-1020", "displayName": "Sofia Martinez" } },
+    "createdDateTime": "2025-12-19T11:00:00Z",
+    "lastModifiedBy": { "user": { "id": "EMP-1020", "displayName": "Sofia Martinez" } },
+    "lastModifiedDateTime": "2025-12-19T11:00:00Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" }, "permission": "read" },
+      { "user": { "id": "EMP-1021", "displayName": "Hiroshi Tanaka" }, "permission": "read" }
+    ],
+    "contentSummary": "Master services agreement with Sentinel Observability Inc, effective 1 Jan 2026 through 31 Dec 2028. Annual list $672k billed $168k quarterly in advance. 90-day termination for convenience. Net-30 from invoice date. SOC 2 Type II + EU data residency addendum."
+  },
+  {
+    "id": "FILE-50006",
+    "name": "may-close-timeline.xlsx",
+    "webUrl": "https://sharepoint.example.com/finance/close/may-2026/may-close-timeline.xlsx",
+    "drive": "sharepoint",
+    "site": "Finance / Close",
+    "path": "/finance/close/may-2026/may-close-timeline.xlsx",
+    "size": 38400,
+    "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "createdBy": { "user": { "id": "EMP-1021", "displayName": "Hiroshi Tanaka" } },
+    "createdDateTime": "2026-05-30T10:00:00Z",
+    "lastModifiedBy": { "user": { "id": "EMP-1021", "displayName": "Hiroshi Tanaka" } },
+    "lastModifiedDateTime": "2026-06-03T15:08:00Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-1020", "displayName": "Sofia Martinez" }, "permission": "read-write" }
+    ],
+    "contentSummary": "5-day close timeline for May 2026. Mon 8 Jun: kickoff + variance commentary. Tue 9 Jun: accrual cutoff. Wed 10 Jun: JEs posted. Thu 11 Jun: review + adjustments. Fri 12 Jun: books closed + board pre-read."
+  },
+  {
+    "id": "FILE-50007",
+    "name": "INC-30099-postmortem-template.md",
+    "webUrl": "https://sharepoint.example.com/eng/platform/post-mortems/INC-30099-postmortem-template.md",
+    "drive": "sharepoint",
+    "site": "Engineering / Platform",
+    "path": "/eng/platform/post-mortems/INC-30099-postmortem-template.md",
+    "size": 4820,
+    "mimeType": "text/markdown",
+    "createdBy": { "user": { "id": "EMP-2001", "displayName": "Theo Nakamura" } },
+    "createdDateTime": "2026-06-04T18:30:00Z",
+    "lastModifiedBy": { "user": { "id": "EMP-2001", "displayName": "Theo Nakamura" } },
+    "lastModifiedDateTime": "2026-06-04T18:30:00Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-1011", "displayName": "Aisha Okonkwo" }, "permission": "read-write" },
+      { "user": { "id": "EMP-2002", "displayName": "Elena Morales" }, "permission": "read-write" }
+    ],
+    "contentSummary": "Blameless post-mortem template for INC-30099 (api-gateway-prod 5xx spike 2026-06-04 02:14 UTC). Sections: timeline, root cause, contributing factors, customer impact, prevention items."
+  },
+  {
+    "id": "FILE-50008",
+    "name": "q2-board-pre-read-template.pptx",
+    "webUrl": "https://sharepoint.example.com/exec/board/q2-2026/q2-board-pre-read-template.pptx",
+    "drive": "sharepoint",
+    "site": "Exec / Board",
+    "path": "/exec/board/q2-2026/q2-board-pre-read-template.pptx",
+    "size": 1248000,
+    "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "createdBy": { "user": { "id": "EMP-1001", "displayName": "Diana Whitfield" } },
+    "createdDateTime": "2026-06-04T19:35:00Z",
+    "lastModifiedBy": { "user": { "id": "EMP-1001", "displayName": "Diana Whitfield" } },
+    "lastModifiedDateTime": "2026-06-04T19:35:00Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-1020", "displayName": "Sofia Martinez" }, "permission": "read-write" },
+      { "user": { "id": "EMP-1030", "displayName": "Beatrix Holloway" }, "permission": "read-write" },
+      { "user": { "id": "EMP-1010", "displayName": "Marcus Reyes" }, "permission": "read-write" },
+      { "user": { "id": "EMP-1040", "displayName": "Priya Raghavan" }, "permission": "read-write" }
+    ],
+    "contentSummary": "Q2 2026 board pre-read template, same shape as Q1. Each function lead drops 1-3 slides. Due Friday 12 Jun EOD Cleveland time."
+  },
+  {
+    "id": "FILE-50009",
+    "name": "vip-watchlist-wk22.xlsx",
+    "webUrl": "https://sharepoint.example.com/it/service-desk/reports/vip-watchlist-wk22.xlsx",
+    "drive": "sharepoint",
+    "site": "IT / Service Desk",
+    "path": "/it/service-desk/reports/vip-watchlist-wk22.xlsx",
+    "size": 28400,
+    "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "createdBy": { "user": { "id": "EMP-2201", "displayName": "Frank Delgado" } },
+    "createdDateTime": "2026-06-02T15:45:00Z",
+    "lastModifiedBy": { "user": { "id": "EMP-2201", "displayName": "Frank Delgado" } },
+    "lastModifiedDateTime": "2026-06-02T15:45:00Z",
+    "sharedWith": [
+      { "user": { "id": "EMP-1031", "displayName": "Wesley Park" }, "permission": "read" }
+    ],
+    "contentSummary": "Wk22 VIP open-ticket list, 7 records. 4 driven by Munich VPN rollout (Maya Patel, Jamal Carter, two travelling execs). Lucia Romano owns cutover for Fri."
+  }
+]

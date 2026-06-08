@@ -1,0 +1,16 @@
+{
+  "name": "email-draft-with-hitl",
+  "category": "write-confirmation",
+  "description": "Two-step mail write — agent drafts a variance commentary reply to Hiroshi via m365_draft_message, shows the Draft, asks_user, and DOES NOT call m365_send_message without explicit user confirmation.",
+  "input_message": "Reply to Hiroshi's variance reminder about CC-0011 — the driver is the planned Sentinel uplift and the May run-rate continues. I'll be accruing $42k for June separately. Draft it.",
+  "input_data": {
+    "recipient_name": "Hiroshi Tanaka",
+    "recipient_email_expected": "hiroshi.tanaka@olympus.example.com",
+    "cc_expected": "sofia.martinez@olympus.example.com",
+    "topic": "CC-0011 May variance commentary",
+    "should_send_in_this_turn": false
+  },
+  "expected_behavior": "Resolves Hiroshi via workday_search_employees_by_name to get work_email. Optionally searches Aisha's mailbox via m365_search_messages to find the parent conversation id for threading. Calls m365_draft_message with from=EMP-1011, to=[hiroshi.tanaka], cc=[sofia.martinez], subject mentioning CC-0011 May variance, body covering driver/outlook/action per §5.2. Renders the Draft in chat (From / To / Cc / Subject / body). Asks user via ask_user to confirm before sending. CRITICALLY: must NOT call m365_send_message in this turn.",
+  "expected_tool_calls": ["workday", "m365-graph", "variance-email"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

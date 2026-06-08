@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Olympus Industries — Close Pack {{PERIOD}}</title>
+  <style>
+    @page { size: A4; margin: 12mm 14mm; }
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: #1a1a1a;
+      font-size: 10pt;
+      line-height: 1.4;
+      margin: 0;
+    }
+    .cover {
+      background: linear-gradient(135deg, #0b1f3a 0%, #1e3a5f 100%);
+      color: #fff;
+      padding: 28mm 14mm;
+      margin: -12mm -14mm 0 -14mm;
+    }
+    .cover .firm { font-size: 11pt; letter-spacing: 4px; color: #d4a017; font-weight: 600; }
+    .cover h1   { font-size: 32pt; margin: 12mm 0 4mm 0; font-weight: 300; }
+    .cover .sub { font-size: 13pt; color: #cfd8dc; margin-bottom: 24mm; }
+    .cover .meta { display: flex; justify-content: space-between; font-size: 9pt; color: #cfd8dc; border-top: 1px solid #d4a017; padding-top: 6mm; }
+    .cover .meta strong { color: #fff; }
+    h2 {
+      font-size: 14pt; color: #0b1f3a; margin-top: 10mm; margin-bottom: 3mm;
+      border-bottom: 2px solid #d4a017; padding-bottom: 2mm;
+    }
+    h3 { font-size: 11pt; color: #0b1f3a; margin-top: 6mm; }
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm;
+      margin: 6mm 0 8mm 0;
+    }
+    .kpi {
+      background: #f5f7fa; border-left: 4px solid #d4a017; padding: 3mm 4mm;
+      border-radius: 2px;
+    }
+    .kpi .label { font-size: 8pt; text-transform: uppercase; color: #607d8b; letter-spacing: 1px; }
+    .kpi .value { font-size: 18pt; color: #0b1f3a; font-weight: 600; }
+    table {
+      border-collapse: collapse; width: 100%; margin: 3mm 0 6mm 0;
+      font-size: 9pt;
+    }
+    th, td { padding: 1.6mm 2mm; border-bottom: 1px solid #e0e6ed; text-align: left; vertical-align: top; }
+    th { background: #f5f7fa; color: #0b1f3a; font-weight: 600; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .chart { text-align: center; margin: 6mm 0 8mm 0; }
+    .chart img { max-width: 100%; height: auto; }
+    .callout { background: #fff3e0; border-left: 4px solid #d4a017; padding: 4mm; margin: 4mm 0; }
+    .callout ul { margin: 0; padding-left: 5mm; }
+    .missing { color: #c62828; font-style: italic; }
+    .footer { margin-top: 14mm; padding-top: 4mm; border-top: 1px solid #e0e6ed; font-size: 8pt; color: #607d8b; }
+    .signoff {
+      margin-top: 10mm; display: grid; grid-template-columns: 1fr 1fr; gap: 8mm;
+    }
+    .signoff .box {
+      border: 1px solid #0b1f3a; padding: 6mm 5mm; min-height: 26mm;
+    }
+    .signoff .box .role { font-size: 8pt; color: #607d8b; text-transform: uppercase; letter-spacing: 1px; }
+    .signoff .box .name { font-size: 11pt; color: #0b1f3a; margin-top: 12mm; }
+    .signoff .box .date { font-size: 8pt; color: #607d8b; }
+    .pagebreak { page-break-after: always; }
+  </style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="firm">OLYMPUS INDUSTRIES</div>
+  <h1>Month-End Close Pack</h1>
+  <div class="sub">Period {{PERIOD}} · US-GAAP · USD</div>
+  <div class="meta">
+    <span>Prepared by <strong>{{PREPARED_BY}}</strong></span>
+    <span>Generated {{GENERATED_AT}}</span>
+  </div>
+</div>
+
+<h2>Executive summary</h2>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">JEs posted</div><div class="value">{{JE_COUNT}}</div></div>
+  <div class="kpi"><div class="label">Accruals booked</div><div class="value">{{ACCRUAL_COUNT}}</div></div>
+  <div class="kpi"><div class="label">Investigate flags</div><div class="value">{{INVESTIGATE_COUNT}}</div></div>
+  <div class="kpi"><div class="label">Manual JEs</div><div class="value">{{MANUAL_COUNT}}</div></div>
+</div>
+
+<div class="callout">
+  <strong>Top callouts:</strong>
+  <ul>{{CALLOUTS}}</ul>
+</div>
+
+<h2>Variance review</h2>
+<p>Cost-centre × GL variance vs prior year. Threshold lines at ±20% mark the <strong>investigate</strong> bucket per close policy §5.1.</p>
+<div class="chart">
+  <img src="data:image/png;base64,{{CHART_B64}}" alt="Variance chart for period {{PERIOD}}" />
+</div>
+
+<h3>Investigate-flagged rows — owner commentary required</h3>
+<table>
+  <thead><tr>
+    <th>Cost centre</th><th>GL</th><th>Var %</th><th>Var $</th><th>Owner</th><th>Commentary</th>
+  </tr></thead>
+  <tbody>{{VARIANCE_ROWS}}</tbody>
+</table>
+
+<div class="pagebreak"></div>
+
+<h2>Journal entry queue</h2>
+<table>
+  <thead><tr>
+    <th>JE id</th><th>Type</th><th>Status</th><th>Total</th><th>Memo</th>
+  </tr></thead>
+  <tbody>{{JE_ROWS}}</tbody>
+</table>
+
+<h2>Accruals booked this period</h2>
+<table>
+  <thead><tr>
+    <th>JE</th><th>Vendor</th><th>Amount</th><th>Evidence</th><th>Auto-reverse</th>
+  </tr></thead>
+  <tbody>{{ACCRUAL_ROWS}}</tbody>
+</table>
+
+<h2>Vendor exceptions</h2>
+<table>
+  <thead><tr>
+    <th>Vendor id</th><th>Name</th><th>Reason</th><th>Approver</th>
+  </tr></thead>
+  <tbody>{{EXCEPTION_ROWS}}</tbody>
+</table>
+
+<div class="signoff">
+  <div class="box">
+    <div class="role">Controller</div>
+    <div class="name">_______________________________</div>
+    <div class="date">Date: _____________</div>
+  </div>
+  <div class="box">
+    <div class="role">Chief Financial Officer</div>
+    <div class="name">_______________________________</div>
+    <div class="date">Date: _____________</div>
+  </div>
+</div>
+
+<div class="footer">
+  Strictly Private &amp; Confidential · Olympus Industries Controllers' team · Generated by Kratos Finance Close Co-pilot · {{GENERATED_AT}}
+</div>
+
+</body>
+</html>

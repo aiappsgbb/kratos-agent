@@ -1,0 +1,10 @@
+name: kratos-finance-close
+version: 1.0.0
+description: Kratos agent — finance-close use-case APM manifest
+author: kratos-agent
+license: MIT
+target: copilot
+
+dependencies:
+  apm: []
+  mcp: []

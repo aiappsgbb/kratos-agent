@@ -1,0 +1,26 @@
+{
+  "name": "sap-s4-mcp-server",
+  "version": "0.1.0",
+  "description": "Mock SAP S/4HANA (Finance + Materials) as a stdio MCP server — cost centres, GL accounts, journal entries, vendors, materials, plants, production orders.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "sap-s4-mcp-server": "dist/server.js"
+  },
+  "files": [
+    "dist/",
+    "src/data/"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('dist/server.js', 0o755)\" && rm -rf dist/data && cp -R src/data dist/data",
+    "link": "npm link"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  }
+}
