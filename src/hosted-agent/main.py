@@ -346,8 +346,24 @@ async def handle_invoke(request: Request) -> Response:
     if _copilot_agent is None:
         await _startup()
 
+    # Keep-warm fast-path: the backend pings the hosted agent periodically with
+    # ``{"warmup": true}`` to stop the Foundry platform from scaling the container
+    # to zero (which causes multi-second cold starts and gateway 408 timeouts on
+    # the next real request). Running _startup() above already re-provisions and
+    # initialises every service, so we return immediately without invoking the
+    # model or persisting anything — this resets the platform idle timer cheaply.
     try:
-        data = await request.json()
+        _warmup_data = await request.json()
+    except (json.JSONDecodeError, ValueError):
+        _warmup_data = None
+    if isinstance(_warmup_data, dict) and _warmup_data.get("warmup") is True:
+        return JSONResponse(
+            status_code=200,
+            content={"status": "warm", "ready": _copilot_agent is not None},
+        )
+
+    try:
+        data = _warmup_data if isinstance(_warmup_data, dict) else await request.json()
         if not isinstance(data, dict):
             raise ValueError("body is not a JSON object")
 

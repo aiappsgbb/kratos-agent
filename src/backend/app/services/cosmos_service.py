@@ -355,7 +355,6 @@ class CosmosService:
         try:
             items = self._sessions_container.query_items(
                 query="SELECT c.id, c.conversationId FROM c",
-                enable_cross_partition_query=True,
             )
             async for item in items:
                 with contextlib.suppress(Exception):

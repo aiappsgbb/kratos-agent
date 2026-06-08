@@ -78,6 +78,30 @@ async def _apm_startup_sync(apm_service: ApmService, use_cases_root: str) -> tup
     return (synced, total)
 
 
+async def _keep_warm_loop(proxy: FoundryAgentProxy, interval_s: int) -> None:
+    """Maintain the hosted-agent warm pool so new conversations start fast AND
+    stay isolated.
+
+    Foundry hosted agents scale per-session: each conversation's sandbox has its
+    own /tmp, so sandboxes must NOT be shared between conversations. This loop
+    keeps a small pool of pre-provisioned, unclaimed sandboxes warm (pinging each
+    to reset its 15-min idle timer) and replenishes the pool after claims. A new
+    conversation pops its own dedicated warm sandbox — fast and fully isolated.
+    Runs until cancelled on shutdown; never lets a transient error kill the loop.
+    """
+    import asyncio
+
+    while True:
+        try:
+            size, target = await proxy.maintain_warm_pool()
+            logger.info("Warm-pool: ready (%d/%d sandboxes provisioned)", size, target)
+        except asyncio.CancelledError:
+            raise
+        except Exception:  # noqa: BLE001 — keep the loop alive across any transient error
+            logger.warning("Warm-pool: unexpected error in loop", exc_info=True)
+        await asyncio.sleep(interval_s)
+
+
 @asynccontextmanager
 async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan: initialize services on startup, cleanup on shutdown."""
@@ -143,6 +167,23 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     application.state.foundry_proxy = foundry_proxy
     application.state.settings = settings
 
+    # Start the keep-warm background task so the hosted-agent container never
+    # scales to zero (avoids cold-start latency and gateway 408s). Skipped in
+    # local mode where the hosted agent is a localhost stub.
+    keep_warm_task = None
+    if settings.keep_warm_enabled and not settings.is_local_mode:
+        import asyncio
+
+        keep_warm_task = asyncio.create_task(
+            _keep_warm_loop(foundry_proxy, settings.keep_warm_interval_s)
+        )
+        logger.info(
+            "Warm-pool task started — maintaining %d pre-warmed sandboxes, refresh every %ds",
+            settings.warm_pool_size,
+            settings.keep_warm_interval_s,
+        )
+    application.state.keep_warm_task = keep_warm_task
+
     # Initialize Eval storage + service (per-use-case scenarios, runs, results)
     eval_storage = EvalStorage(blob_skill_service, local_base_dir=settings.apm_use_cases_root)
     application.state.eval_storage = eval_storage
@@ -157,6 +198,13 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     # Cleanup
+    if keep_warm_task is not None:
+        import asyncio
+        import contextlib
+
+        keep_warm_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await keep_warm_task
     await eval_service.shutdown()
     await traces_service.close()
     await foundry_proxy.stop()

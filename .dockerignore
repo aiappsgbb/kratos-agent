@@ -1,0 +1,42 @@
+# Root .dockerignore — both agent-service and hosted-agent build with context: ../.. (repo root)
+# Dockerfiles only COPY: mocks/, src/backend/, src/hosted-agent/, use-cases/
+# Keep the build context small to avoid huge transfers and "no space left on device".
+
+# Virtual environments (src/backend/.venv ~536MB)
+**/.venv
+**/venv
+**/.virtualenv
+
+# Node modules (src/frontend ~347MB, mocks build output is reinstalled in image)
+**/node_modules
+
+# Python caches / build artifacts
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.egg-info
+**/build/
+**/dist/
+
+# Frontend (not needed by backend/hosted-agent images; deployed as Static Web App)
+src/frontend/
+
+# Docs site, infra, scripts, mocks node output not needed at build context root
+docs/
+infra/
+scripts/
+
+# Test artifacts
+**/test-results/
+**/playwright-report/
+test-results/
+
+# Git / editor / OS
+.git/
+.github/
+**/.DS_Store
+**/.vscode/
+*.log
