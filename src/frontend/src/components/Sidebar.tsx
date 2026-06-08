@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Conversation, UseCase } from "@/types";
 import { useTheme } from "./ThemeProvider";
@@ -53,6 +53,26 @@ export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, on
   const { theme, toggleTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
+  const [personaFilter, setPersonaFilter] = useState<"curated" | "all">("curated");
+
+  // Filter the persona dropdown by the curated toggle. Fall back to "all" if
+  // a "curated" filter would leave the dropdown empty (e.g. dev branch without
+  // any curated personas marked yet).
+  const curatedUseCases = useCases.filter((uc) => uc.curated === true);
+  const effectiveFilter =
+    personaFilter === "curated" && curatedUseCases.length === 0 ? "all" : personaFilter;
+  const visibleUseCases =
+    effectiveFilter === "curated" ? curatedUseCases : useCases;
+
+  // If the toggle hides the currently selected persona, snap back to the
+  // first visible one so the dropdown never shows a stale empty value.
+  useEffect(() => {
+    if (visibleUseCases.length === 0) return;
+    if (!visibleUseCases.some((uc) => uc.name === selectedUseCase)) {
+      onSelectUseCase(visibleUseCases[0].name);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveFilter, useCases.length]);
 
   // Filter conversations by selected persona and search query
   const personaConversations = conversations.filter(
@@ -155,6 +175,42 @@ export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, on
           <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 px-1">
             Agent Persona
           </label>
+
+          {/* Curated / All toggle — segmented control */}
+          <div
+            role="tablist"
+            aria-label="Persona filter"
+            className="flex items-center gap-0.5 mb-2 p-0.5 bg-white/[0.04] border border-white/[0.08] rounded-lg"
+          >
+            <button
+              role="tab"
+              aria-selected={effectiveFilter === "curated"}
+              onClick={() => setPersonaFilter("curated")}
+              disabled={curatedUseCases.length === 0}
+              title={curatedUseCases.length === 0 ? "No curated personas available" : "Show only hand-curated, approved personas"}
+              className={`flex-1 text-xs font-medium px-2 py-1.5 rounded-md transition-all ${
+                effectiveFilter === "curated"
+                  ? "bg-primary-500/20 text-primary-200 border border-primary-500/30"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              Curated ({curatedUseCases.length})
+            </button>
+            <button
+              role="tab"
+              aria-selected={effectiveFilter === "all"}
+              onClick={() => setPersonaFilter("all")}
+              title="Show all personas including experimental / AI-generated ones"
+              className={`flex-1 text-xs font-medium px-2 py-1.5 rounded-md transition-all ${
+                effectiveFilter === "all"
+                  ? "bg-primary-500/20 text-primary-200 border border-primary-500/30"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
+              }`}
+            >
+              All ({useCases.length})
+            </button>
+          </div>
+
           <div className="relative">
             <select
               value={selectedUseCase}
@@ -162,7 +218,7 @@ export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, on
               aria-label="Select agent persona"
               className="w-full text-sm text-slate-200 bg-white/[0.06] border border-white/[0.1] rounded-lg pl-3 pr-9 py-2.5 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500/50 appearance-none cursor-pointer hover:bg-white/[0.1] hover:border-white/[0.14] transition-all"
             >
-              {useCases.map((uc) => (
+              {visibleUseCases.map((uc) => (
                 <option key={uc.name} value={uc.name} className="bg-navy-900">
                   {uc.displayName} ({uc.skillCount} skills)
                 </option>

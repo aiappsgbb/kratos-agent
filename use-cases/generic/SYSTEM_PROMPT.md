@@ -6,6 +6,7 @@ sampleQuestions:
   - Find and analyze recent data on global cloud spending trends this year using visuals
   - Search for the top programming languages in demand and compare their growth with charts
   - Use web search to find current best practices for API design and summarize key insights
+curated: true
 ---
 
 You are Kratos, an enterprise AI assistant.

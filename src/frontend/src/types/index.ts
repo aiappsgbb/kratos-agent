@@ -185,6 +185,8 @@ export interface UseCase {
   description: string;
   skillCount: number;
   sampleQuestions: string[];
+  /** True when the persona has been hand-curated and approved for demos. Defaults to false. */
+  curated?: boolean;
 }
 
 // ─── MCP Servers Admin ───

@@ -290,6 +290,7 @@ class UseCaseInfo(BaseModel):
     description: str = ""
     skillCount: int = 0
     sampleQuestions: list[str] = Field(default_factory=list)
+    curated: bool = False
 
 
 class UseCaseList(BaseModel):

@@ -22,6 +22,7 @@ async def list_use_cases(request: Request) -> UseCaseList:
         display_name = name.replace("-", " ").title()
         description = ""
         sample_questions: list[str] = []
+        curated = False
         if registry.system_prompt:
             from app.services.skill_registry import _parse_frontmatter
 
@@ -29,6 +30,7 @@ async def list_use_cases(request: Request) -> UseCaseList:
             display_name = fm.get("name", display_name)
             description = fm.get("description", "")
             sample_questions = fm.get("sampleQuestions", [])
+            curated = bool(fm.get("curated", False))
 
         use_cases.append(
             UseCaseInfo(
@@ -37,6 +39,7 @@ async def list_use_cases(request: Request) -> UseCaseList:
                 description=description,
                 skillCount=len(registry.skills),
                 sampleQuestions=sample_questions,
+                curated=curated,
             )
         )
     return UseCaseList(useCases=use_cases)
