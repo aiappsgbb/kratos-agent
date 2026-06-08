@@ -1,0 +1,14 @@
+{
+  "name": "onboarding-pack-pdf-deliverable",
+  "category": "deliverable",
+  "description": "End-to-end deliverable. Agent gathers Workday + ServiceNow + M365 status for a joiner and produces the printable PDF.",
+  "input_message": "Build the onboarding pack PDF for Priya Subramaniam — REQ-2009",
+  "input_data": {
+    "expected_joiner": "Priya Subramaniam",
+    "expected_requisition": "REQ-2009",
+    "expected_output_path_pattern": "/tmp/onboarding-pack"
+  },
+  "expected_behavior": "Composes the 3 MCPs: workday for the position + hiring manager (Aisha Okonkwo, EMP-1011), servicenow for the REQ state, m365 for mailbox + day-1 1:1 booking. Builds the status JSON and invokes onboarding-pack-pdf (code_interpreter executing scripts/render_onboarding_pack.py). PDF written to /tmp/onboarding-pack-priya-subramaniam.pdf. References the path so file-sharing picks it up. Does NOT include salary or equity numbers (per §9.2 — they don't belong on a doc the manager will see).",
+  "expected_tool_calls": ["workday", "servicenow", "m365-graph", "onboarding-pack-pdf", "file-sharing"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "joiner-brief-cross-mcp-no-identity-ask",
+  "category": "identity-anchor",
+  "description": "Headline sample question. Agent must resolve the user as Beatrix Holloway (EMP-1030, CPO) and the date as 8 Jun 2026 without asking, then compose Workday + ServiceNow + M365 for a single joiner brief.",
+  "input_message": "Brief me on Priya Subramaniam's onboarding — where are we and what's outstanding for her 22 June start?",
+  "input_data": {
+    "expected_practitioner": "EMP-1030",
+    "expected_joiner": "Priya Subramaniam",
+    "expected_start_date": "2026-06-22",
+    "must_not_ask_identity": true
+  },
+  "expected_behavior": "Resolves the user as Beatrix (EMP-1030) and the date without asking. Looks up Priya Subramaniam — she's referenced in m365 fixtures (chats + messages from Beatrix to Aisha confirming the hire). Fans out to: workday (her record may not exist yet — that's expected for a pre-hire), servicenow (look for REQ in IT Provisioning tied to her), m365-graph (mailbox provisioned? day-1 1:1 booked on Aisha's calendar?). Renders a brief: identity + hire details, status across the 3 systems, what's outstanding before day -3. Does NOT ask 'which joiner' or 'when'.",
+  "expected_tool_calls": ["workday", "servicenow", "m365-graph"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}
