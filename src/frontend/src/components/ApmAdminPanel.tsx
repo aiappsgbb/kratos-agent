@@ -289,15 +289,15 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
   if (disabled) {
     return (
       <div className="max-w-2xl">
-        <div className="px-6 py-8 bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl text-center">
-          <div className="mx-auto mb-3 w-10 h-10 rounded-xl bg-slate-200 dark:bg-white/[0.08] flex items-center justify-center">
-            <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="px-6 py-8 bg-surface-2 border border-border-soft rounded-2xl text-center">
+          <div className="mx-auto mb-3 w-10 h-10 rounded-xl bg-surface-2 flex items-center justify-center">
+            <svg className="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
           </div>
-          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">APM is disabled</h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Set <code className="px-1 py-0.5 rounded bg-slate-200/80 dark:bg-white/[0.08] font-mono text-[11px]">APM_ENABLED=true</code> in the backend environment to manage packages from the UI.
+          <h3 className="text-sm font-semibold text-text">APM is disabled</h3>
+          <p className="mt-1 text-xs text-muted">
+            Set <code className="px-1 py-0.5 rounded bg-slate-200/80 font-mono text-[11px]">APM_ENABLED=true</code> in the backend environment to manage packages from the UI.
           </p>
         </div>
       </div>
@@ -314,8 +314,8 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
       {/* Header block */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white">APM Packages</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
+          <h3 className="text-base font-semibold text-text">APM Packages</h3>
+          <p className="text-xs text-muted mt-0.5 font-mono">
             apm CLI: {version || "…"}
           </p>
         </div>
@@ -323,7 +323,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
           <button
             onClick={handleSync}
             disabled={anyBusy}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-text bg-surface-2 border border-border-soft rounded-xl hover:bg-hover transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {busy === "sync" ? spin : (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -335,7 +335,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
           <button
             onClick={handleUpdateAll}
             disabled={anyBusy}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {busy === "update-all" ? spin : (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -360,19 +360,19 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
       )}
 
       {/* Dependency table */}
-      <div className="bg-white dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden">
+      <div className="bg-surface border border-border-soft rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-200 border-t-primary-600" />
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-primary-600" />
           </div>
         ) : dependencies.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+          <div className="px-6 py-10 text-center text-sm text-muted">
             No APM packages installed for this use-case yet.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-white/[0.03] text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted">
                 <tr>
                   <th className="px-4 py-2.5 text-left font-semibold">Name</th>
                   <th className="px-4 py-2.5 text-left font-semibold">Ref</th>
@@ -385,13 +385,13 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                 {dependencies.map((dep) => {
                   const tag = `uninstall:${dep.name}`;
                   return (
-                    <tr key={dep.name} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition-colors">
-                      <td className="px-4 py-2.5 font-mono text-slate-900 dark:text-slate-200">{dep.name}</td>
-                      <td className="px-4 py-2.5 font-mono text-slate-600 dark:text-slate-400">{dep.ref ?? "—"}</td>
-                      <td className="px-4 py-2.5 font-mono text-slate-600 dark:text-slate-400 truncate max-w-[220px]" title={dep.resolved ?? ""}>
+                    <tr key={dep.name} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="px-4 py-2.5 font-mono text-text">{dep.name}</td>
+                      <td className="px-4 py-2.5 font-mono text-text">{dep.ref ?? "—"}</td>
+                      <td className="px-4 py-2.5 font-mono text-text truncate max-w-[220px]" title={dep.resolved ?? ""}>
                         {dep.resolved ?? "—"}
                       </td>
-                      <td className="px-4 py-2.5 text-slate-600 dark:text-slate-400">{dep.source}</td>
+                      <td className="px-4 py-2.5 text-text">{dep.source}</td>
                       <td className="px-4 py-2.5 text-right">
                         <button
                           onClick={() => handleUninstall(dep.name)}
@@ -416,23 +416,23 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
       </div>
 
       {/* MCP servers provided by APM */}
-      <div className="bg-white dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-5">
+      <div className="bg-surface border border-border-soft rounded-2xl p-5">
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white">MCP servers from APM</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <h4 className="text-sm font-semibold text-text">MCP servers from APM</h4>
+          <p className="text-xs text-muted mt-0.5">
             Declared under <span className="font-mono">dependencies.mcp</span> in{" "}
             <span className="font-mono">apm.yml</span>. Installed servers are merged into the use-case&apos;s MCP
             registry automatically — local/blob entries win on name collisions.
           </p>
         </div>
         {mcpServers.length === 0 ? (
-          <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+          <div className="px-4 py-6 text-center text-sm text-muted">
             No APM-managed MCP servers yet. Install one from the suggestions below or add your own.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-white/[0.03] text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted">
                 <tr>
                   <th className="px-4 py-2.5 text-left font-semibold">Name</th>
                   <th className="px-4 py-2.5 text-left font-semibold">Transport</th>
@@ -452,8 +452,8 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                   const pending = !s.command && !s.url;
                   const tag = `uninstall-mcp:${s.name}`;
                   return (
-                    <tr key={s.name} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition-colors">
-                      <td className="px-4 py-2.5 font-mono text-slate-900 dark:text-slate-200">{s.name}</td>
+                    <tr key={s.name} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="px-4 py-2.5 font-mono text-text">{s.name}</td>
                       <td className="px-4 py-2.5">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium ${
                           isLocal
@@ -461,7 +461,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                             : "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400"
                         }`}>{s.transport}</span>
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-slate-600 dark:text-slate-400 truncate max-w-[280px]" title={commandOrUrl}>
+                      <td className="px-4 py-2.5 font-mono text-text truncate max-w-[280px]" title={commandOrUrl}>
                         {commandOrUrl || "—"}
                       </td>
                       <td className="px-4 py-2.5">
@@ -490,10 +490,10 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
       </div>
 
       {/* Suggested MCP servers */}
-      <div className="bg-white dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-5">
+      <div className="bg-surface border border-border-soft rounded-2xl p-5">
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Suggested MCP servers</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <h4 className="text-sm font-semibold text-text">Suggested MCP servers</h4>
+          <p className="text-xs text-muted mt-0.5">
             Curated MCP servers known to resolve via <span className="font-mono">apm mcp install</span>. One click
             adds them to this use-case&apos;s <span className="font-mono">apm.yml</span>.
           </p>
@@ -508,12 +508,12 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
             return (
               <div
                 key={s.id}
-                className="flex flex-col gap-2 p-4 bg-slate-50/70 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                className="flex flex-col gap-2 p-4 bg-slate-50/70 border border-border-soft rounded-xl"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{s.name}</span>
+                      <span className="text-sm font-semibold text-text truncate">{s.name}</span>
                       <span className={`text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded-md ${
                         s.transport === "stdio"
                           ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
@@ -524,7 +524,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                       href={s.homepage}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[11px] font-mono text-primary-600 dark:text-primary-400 hover:underline break-all"
+                      className="text-[11px] font-mono text-accent hover:underline break-all"
                       title={runtimeHint}
                     >
                       {runtimeHint}
@@ -536,14 +536,14 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs text-text leading-relaxed">
                   {s.description}
                 </p>
                 <div className="flex justify-end mt-1">
                   <button
                     onClick={() => handleInstallSuggestedMcp(s)}
                     disabled={anyBusy || installed}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-accent-fg bg-accent rounded-lg transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {busy === tag ? spin : (
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -560,17 +560,17 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
       </div>
 
       {/* Custom MCP install form */}
-      <form onSubmit={handleInstallMcp} className="bg-white dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-5 space-y-4">
+      <form onSubmit={handleInstallMcp} className="bg-surface border border-border-soft rounded-2xl p-5 space-y-4">
         <div>
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Install MCP server</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <h4 className="text-sm font-semibold text-text">Install MCP server</h4>
+          <p className="text-xs text-muted mt-0.5">
             Declare any MCP server. <span className="font-mono">stdio</span> runs a local command;{" "}
             <span className="font-mono">http</span> / <span className="font-mono">sse</span> talks to a remote endpoint.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-xs font-medium text-text mb-1.5">
               Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -579,15 +579,15 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
               onChange={(e) => setMcpName(e.target.value)}
               placeholder="markitdown"
               required
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Transport</label>
+            <label className="block text-xs font-medium text-text mb-1.5">Transport</label>
             <select
               value={mcpTransport}
               onChange={(e) => setMcpTransport(e.target.value as "stdio" | "http" | "sse")}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
             >
               <option value="stdio">stdio</option>
               <option value="http">http</option>
@@ -596,7 +596,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
           </div>
           {mcpTransport === "stdio" ? (
             <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-text mb-1.5">
                 Command <span className="text-red-500">*</span>
               </label>
               <input
@@ -605,12 +605,12 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                 onChange={(e) => setMcpCommand(e.target.value)}
                 placeholder="uvx"
                 required
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+                className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
               />
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-text mb-1.5">
                 URL <span className="text-red-500">*</span>
               </label>
               <input
@@ -619,42 +619,42 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                 onChange={(e) => setMcpUrl(e.target.value)}
                 placeholder="https://example.com/mcp"
                 required
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+                className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
               />
             </div>
           )}
         </div>
         {mcpTransport === "stdio" && (
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              Args <span className="text-slate-400 font-normal">(space-separated)</span>
+            <label className="block text-xs font-medium text-text mb-1.5">
+              Args <span className="text-muted font-normal">(space-separated)</span>
             </label>
             <input
               type="text"
               value={mcpArgsInput}
               onChange={(e) => setMcpArgsInput(e.target.value)}
               placeholder="markitdown-mcp"
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
             />
           </div>
         )}
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-            Env <span className="text-slate-400 font-normal">(KEY=VALUE per line, optional)</span>
+          <label className="block text-xs font-medium text-text mb-1.5">
+            Env <span className="text-muted font-normal">(KEY=VALUE per line, optional)</span>
           </label>
           <textarea
             value={mcpEnvInput}
             onChange={(e) => setMcpEnvInput(e.target.value)}
             placeholder="GITHUB_TOKEN=ghp_...&#10;DEBUG=true"
             rows={2}
-            className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+            className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
           />
         </div>
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={anyBusy || !mcpName.trim()}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {busy === `install-mcp:${mcpName.trim()}` ? spin : (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -667,11 +667,11 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
       </form>
 
       {/* Suggested packages */}
-      <div className="bg-white dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-5">
+      <div className="bg-surface border border-border-soft rounded-2xl p-5">
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Suggested packages</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <h4 className="text-sm font-semibold text-text">Suggested packages</h4>
+            <p className="text-xs text-muted mt-0.5">
               Curated, public APM packages that resolve out-of-the-box. One click installs into{" "}
               <span className="font-mono">{useCase}</span>.
             </p>
@@ -684,18 +684,18 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
             return (
               <div
                 key={pkg.id}
-                className="flex flex-col gap-2 p-4 bg-slate-50/70 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl"
+                className="flex flex-col gap-2 p-4 bg-slate-50/70 border border-border-soft rounded-xl"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                    <div className="text-sm font-semibold text-text truncate">
                       {pkg.name}
                     </div>
                     <a
                       href={pkg.homepage}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[11px] font-mono text-primary-600 dark:text-primary-400 hover:underline break-all"
+                      className="text-[11px] font-mono text-accent hover:underline break-all"
                     >
                       {pkg.pkg}
                       {pkg.ref ? `#${pkg.ref}` : ""}
@@ -707,14 +707,14 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs text-text leading-relaxed">
                   {pkg.description}
                 </p>
                 <div className="flex justify-end mt-1">
                   <button
                     onClick={() => handleInstallSuggested(pkg)}
                     disabled={anyBusy || installed}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-lg hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-accent-fg bg-accent rounded-lg transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {busy === tag ? spin : (
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -731,16 +731,16 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
       </div>
 
       {/* Install form */}
-      <form onSubmit={handleInstall} className="bg-white dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-5 space-y-4">
+      <form onSubmit={handleInstall} className="bg-surface border border-border-soft rounded-2xl p-5 space-y-4">
         <div>
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Install package</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <h4 className="text-sm font-semibold text-text">Install package</h4>
+          <p className="text-xs text-muted mt-0.5">
             Add a GitHub-hosted APM package to this use-case.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-xs font-medium text-text mb-1.5">
               Package <span className="text-red-500">*</span>
             </label>
             <input
@@ -749,36 +749,36 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
               onChange={(e) => setPkgInput(e.target.value)}
               placeholder="owner/repo or owner/repo/subdir"
               required
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              Ref <span className="text-slate-400 font-normal">(optional)</span>
+            <label className="block text-xs font-medium text-text mb-1.5">
+              Ref <span className="text-muted font-normal">(optional)</span>
             </label>
             <input
               type="text"
               value={refInput}
               onChange={(e) => setRefInput(e.target.value)}
               placeholder="main / v1.2.3 / sha"
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
             />
           </div>
         </div>
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-text cursor-pointer">
             <input
               type="checkbox"
               checked={devInput}
               onChange={(e) => setDevInput(e.target.checked)}
-              className="rounded border-slate-300 dark:border-white/[0.15] text-primary-600 focus:ring-primary-500/20"
+              className="rounded border-border-soft text-accent focus:ring-accent"
             />
             <span>Dev dependency</span>
           </label>
           <button
             type="submit"
             disabled={anyBusy || !pkgInput.trim()}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {busy === "install" ? spin : (
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -792,9 +792,9 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
 
       {/* Materialised skill dirs */}
       {materialisedDirs.length > 0 && (
-        <div className="bg-white dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-5">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">Materialised skill directories</h4>
-          <ul className="space-y-1 text-xs font-mono text-slate-600 dark:text-slate-400">
+        <div className="bg-surface border border-border-soft rounded-2xl p-5">
+          <h4 className="text-sm font-semibold text-text mb-2">Materialised skill directories</h4>
+          <ul className="space-y-1 text-xs font-mono text-text">
             {materialisedDirs.map((d) => <li key={d}>{d}</li>)}
           </ul>
         </div>
@@ -802,10 +802,10 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
 
       {/* Last command output (collapsible) */}
       {lastResult && (
-        <div className="bg-white dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="bg-surface border border-border-soft rounded-2xl overflow-hidden">
           <button
             onClick={() => setOutputOpen((v) => !v)}
-            className="w-full flex items-center justify-between px-5 py-3 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3 text-sm font-medium text-text hover:bg-hover transition-colors"
           >
             <div className="flex items-center gap-3">
               <span>Last command output</span>
@@ -816,7 +816,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
               }`}>
                 rc={lastResult.returncode}
               </span>
-              <span className="text-[11px] text-slate-500 font-mono">
+              <span className="text-[11px] text-muted font-mono">
                 {Math.round(lastResult.duration_ms)} ms
               </span>
             </div>
@@ -825,16 +825,16 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
             </svg>
           </button>
           {outputOpen && (
-            <div className="px-5 pb-5 space-y-3 border-t border-slate-200/80 dark:border-white/[0.06]">
+            <div className="px-5 pb-5 space-y-3 border-t border-border-soft">
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-slate-500 mt-3 mb-1.5">stdout</div>
-                <pre className="text-xs font-mono whitespace-pre-wrap max-h-64 overflow-auto bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/[0.06] rounded-lg p-3 text-slate-700 dark:text-slate-300">
+                <div className="text-[11px] uppercase tracking-wider text-muted mt-3 mb-1.5">stdout</div>
+                <pre className="text-xs font-mono whitespace-pre-wrap max-h-64 overflow-auto bg-surface-2 dark:bg-black/30 border border-border-soft rounded-lg p-3 text-text">
                   {lastResult.stdout || "(empty)"}
                 </pre>
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-slate-500 mb-1.5">stderr</div>
-                <pre className="text-xs font-mono whitespace-pre-wrap max-h-64 overflow-auto bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/[0.06] rounded-lg p-3 text-slate-700 dark:text-slate-300">
+                <div className="text-[11px] uppercase tracking-wider text-muted mb-1.5">stderr</div>
+                <pre className="text-xs font-mono whitespace-pre-wrap max-h-64 overflow-auto bg-surface-2 dark:bg-black/30 border border-border-soft rounded-lg p-3 text-text">
                   {lastResult.stderr || "(empty)"}
                 </pre>
               </div>

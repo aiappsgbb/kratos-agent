@@ -384,15 +384,15 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
   };
 
   return (
-    <div className="flex flex-col h-full bg-surface-50 dark:bg-navy-950">
+    <div className="flex flex-col h-full bg-bg">
       {/* Header */}
-      <header className="border-b border-slate-200/60 dark:border-white/[0.05] px-4 sm:px-6 py-3 bg-white/80 dark:bg-navy-900/80 backdrop-blur-2xl sticky top-0 z-10 shadow-sm shadow-slate-100/50 dark:shadow-black/10">
+      <header className="border-b border-border-soft px-4 sm:px-6 py-3 bg-surface backdrop-blur sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-3 max-w-5xl mx-auto">
           {/* Mobile hamburger */}
           {onOpenSidebar && (
             <button
               onClick={onOpenSidebar}
-              className="lg:hidden p-2 -ml-1 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100/80 dark:hover:bg-white/[0.06] transition-all flex-shrink-0"
+              className="lg:hidden p-2 -ml-1 text-muted hover:text-text rounded-lg hover:bg-slate-100/80 transition-all flex-shrink-0"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -401,11 +401,11 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2.5">
-              <h2 className="text-sm font-semibold text-slate-800 dark:text-white truncate">
+              <h2 className="text-sm font-semibold text-text truncate">
                 {conversation.title}
               </h2>
               {conversation.useCase && conversation.useCase !== "generic" && (
-                <span className="text-[10px] px-2 py-0.5 bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-full font-medium flex-shrink-0">
+                <span className="text-[10px] px-2 py-0.5 bg-accent-soft text-accent rounded-full font-medium flex-shrink-0">
                   {conversation.useCase.replace(/-/g, " ")}
                 </span>
               )}
@@ -458,10 +458,10 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
             </div>
           )}
 
-          {/* User input request from agent */}
+          {/* User input request from agent — themed with ask-* tokens */}
           {userInputPrompt && (
-            <div className="ml-11 bg-amber-50/80 border border-amber-200/80 rounded-xl p-4 max-w-2xl backdrop-blur-sm">
-              <p className="text-sm font-medium text-amber-800 mb-3">
+            <div className="ml-11 bg-ask-bg border border-ask-border border-l-[3px] border-l-ask rounded-xl p-4 max-w-2xl">
+              <p className="text-sm font-medium text-text-strong mb-3">
                 {userInputPrompt.question}
               </p>
               {userInputPrompt.choices.length > 0 && (
@@ -470,7 +470,7 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
                     <button
                       key={choice}
                       onClick={() => handleUserInputSubmit(choice)}
-                      className="px-3.5 py-1.5 text-sm bg-white border border-amber-300/80 rounded-lg hover:bg-amber-100 transition-all duration-150 shadow-sm"
+                      className="px-3.5 py-1.5 text-sm bg-surface text-text border border-border rounded-lg hover:bg-hover hover:border-ask transition-all"
                     >
                       {choice}
                     </button>
@@ -489,12 +489,12 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
                       }
                     }}
                     placeholder="Type your answer..."
-                    className="flex-1 text-sm border border-amber-300/80 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400/50 bg-white"
+                    className="flex-1 text-sm text-text bg-surface border border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ask placeholder:text-muted"
                   />
                   <button
                     onClick={() => handleUserInputSubmit(userInputAnswer.trim())}
                     disabled={!userInputAnswer.trim()}
-                    className="px-4 py-2 text-sm bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 transition-colors shadow-sm"
+                    className="px-4 py-2 text-sm bg-ask text-accent-fg rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity font-medium"
                   >
                     Send
                   </button>
@@ -507,12 +507,12 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
           {!isStreaming && followUpQuestions.length > 0 && (
             <div className="ml-11 animate-fade-in">
               <div className="flex items-center gap-2 mb-2.5">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-violet-500/10 to-primary-500/10 dark:from-violet-500/20 dark:to-primary-500/20 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-primary-500" viewBox="0 0 24 24" fill="currentColor">
+                <div className="w-5 h-5 rounded-md bg-accent dark:from-violet-500/20 dark:to-primary-500/20 flex items-center justify-center">
+                  <svg className="w-3 h-3 text-accent" viewBox="0 0 24 24" fill="currentColor">
                     <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.913-.143z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Continue exploring</span>
+                <span className="text-xs font-medium text-muted uppercase tracking-wider">Continue exploring</span>
               </div>
               <div className="flex flex-col gap-1.5 stagger-children">
                 {followUpQuestions.map((question, idx) => (
@@ -522,12 +522,12 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
                       setFollowUpQuestions([]);
                       handleSend(question);
                     }}
-                    className="group flex items-center gap-3 px-3.5 py-2.5 text-[13px] text-left rounded-xl border border-transparent hover:bg-white dark:hover:bg-navy-900/80 hover:border-slate-200/60 dark:hover:border-white/[0.08] hover:shadow-sm transition-all duration-300 animate-slide-up-stagger active:scale-[0.98]"
+                    className="group flex items-center gap-3 px-3.5 py-2.5 text-[13px] text-left rounded-xl border border-transparent hover:bg-hover hover:border-border hover:shadow-sm transition-all duration-300 animate-slide-up-stagger active:scale-[0.98]"
                   >
-                    <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-primary-500 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <svg className="w-4 h-4 text-text-strong group-hover:text-primary-500 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span className="text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">
+                    <span className="text-muted group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">
                       {question}
                     </span>
                   </button>
@@ -547,15 +547,15 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
             {attachments.map((att, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] rounded-lg shadow-sm animate-fade-in"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-surface border border-border-soft rounded-lg shadow-sm animate-fade-in"
               >
-                <svg className="w-3.5 h-3.5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                 </svg>
-                <span className="text-slate-600 dark:text-slate-300 font-medium">{att.displayName || ("path" in att ? att.path : "")}</span>
+                <span className="text-text font-medium">{att.displayName || ("path" in att ? att.path : "")}</span>
                 <button
                   onClick={() => removeAttachment(idx)}
-                  className="ml-0.5 text-slate-400 hover:text-red-400 transition-colors"
+                  className="ml-0.5 text-muted hover:text-red-400 transition-colors"
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -570,7 +570,7 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
       {/* Input area */}
       <div className="px-3 sm:px-4 pb-4 sm:pb-5 pt-2">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-end gap-2 bg-white dark:bg-navy-900/80 rounded-2xl border border-slate-200/60 dark:border-white/[0.06] px-3 py-2 focus-within:border-primary-400/60 dark:focus-within:border-primary-500/40 focus-within:shadow-[0_0_0_3px_rgba(99,102,241,0.1),0_4px_16px_rgba(0,0,0,0.04)] shadow-lg shadow-slate-200/40 dark:shadow-black/20 transition-all duration-300">
+          <div className="flex items-end gap-2 bg-surface rounded-2xl border border-border-soft px-3 py-2 focus-within:border-primary-400/60 dark:focus-within:border-primary-500/40 focus-within:shadow-[0_0_0_3px_rgba(99,102,241,0.1),0_4px_16px_rgba(0,0,0,0.04)] shadow-lg transition-all duration-300">
             <input
               ref={fileInputRef}
               type="file"
@@ -582,7 +582,7 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
               onClick={() => fileInputRef.current?.click()}
               disabled={isStreaming}
               title="Attach files"
-              className="p-2 text-slate-400 hover:text-primary-500 rounded-lg hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+              className="p-2 text-muted hover:text-accent rounded-lg hover:bg-hover transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
@@ -595,7 +595,7 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
               placeholder="Ask me anything..."
               rows={1}
               disabled={isStreaming}
-              className="flex-1 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-transparent border-none focus:outline-none focus:ring-0 py-2 px-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 resize-none text-sm text-text placeholder:text-muted bg-transparent border-none focus:outline-none focus:ring-0 py-2 px-1 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ minHeight: "36px", maxHeight: "200px" }}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement;
@@ -607,7 +607,7 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
               onClick={() => handleSend()}
               disabled={isStreaming || !input.trim()}
               aria-label={isStreaming ? "Sending message" : "Send message"}
-              className="p-2.5 bg-gradient-to-r from-primary-600 to-violet-600 text-white rounded-xl hover:from-primary-700 hover:to-violet-700 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-primary-500/20 hover:shadow-lg hover:shadow-primary-500/30 active:scale-95"
+              className="p-2.5 bg-accent text-accent-fg rounded-xl transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md hover:shadow-lg active:scale-95"
             >
               {isStreaming ? (
                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

@@ -64,16 +64,16 @@ function VizChatInput() {
         <span className="w-3 h-3 rounded-full bg-red-500/80" />
         <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
         <span className="w-3 h-3 rounded-full bg-green-500/80" />
-        <span className="ml-2 text-xs text-slate-500">Kratos Agent</span>
+        <span className="ml-2 text-xs text-muted">Kratos Agent</span>
       </div>
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-slate-400">
+        <div className="flex items-center gap-2 text-muted">
           <span className="text-cyan-400 text-xs font-semibold px-1.5 py-0.5 rounded bg-cyan-400/10">[user]</span>
-          <span className="text-slate-300">Analyze my portfolio performance and draft a summary email</span>
+          <span className="text-text-strong">Analyze my portfolio performance and draft a summary email</span>
         </div>
-        <div className="flex items-start gap-2 text-slate-500">
+        <div className="flex items-start gap-2 text-muted">
           <span className="text-cyan-400/60 text-xs font-semibold px-1.5 py-0.5 rounded bg-cyan-400/5 mt-0.5">📎</span>
-          <span className="text-slate-500 text-xs">portfolio_q4.xlsx <span className="text-slate-600">(base64, 142 KB)</span></span>
+          <span className="text-muted text-xs">portfolio_q4.xlsx <span className="text-text">(base64, 142 KB)</span></span>
         </div>
       </div>
     </div>
@@ -85,20 +85,20 @@ function VizApiRequest() {
     <div className="rounded-xl bg-slate-950 p-4 font-mono text-xs" role="img" aria-label="API request visualization">
       <div className="mb-2">
         <span className="text-green-400 font-bold">POST</span>{" "}
-        <span className="text-slate-300">/chat</span>{" "}
-        <span className="text-slate-600">HTTP/1.1</span>
+        <span className="text-text-strong">/chat</span>{" "}
+        <span className="text-text">HTTP/1.1</span>
       </div>
-      <div className="text-slate-500 mb-3">
-        <div>Content-Type: <span className="text-slate-400">text/event-stream</span></div>
-        <div>Connection: <span className="text-slate-400">keep-alive</span></div>
+      <div className="text-muted mb-3">
+        <div>Content-Type: <span className="text-muted">text/event-stream</span></div>
+        <div>Connection: <span className="text-muted">keep-alive</span></div>
       </div>
-      <div className="border-t border-slate-800 pt-2 space-y-1">
-        <div className="text-primary-400">{"{"}</div>
-        <div className="pl-4"><span className="text-violet-400">&quot;message&quot;</span>: <span className="text-amber-300">&quot;Analyze my portfolio...&quot;</span>,</div>
-        <div className="pl-4"><span className="text-violet-400">&quot;conversationId&quot;</span>: <span className="text-amber-300">&quot;c9f2e...&quot;</span>,</div>
-        <div className="pl-4"><span className="text-violet-400">&quot;useCase&quot;</span>: <span className="text-amber-300">&quot;wealth-management&quot;</span>,</div>
-        <div className="pl-4"><span className="text-violet-400">&quot;attachments&quot;</span>: [<span className="text-slate-500">...</span>]</div>
-        <div className="text-primary-400">{"}"}</div>
+      <div className="border-t border-border pt-2 space-y-1">
+        <div className="text-accent">{"{"}</div>
+        <div className="pl-4"><span className="text-accent">&quot;message&quot;</span>: <span className="text-amber-300">&quot;Analyze my portfolio...&quot;</span>,</div>
+        <div className="pl-4"><span className="text-accent">&quot;conversationId&quot;</span>: <span className="text-amber-300">&quot;c9f2e...&quot;</span>,</div>
+        <div className="pl-4"><span className="text-accent">&quot;useCase&quot;</span>: <span className="text-amber-300">&quot;wealth-management&quot;</span>,</div>
+        <div className="pl-4"><span className="text-accent">&quot;attachments&quot;</span>: [<span className="text-muted">...</span>]</div>
+        <div className="text-accent">{"}"}</div>
       </div>
     </div>
   );
@@ -108,21 +108,21 @@ function VizCosmosWrite() {
   return (
     <div className="rounded-xl bg-slate-950 p-4 font-mono text-xs" role="img" aria-label="Cosmos DB write visualization">
       <div className="flex items-center gap-2 mb-3">
-        <svg className="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375" />
         </svg>
-        <span className="text-primary-400 font-semibold text-xs">Cosmos DB — Write-Ahead</span>
+        <span className="text-accent font-semibold text-xs">Cosmos DB — Write-Ahead</span>
       </div>
       <div className="space-y-1">
-        <div className="text-slate-500">container: <span className="text-slate-300">messages</span></div>
-        <div className="text-slate-500">partition: <span className="text-amber-300">&quot;c9f2e...&quot;</span></div>
-        <div className="border-t border-slate-800 my-2" />
-        <div className="text-primary-300">{"{"}</div>
-        <div className="pl-4"><span className="text-violet-400">&quot;id&quot;</span>: <span className="text-amber-300">&quot;a7b3f...&quot;</span>,</div>
-        <div className="pl-4"><span className="text-violet-400">&quot;role&quot;</span>: <span className="text-amber-300">&quot;user&quot;</span>,</div>
-        <div className="pl-4"><span className="text-violet-400">&quot;content&quot;</span>: <span className="text-amber-300">&quot;Analyze my portfolio...&quot;</span>,</div>
-        <div className="pl-4"><span className="text-violet-400">&quot;timestamp&quot;</span>: <span className="text-amber-300">&quot;2025-07-14T09:32:01Z&quot;</span></div>
-        <div className="text-primary-300">{"}"}</div>
+        <div className="text-muted">container: <span className="text-text-strong">messages</span></div>
+        <div className="text-muted">partition: <span className="text-amber-300">&quot;c9f2e...&quot;</span></div>
+        <div className="border-t border-border my-2" />
+        <div className="text-accent">{"{"}</div>
+        <div className="pl-4"><span className="text-accent">&quot;id&quot;</span>: <span className="text-amber-300">&quot;a7b3f...&quot;</span>,</div>
+        <div className="pl-4"><span className="text-accent">&quot;role&quot;</span>: <span className="text-amber-300">&quot;user&quot;</span>,</div>
+        <div className="pl-4"><span className="text-accent">&quot;content&quot;</span>: <span className="text-amber-300">&quot;Analyze my portfolio...&quot;</span>,</div>
+        <div className="pl-4"><span className="text-accent">&quot;timestamp&quot;</span>: <span className="text-amber-300">&quot;2025-07-14T09:32:01Z&quot;</span></div>
+        <div className="text-accent">{"}"}</div>
       </div>
       <div className="mt-2 text-green-400 text-xs flex items-center gap-1">
         <span>✓</span> Persisted before AI processing
@@ -136,23 +136,23 @@ function VizSessionResolve() {
     <div className="rounded-xl bg-slate-950 p-4 font-mono text-xs" role="img" aria-label="Session resolution visualization">
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <div className="flex-1 rounded-lg bg-violet-500/10 border border-violet-500/20 p-2.5 text-center">
-            <div className="text-violet-400 font-semibold text-[10px] uppercase tracking-wide mb-1">conversation_id</div>
-            <div className="text-slate-300">c9f2e-4a1b</div>
+          <div className="flex-1 rounded-lg bg-accent border border-violet-500/20 p-2.5 text-center">
+            <div className="text-accent font-semibold text-[10px] uppercase tracking-wide mb-1">conversation_id</div>
+            <div className="text-text-strong">c9f2e-4a1b</div>
           </div>
-          <div className="text-slate-500 text-lg">→</div>
-          <div className="flex-1 rounded-lg bg-violet-500/10 border border-violet-500/20 p-2.5 text-center">
-            <div className="text-violet-400 font-semibold text-[10px] uppercase tracking-wide mb-1">sdk_session_id</div>
-            <div className="text-slate-300">sess_8x7k2</div>
+          <div className="text-muted text-lg">→</div>
+          <div className="flex-1 rounded-lg bg-accent border border-violet-500/20 p-2.5 text-center">
+            <div className="text-accent font-semibold text-[10px] uppercase tracking-wide mb-1">sdk_session_id</div>
+            <div className="text-text-strong">sess_8x7k2</div>
           </div>
         </div>
-        <div className="border-t border-slate-800 pt-2">
+        <div className="border-t border-border pt-2">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
             <span className="text-green-400">Existing session found — resuming multi-turn context</span>
           </div>
         </div>
-        <div className="text-slate-600 text-[10px]">Auth: ManagedIdentityCredential → AzureCLICredential chain</div>
+        <div className="text-text text-[10px]">Auth: ManagedIdentityCredential → AzureCLICredential chain</div>
       </div>
     </div>
   );
@@ -163,22 +163,22 @@ function VizSystemPrompt() {
     <div className="rounded-xl bg-slate-950 p-4 font-mono text-xs" role="img" aria-label="System prompt assembly visualization">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-amber-400">📄</span>
-        <span className="text-slate-400">Blob Storage</span>
-        <span className="text-slate-600">/</span>
+        <span className="text-muted">Blob Storage</span>
+        <span className="text-text">/</span>
         <span className="text-amber-300">wealth-management</span>
-        <span className="text-slate-600">/</span>
-        <span className="text-slate-200">SYSTEM_PROMPT.md</span>
+        <span className="text-text">/</span>
+        <span className="text-text-strong">SYSTEM_PROMPT.md</span>
       </div>
-      <div className="rounded-lg bg-slate-900 border border-slate-800 p-3 space-y-1.5">
-        <div className="text-primary-400 font-semibold text-[10px] uppercase tracking-wide">System Prompt</div>
-        <div className="text-slate-300">You are a wealth management advisor AI assistant.</div>
-        <div className="text-slate-300">You have access to portfolio analysis tools,</div>
-        <div className="text-slate-300">market data, and document generation.</div>
-        <div className="text-slate-500 mt-2">Always prefer tool usage over guessing.</div>
-        <div className="text-slate-500">Never fabricate financial data.</div>
+      <div className="rounded-lg bg-slate-900 border border-border p-3 space-y-1.5">
+        <div className="text-accent font-semibold text-[10px] uppercase tracking-wide">System Prompt</div>
+        <div className="text-text-strong">You are a wealth management advisor AI assistant.</div>
+        <div className="text-text-strong">You have access to portfolio analysis tools,</div>
+        <div className="text-text-strong">market data, and document generation.</div>
+        <div className="text-muted mt-2">Always prefer tool usage over guessing.</div>
+        <div className="text-muted">Never fabricate financial data.</div>
       </div>
-      <div className="mt-2 flex items-center gap-2 text-slate-500 text-[10px]">
-        <span className="text-violet-400">mode=&apos;replace&apos;</span>
+      <div className="mt-2 flex items-center gap-2 text-muted text-[10px]">
+        <span className="text-accent">mode=&apos;replace&apos;</span>
         <span>•</span>
         <span>YAML frontmatter stripped</span>
       </div>
@@ -190,9 +190,9 @@ function VizSkillRegistry() {
   return (
     <div className="rounded-xl bg-slate-950 p-4 text-xs" role="img" aria-label="Skill registry visualization">
       <div className="flex items-center gap-2 mb-3 font-mono">
-        <span className="text-primary-400 font-semibold">skills.yaml</span>
-        <span className="text-slate-600">→</span>
-        <span className="text-slate-400">wealth-management</span>
+        <span className="text-accent font-semibold">skills.yaml</span>
+        <span className="text-text">→</span>
+        <span className="text-muted">wealth-management</span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {[
@@ -219,8 +219,8 @@ function VizSkillRegistry() {
           </div>
         ))}
       </div>
-      <div className="mt-2 font-mono text-slate-500 text-[10px]">
-        Each skill: <span className="text-violet-400">@define_tool</span> async function + OpenTelemetry span
+      <div className="mt-2 font-mono text-muted text-[10px]">
+        Each skill: <span className="text-accent">@define_tool</span> async function + OpenTelemetry span
       </div>
     </div>
   );
@@ -231,25 +231,25 @@ function VizSendToSdk() {
     <div className="rounded-xl bg-slate-950 p-4 font-mono text-xs" role="img" aria-label="SDK dispatch visualization">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="rounded-lg bg-primary-400/10 border border-primary-400/20 px-3 py-2 text-center">
-            <div className="text-primary-400 font-semibold text-[10px] uppercase tracking-wide">FastAPI</div>
-            <div className="text-slate-400 text-[10px]">Backend</div>
+          <div className="rounded-lg bg-accent border border-accent px-3 py-2 text-center">
+            <div className="text-accent font-semibold text-[10px] uppercase tracking-wide">FastAPI</div>
+            <div className="text-muted text-[10px]">Backend</div>
           </div>
           <div className="flex-1 px-3 flex flex-col items-center">
-            <div className="text-violet-400 text-[10px] mb-1">session.send()</div>
-            <div className="w-full h-[1px] bg-gradient-to-r from-primary-400 to-violet-400 relative">
-              <div className="absolute right-0 -top-1 text-violet-400">▶</div>
+            <div className="text-accent text-[10px] mb-1">session.send()</div>
+            <div className="w-full h-[1px] bg-accent relative">
+              <div className="absolute right-0 -top-1 text-accent">▶</div>
             </div>
-            <div className="text-slate-600 text-[10px] mt-1">message + attachments</div>
+            <div className="text-text text-[10px] mt-1">message + attachments</div>
           </div>
-          <div className="rounded-lg bg-violet-400/10 border border-violet-400/20 px-3 py-2 text-center">
-            <div className="text-violet-400 font-semibold text-[10px] uppercase tracking-wide">Copilot SDK</div>
-            <div className="text-slate-400 text-[10px]">Session</div>
+          <div className="rounded-lg bg-accent border border-violet-400/20 px-3 py-2 text-center">
+            <div className="text-accent font-semibold text-[10px] uppercase tracking-wide">Copilot SDK</div>
+            <div className="text-muted text-[10px]">Session</div>
           </div>
         </div>
-        <div className="border-t border-slate-800 pt-2 text-slate-500">
+        <div className="border-t border-border pt-2 text-muted">
           <div>on_event callback → asyncio.Queue → SSE generator</div>
-          <div className="text-slate-600 mt-1">Registered once per session, captures all SDK events</div>
+          <div className="text-text mt-1">Registered once per session, captures all SDK events</div>
         </div>
       </div>
     </div>
@@ -261,14 +261,14 @@ function VizModelInference() {
     <div className="rounded-xl bg-slate-950 p-4 font-mono text-xs" role="img" aria-label="Model inference visualization">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="rounded-lg bg-violet-400/10 border border-violet-400/20 px-3 py-2 text-center">
-            <div className="text-violet-400 font-semibold text-[10px]">Copilot SDK</div>
+          <div className="rounded-lg bg-accent border border-violet-400/20 px-3 py-2 text-center">
+            <div className="text-accent font-semibold text-[10px]">Copilot SDK</div>
           </div>
           <div className="flex-1 px-2 flex flex-col items-center">
-            <div className="w-full h-[1px] bg-gradient-to-r from-violet-400 to-accent-400 relative">
+            <div className="w-full h-[1px] bg-accent to-accent-400 relative">
               <div className="absolute right-0 -top-1 text-accent-400">▶</div>
             </div>
-            <div className="text-slate-600 text-[10px] mt-0.5 flex items-center gap-1">
+            <div className="text-text text-[10px] mt-0.5 flex items-center gap-1">
               <svg className="w-3 h-3 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -277,18 +277,18 @@ function VizModelInference() {
           </div>
           <div className="rounded-lg bg-accent-400/10 border border-accent-400/20 px-3 py-2 text-center">
             <div className="text-accent-400 font-semibold text-[10px]">Azure OpenAI</div>
-            <div className="text-slate-500 text-[10px]">GPT-4o</div>
+            <div className="text-muted text-[10px]">GPT-4o</div>
           </div>
         </div>
-        <div className="rounded-lg bg-slate-900 border border-slate-800 p-2.5 space-y-1">
+        <div className="rounded-lg bg-slate-900 border border-border p-2.5 space-y-1">
           <div className="text-accent-400 text-[10px] font-semibold uppercase tracking-wide">Streaming Response</div>
-          <div className="text-slate-400">
+          <div className="text-muted">
             data: {`{"type":"content_block_delta","delta":{"text":"I'll analyze"}}`}
           </div>
-          <div className="text-slate-500">
+          <div className="text-muted">
             data: {`{"type":"content_block_delta","delta":{"text":" your Q4 portfolio"}}`}
           </div>
-          <div className="text-slate-600">
+          <div className="text-text">
             data: {`{"type":"content_block_delta","delta":{"text":"..."}}`}
           </div>
         </div>
@@ -301,12 +301,12 @@ function VizToolDecision() {
   return (
     <div className="rounded-xl bg-slate-950 p-4 font-mono text-xs" role="img" aria-label="Tool decision visualization">
       <div className="space-y-3">
-        <div className="rounded-lg bg-slate-900 border border-slate-800 p-3">
-          <div className="text-slate-300 mb-2">I&apos;ll analyze your portfolio data. Let me use the data analysis tool...</div>
-          <div className="rounded-lg bg-violet-400/10 border border-violet-400/20 p-2.5 space-y-1">
-            <div className="text-violet-400 font-semibold">tool_use:</div>
-            <div className="pl-3 text-slate-300">name: <span className="text-amber-300">&quot;data_analysis&quot;</span></div>
-            <div className="pl-3 text-slate-300">input: <span className="text-amber-300">&quot;Analyze portfolio_q4.xlsx — returns, risk metrics&quot;</span></div>
+        <div className="rounded-lg bg-slate-900 border border-border p-3">
+          <div className="text-text-strong mb-2">I&apos;ll analyze your portfolio data. Let me use the data analysis tool...</div>
+          <div className="rounded-lg bg-accent border border-violet-400/20 p-2.5 space-y-1">
+            <div className="text-accent font-semibold">tool_use:</div>
+            <div className="pl-3 text-text-strong">name: <span className="text-amber-300">&quot;data_analysis&quot;</span></div>
+            <div className="pl-3 text-text-strong">input: <span className="text-amber-300">&quot;Analyze portfolio_q4.xlsx — returns, risk metrics&quot;</span></div>
           </div>
         </div>
         <div className="flex items-center gap-2 text-green-400">
@@ -328,19 +328,19 @@ function VizToolExecution() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-400" />
             <span className="text-green-400 font-semibold">data_analysis</span>
-            <span className="text-slate-600">— execution_start</span>
+            <span className="text-text">— execution_start</span>
           </div>
-          <div className="rounded-lg bg-slate-900 border border-slate-800 p-2.5 ml-4">
-            <div className="text-slate-500 text-[10px] mb-1">OpenTelemetry span: gen_ai.tool.name=data_analysis</div>
-            <div className="text-slate-300">Analyzing portfolio_q4.xlsx...</div>
-            <div className="text-slate-300 mt-1">Total return: <span className="text-green-400">+12.4%</span></div>
-            <div className="text-slate-300">Sharpe ratio: <span className="text-amber-300">1.82</span></div>
-            <div className="text-slate-300">Max drawdown: <span className="text-red-400">-6.1%</span></div>
+          <div className="rounded-lg bg-slate-900 border border-border p-2.5 ml-4">
+            <div className="text-muted text-[10px] mb-1">OpenTelemetry span: gen_ai.tool.name=data_analysis</div>
+            <div className="text-text-strong">Analyzing portfolio_q4.xlsx...</div>
+            <div className="text-text-strong mt-1">Total return: <span className="text-green-400">+12.4%</span></div>
+            <div className="text-text-strong">Sharpe ratio: <span className="text-amber-300">1.82</span></div>
+            <div className="text-text-strong">Max drawdown: <span className="text-red-400">-6.1%</span></div>
           </div>
           <div className="flex items-center gap-2 ml-4">
             <span className="w-2 h-2 rounded-full bg-green-400" />
             <span className="text-green-400">execution_complete</span>
-            <span className="text-slate-600">— 1.2s</span>
+            <span className="text-text">— 1.2s</span>
           </div>
         </div>
       </div>
@@ -366,12 +366,12 @@ function VizAgenticLoop() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className={iter.status === "active" ? "text-primary-300" : "text-slate-400"}>{iter.tool}</span>
-                <span className="text-slate-700">→</span>
-                <span className="text-slate-500 truncate">{iter.result}</span>
+                <span className="text-text">→</span>
+                <span className="text-muted truncate">{iter.result}</span>
               </div>
             </div>
             {iter.status === "active" ? (
-              <div className="flex items-center gap-1 text-primary-400">
+              <div className="flex items-center gap-1 text-accent">
                 <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M21.012 4.356v4.992" />
                 </svg>
@@ -381,7 +381,7 @@ function VizAgenticLoop() {
             )}
           </div>
         ))}
-        <div className="flex items-center gap-2 pt-1 text-slate-600">
+        <div className="flex items-center gap-2 pt-1 text-text">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M21.012 4.356v4.992" />
           </svg>
@@ -406,12 +406,12 @@ function VizSseStream() {
         ].map((evt, i) => (
           <div key={i} className={`flex items-start gap-2 rounded-lg px-2 py-1 ${evt.bg}`}>
             <span className={`${evt.color} whitespace-nowrap font-semibold`}>event:</span>
-            <span className="text-slate-500 whitespace-nowrap">{evt.type}</span>
-            <span className="text-slate-600 truncate">{evt.data}</span>
+            <span className="text-muted whitespace-nowrap">{evt.type}</span>
+            <span className="text-text truncate">{evt.data}</span>
           </div>
         ))}
       </div>
-      <div className="mt-2 text-slate-600 text-[10px]">Real-time delivery via Server-Sent Events — single HTTP connection</div>
+      <div className="mt-2 text-text text-[10px]">Real-time delivery via Server-Sent Events — single HTTP connection</div>
     </div>
   );
 }
@@ -434,17 +434,17 @@ function VizComplete() {
           ].map((task) => (
             <div
               key={task.label}
-              className="rounded-lg bg-slate-900 border border-slate-800 p-2.5 text-center"
+              className="rounded-lg bg-slate-900 border border-border p-2.5 text-center"
             >
               <div className="text-lg mb-1">{task.icon}</div>
-              <div className="text-slate-300 font-semibold text-[10px]">{task.label}</div>
-              <div className="text-slate-600 text-[10px]">{task.detail}</div>
+              <div className="text-text-strong font-semibold text-[10px]">{task.label}</div>
+              <div className="text-text text-[10px]">{task.detail}</div>
               {task.done && <div className="text-green-400 text-[10px] mt-1">✓ done</div>}
             </div>
           ))}
         </div>
-        <div className="border-t border-slate-800 pt-2 flex items-center gap-3 text-slate-500 text-[10px]">
-          <span>OpenTelemetry: <span className="text-primary-400">operation_duration</span>, <span className="text-primary-400">token_usage</span></span>
+        <div className="border-t border-border pt-2 flex items-center gap-3 text-muted text-[10px]">
+          <span>OpenTelemetry: <span className="text-accent">operation_duration</span>, <span className="text-accent">token_usage</span></span>
         </div>
       </div>
     </div>
@@ -773,11 +773,11 @@ export default function AgentLoop({ open, onClose }: { open: boolean; onClose: (
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="relative w-full max-w-6xl mx-4 my-6 md:my-10 rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-surface dark:bg-navy-950 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="relative w-full max-w-6xl mx-4 my-6 md:my-10 rounded-2xl border border-border-soft bg-surface shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/[0.1] bg-white/80 dark:bg-navy-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-all backdrop-blur-sm"
+          className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-xl border border-border-soft bg-surface text-muted hover:text-text hover:bg-hover transition-all backdrop-blur-sm"
           aria-label="Close"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -787,13 +787,13 @@ export default function AgentLoop({ open, onClose }: { open: boolean; onClose: (
         <div className="px-4 sm:px-6 md:px-10 py-8 md:py-12">
       {/* ── Header ── */}
       <div className="mb-10 md:mb-14">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-400/10 border border-primary-200 dark:border-primary-400/20 mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse-slow" />
-          <span className="text-xs font-semibold text-primary-600 dark:text-primary-400 tracking-wide uppercase">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-soft border border-accent mb-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-slow" />
+          <span className="text-xs font-semibold text-accent tracking-wide uppercase">
             Agentic Pipeline
           </span>
         </div>
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text tracking-tight">
           Agentic Loop
         </h2>
       </div>
@@ -801,10 +801,10 @@ export default function AgentLoop({ open, onClose }: { open: boolean; onClose: (
       {/* ── Timeline ── */}
       <div className="relative mb-16 md:mb-20">
         {/* Track line */}
-        <div className="absolute left-0 right-0 top-6 h-[2px] bg-slate-200 dark:bg-white/[0.06] rounded-full" />
+        <div className="absolute left-0 right-0 top-6 h-[2px] bg-surface-2 rounded-full" />
         {/* Progress fill */}
         <div
-          className="absolute left-0 top-6 h-[2px] rounded-full bg-gradient-to-r from-primary-400 to-primary-500 transition-all duration-500 ease-out"
+          className="absolute left-0 top-6 h-[2px] rounded-full bg-accent transition-all duration-500 ease-out"
           style={{ width: `${(activeStep / (STEPS.length - 1)) * 100}%` }}
         />
 
@@ -926,7 +926,7 @@ export default function AgentLoop({ open, onClose }: { open: boolean; onClose: (
       {/* ── Detail card ── */}
       <div
         ref={cardRef}
-        className="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-navy-850 shadow-glass dark:shadow-none overflow-hidden animate-fade-in"
+        className="rounded-2xl border border-border-soft bg-surface shadow-card dark:shadow-none overflow-hidden animate-fade-in"
         key={activeStep}
       >
         {/* Top accent strip */}
@@ -939,7 +939,7 @@ export default function AgentLoop({ open, onClose }: { open: boolean; onClose: (
               {step.id}
             </span>
             <div className="flex-1 min-w-0">
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              <h3 className="text-xl md:text-2xl font-bold text-text tracking-tight">
                 {step.title}
               </h3>
               <div className="flex items-center gap-2 mt-1">
@@ -947,14 +947,14 @@ export default function AgentLoop({ open, onClose }: { open: boolean; onClose: (
                   <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
                   {LAYER_LABELS[step.layer]}
                 </span>
-                <span className="text-slate-300 dark:text-white/[0.12]">·</span>
-                <code className="text-[11px] font-mono text-slate-400 dark:text-slate-500 truncate">
+                <span className="text-text-strong dark:text-white/[0.12]">·</span>
+                <code className="text-[11px] font-mono text-muted truncate">
                   {step.source}
                 </code>
               </div>
             </div>
             {step.isLoop && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-primary-50 dark:bg-primary-400/10 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-400/20">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-accent-soft text-accent border border-accent">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M21.012 4.356v4.992" />
                 </svg>
@@ -964,7 +964,7 @@ export default function AgentLoop({ open, onClose }: { open: boolean; onClose: (
           </div>
 
           {/* Short description */}
-          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-5">
+          <p className="text-muted text-sm leading-relaxed mb-5">
             {step.description}
           </p>
 
@@ -974,7 +974,7 @@ export default function AgentLoop({ open, onClose }: { open: boolean; onClose: (
           </div>
 
           {/* Detailed explanation */}
-          <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed mb-5">
+          <p className="text-text text-[15px] leading-relaxed mb-5">
             {step.detail}
           </p>
 

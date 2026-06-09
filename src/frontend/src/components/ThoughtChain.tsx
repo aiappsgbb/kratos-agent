@@ -163,7 +163,7 @@ function ToolPill({ tc, count }: { tc: ToolCallInfo; count?: number }) {
     >
       {isRunning ? (
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-60" />
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-60" />
           <span className={`relative inline-flex rounded-full h-2 w-2 ${colors.dot}`} />
         </span>
       ) : (
@@ -254,14 +254,14 @@ function ToolDetail({ tc }: { tc: ToolCallInfo }) {
   const formattedOutput = tc.output && tc.output !== "None" && tc.output !== "" ? formatToolText(tc.output) : null;
 
   return (
-    <div className="rounded-xl border border-slate-100 dark:border-white/[0.06] bg-white dark:bg-navy-800 overflow-hidden shadow-sm dark:shadow-none">
+    <div className="rounded-xl border border-border-soft bg-surface overflow-hidden shadow-sm dark:shadow-none">
       <button
-        className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors text-left"
+        className="w-full flex items-center gap-2 px-3.5 py-2 hover:bg-hover transition-colors text-left"
         onClick={() => setExpanded(!expanded)}
       >
-        <span className="font-mono text-xs text-slate-500">{tc.skillName}</span>
+        <span className="font-mono text-xs text-muted">{tc.skillName}</span>
         {tc.durationMs !== undefined && tc.durationMs > 0 && (
-          <span className="text-[10px] text-slate-400 font-mono">{formatDuration(tc.durationMs)}</span>
+          <span className="text-[10px] text-muted font-mono">{formatDuration(tc.durationMs)}</span>
         )}
         <svg
           className={`w-3 h-3 text-slate-400 ml-auto transition-transform duration-200 ${expanded ? "rotate-90" : ""}`}
@@ -273,19 +273,19 @@ function ToolDetail({ tc }: { tc: ToolCallInfo }) {
         </svg>
       </button>
       {expanded && (
-        <div className="border-t border-slate-100 dark:border-white/[0.06] px-3.5 py-2.5 space-y-2.5">
+        <div className="border-t border-border-soft px-3.5 py-2.5 space-y-2.5">
           {formattedInput && (
             <div>
-              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Input</div>
-              <pre className="text-xs bg-slate-50 dark:bg-white/[0.04] rounded-lg p-2.5 whitespace-pre-wrap break-all text-slate-600 dark:text-slate-300 max-h-32 overflow-y-auto font-mono border border-slate-100 dark:border-white/[0.06]">
+              <div className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">Input</div>
+              <pre className="text-xs bg-surface-2 rounded-lg p-2.5 whitespace-pre-wrap break-all text-text max-h-32 overflow-y-auto font-mono border border-border-soft">
                 {formattedInput}
               </pre>
             </div>
           )}
           {formattedOutput && (
             <div>
-              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Output</div>
-              <pre className="text-xs bg-slate-50 dark:bg-white/[0.04] rounded-lg p-2.5 whitespace-pre-wrap break-all text-slate-600 dark:text-slate-300 max-h-32 overflow-y-auto font-mono border border-slate-100 dark:border-white/[0.06]">
+              <div className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">Output</div>
+              <pre className="text-xs bg-surface-2 rounded-lg p-2.5 whitespace-pre-wrap break-all text-text max-h-32 overflow-y-auto font-mono border border-border-soft">
                 {formattedOutput}
               </pre>
             </div>
@@ -315,31 +315,31 @@ function TokenBar({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between text-xs text-slate-500">
+      <div className="flex justify-between text-xs text-muted">
         <span className="font-medium">Token usage</span>
-        <span className="font-mono font-semibold text-slate-700 dark:text-slate-300">{total.toLocaleString()}</span>
+        <span className="font-mono font-semibold text-text">{total.toLocaleString()}</span>
       </div>
-      <div className="h-2 bg-slate-100 dark:bg-white/[0.08] rounded-full overflow-hidden flex">
-        <div className="bg-primary-400 transition-all duration-500 ease-out" style={{ width: `${promptPct}%` }} title={`Prompt: ${prompt.toLocaleString()}`} />
+      <div className="h-2 bg-surface-2 rounded-full overflow-hidden flex">
+        <div className="bg-accent transition-all duration-500 ease-out" style={{ width: `${promptPct}%` }} title={`Prompt: ${prompt.toLocaleString()}`} />
         {reasoning > 0 && (
           <div className="bg-amber-400 transition-all duration-500 ease-out" style={{ width: `${reasoningPct}%` }} title={`Reasoning: ${reasoning.toLocaleString()}`} />
         )}
         <div className="bg-emerald-400 transition-all duration-500 ease-out" style={{ width: `${outputPct + remainPct}%` }} title={`Output: ${(completion - reasoning).toLocaleString()}`} />
       </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm bg-primary-400 inline-block" />
-            Prompt <span className="font-mono text-slate-700 dark:text-slate-300 font-medium">{prompt.toLocaleString()}</span>
+          <span className="w-2 h-2 rounded-sm bg-accent inline-block" />
+            Prompt <span className="font-mono text-text font-medium">{prompt.toLocaleString()}</span>
         </span>
         {reasoning > 0 && (
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-sm bg-amber-400 inline-block" />
-            Reasoning <span className="font-mono text-slate-700 dark:text-slate-300 font-medium">{reasoning.toLocaleString()}</span>
+            Reasoning <span className="font-mono text-text font-medium">{reasoning.toLocaleString()}</span>
           </span>
         )}
         <span className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-sm bg-emerald-400 inline-block" />
-            Output <span className="font-mono text-slate-700 dark:text-slate-300 font-medium">{(completion - reasoning).toLocaleString()}</span>
+            Output <span className="font-mono text-text font-medium">{(completion - reasoning).toLocaleString()}</span>
         </span>
       </div>
     </div>
@@ -389,11 +389,11 @@ export function ThoughtChain({
       {isStreaming && latestThought && (
         <div
           key={latestThought}
-          className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 animate-fade-in"
+          className="flex items-center gap-2 text-xs text-muted animate-fade-in"
         >
           <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-70" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-500" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-70" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
           </span>
           <span className="italic truncate">
             Thinking · {collapseAdjacentDuplicateWords(prettyToolName(latestThought))}…
@@ -405,13 +405,13 @@ export function ThoughtChain({
       {uniqueTools.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
           {isStreaming && (
-            <div className="w-4 h-4 rounded-full border-2 border-primary-500 border-t-transparent animate-spin flex-shrink-0" />
+            <div className="w-4 h-4 rounded-full border-2 border-accent border-t-transparent animate-spin flex-shrink-0" />
           )}
           {uniqueTools.map((tc, i) => (
             <ToolPill key={`${tc.skillName}-${i}`} tc={tc} count={callCount.get(tc.skillName)} />
           ))}
           {totalTools > 0 && !isStreaming && (
-            <span className="text-[11px] text-slate-400 ml-1 font-medium">
+            <span className="text-[11px] text-muted ml-1 font-medium">
               {completedTools}/{totalTools} tools
             </span>
           )}
@@ -420,7 +420,7 @@ export function ThoughtChain({
 
       {/* Legend — only shown once tools have completed and >1 kind is present */}
       {!isStreaming && kindsPresent.size > 1 && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-400 dark:text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted">
           {(Array.from(kindsPresent) as ToolKind[]).map((k) => (
             <span key={k} className="inline-flex items-center gap-1">
               <span className={`w-2 h-2 rounded-full ${KIND_COLORS[k].dot}`} />
@@ -432,20 +432,20 @@ export function ThoughtChain({
 
       {/* Expandable details section */}
       {(uniqueTools.length > 0 || thoughts.length > 0 || (runStats && !isStreaming)) && (
-        <div className="rounded-xl border border-slate-200/80 dark:border-white/[0.06] bg-white dark:bg-navy-800 shadow-card dark:shadow-none overflow-hidden text-sm">
+        <div className="rounded-xl border border-border-soft bg-surface shadow-card dark:shadow-none overflow-hidden text-sm">
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50/80 transition-colors cursor-pointer"
           >
             <svg
-              className="w-3.5 h-3.5 text-primary-500 flex-shrink-0"
+              className="w-3.5 h-3.5 text-accent flex-shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <span className="font-medium text-slate-600 dark:text-slate-300 text-xs">Execution details</span>
+            <span className="font-medium text-text text-xs">Execution details</span>
             <svg
               className={`w-3.5 h-3.5 text-slate-400 ml-auto transition-transform duration-200 ${showDetails ? "rotate-90" : ""}`}
               fill="none"
@@ -457,7 +457,7 @@ export function ThoughtChain({
           </button>
 
           {showDetails && (
-            <div className="px-4 py-3 space-y-4 border-t border-slate-100 dark:border-white/[0.06]">
+            <div className="px-4 py-3 space-y-4 border-t border-border-soft">
               {/* Token bar + metrics */}
               {runStats && !isStreaming && (
                 <div className="space-y-3">
@@ -488,12 +488,12 @@ export function ThoughtChain({
               {/* Execution flow timeline */}
               {thoughts.length > 0 && (
                 <div>
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Execution flow</div>
-                  <div className="flex flex-wrap items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                  <div className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">Execution flow</div>
+                  <div className="flex flex-wrap items-center gap-1 text-xs text-muted">
                     {thoughts.map((thought, i) => (
                       <span key={i} className="inline-flex items-center gap-1">
-                        {i > 0 && <span className="text-slate-300 dark:text-slate-600">&rarr;</span>}
-                        <span className="text-slate-600 dark:text-slate-300">{collapseAdjacentDuplicateWords(prettyToolName(thought))}</span>
+                        {i > 0 && <span className="text-text-strong">&rarr;</span>}
+                        <span className="text-text">{collapseAdjacentDuplicateWords(prettyToolName(thought))}</span>
                       </span>
                     ))}
                   </div>
@@ -503,7 +503,7 @@ export function ThoughtChain({
               {/* Tool call I/O details */}
               {uniqueTools.length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Tool details</div>
+                  <div className="text-[10px] font-semibold text-muted uppercase tracking-wider">Tool details</div>
                   {uniqueTools.map((tc, i) => (
                     <ToolDetail key={i} tc={tc} />
                   ))}
@@ -528,7 +528,7 @@ function MetricCell({
 }) {
   const iconSvg = {
     clock: (
-      <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <svg className="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
@@ -538,7 +538,7 @@ function MetricCell({
       </svg>
     ),
     cpu: (
-      <svg className="w-3.5 h-3.5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3M21 8.25h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3M21 15.75h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" />
       </svg>
     ),
@@ -550,11 +550,11 @@ function MetricCell({
   };
 
   return (
-    <div className="rounded-xl border border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.03] px-3 py-2.5 flex items-center gap-2.5">
+    <div className="rounded-xl border border-border-soft bg-slate-50/50 px-3 py-2.5 flex items-center gap-2.5">
       {iconSvg[icon]}
       <div>
-        <div className="text-[10px] text-slate-400 leading-tight font-medium">{label}</div>
-        <div className="text-sm font-mono font-semibold text-slate-800 dark:text-slate-200 leading-tight">
+        <div className="text-[10px] text-muted leading-tight font-medium">{label}</div>
+        <div className="text-sm font-mono font-semibold text-text leading-tight">
           {value}
         </div>
       </div>

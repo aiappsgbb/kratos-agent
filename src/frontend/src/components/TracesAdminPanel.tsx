@@ -108,11 +108,11 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
     <div>
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-2 px-4 py-2 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors text-left group"
+        className="w-full flex items-center gap-2 px-4 py-2 hover:bg-slate-50/50 transition-colors text-left group"
       >
         <div style={{ width: indent, flexShrink: 0 }} />
         <SpanIcon category={span.category} />
-        <span className="text-xs text-slate-700 dark:text-slate-300 truncate flex-shrink-0 font-medium" style={{ maxWidth: "200px" }}>
+        <span className="text-xs text-text truncate flex-shrink-0 font-medium" style={{ maxWidth: "200px" }}>
           {span.name}
         </span>
         {/* Inline gen_ai chips */}
@@ -127,7 +127,7 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
           </span>
         )}
         {(inTok > 0 || outTok > 0) && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 font-mono flex-shrink-0">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-2 text-text font-mono flex-shrink-0">
             {_fmtTokens(inTok)} → {_fmtTokens(outTok)} tok
           </span>
         )}
@@ -137,13 +137,13 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
           </span>
         )}
         {/* Waterfall bar */}
-        <div className="flex-1 relative h-4 bg-slate-100 dark:bg-white/[0.04] rounded overflow-hidden mx-2 min-w-[40px]">
+        <div className="flex-1 relative h-4 bg-surface-2 rounded overflow-hidden mx-2 min-w-[40px]">
           <div
             className={`absolute top-0 h-full ${barColor} rounded opacity-80`}
             style={{ left: `${left}%`, width: `${width}%` }}
           />
         </div>
-        <span className="text-xs text-slate-400 font-mono flex-shrink-0 w-16 text-right">
+        <span className="text-xs text-muted font-mono flex-shrink-0 w-16 text-right">
           {span.duration_ms}ms
         </span>
         {!span.success && (
@@ -151,15 +151,15 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
         )}
       </button>
       {expanded && (
-        <div className="mx-4 mb-2 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04] px-4 py-3 space-y-3" style={{ marginLeft: indent + 32 }}>
+        <div className="mx-4 mb-2 rounded-xl bg-surface-2 border border-border-soft px-4 py-3 space-y-3" style={{ marginLeft: indent + 32 }}>
           {highlights.length > 0 && (
             <div>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Span Details</p>
+              <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">Span Details</p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
                 {highlights.map((h) => (
                   <div key={h.key} className="flex items-start gap-2">
-                    <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 flex-shrink-0 pt-0.5 w-28 truncate">{h.label}</span>
-                    <span className="text-[11px] text-slate-700 dark:text-slate-300 font-mono break-all">{_attr(span, h.key)}</span>
+                    <span className="text-[10px] font-medium text-muted flex-shrink-0 pt-0.5 w-28 truncate">{h.label}</span>
+                    <span className="text-[11px] text-text font-mono break-all">{_attr(span, h.key)}</span>
                   </div>
                 ))}
               </div>
@@ -167,19 +167,19 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
           )}
           {otherAttrs.length > 0 && (
             <div>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Other Attributes</p>
+              <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">Other Attributes</p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-1">
                 {otherAttrs.map(([k, v]) => (
                   <div key={k} className="flex items-start gap-2">
-                    <span className="text-[10px] font-mono text-slate-400 flex-shrink-0 pt-0.5 truncate max-w-[120px]">{k}</span>
-                    <span className="text-[10px] text-slate-600 dark:text-slate-400 break-all">{String(v)}</span>
+                    <span className="text-[10px] font-mono text-muted flex-shrink-0 pt-0.5 truncate max-w-[120px]">{k}</span>
+                    <span className="text-[10px] text-text break-all">{String(v)}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
           {highlights.length === 0 && otherAttrs.length === 0 && (
-            <p className="text-[11px] text-slate-400 italic">No attributes</p>
+            <p className="text-[11px] text-muted italic">No attributes</p>
           )}
         </div>
       )}
@@ -263,27 +263,27 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
       : opDate.toLocaleDateString();
 
   return (
-    <div className="border-b border-slate-100 dark:border-white/[0.04] last:border-b-0">
+    <div className="border-b border-border-soft last:border-b-0">
       <button
         onClick={handleExpand}
-        className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors text-left"
+        className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50/50 transition-colors text-left"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-slate-600 dark:text-slate-400 truncate">
+            <span className="text-xs font-mono text-text truncate">
               {op.operation_id.slice(0, 16)}…
             </span>
             {op.eval_run_id && (
-              <span className="text-[10px] px-1.5 py-0.5 bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded font-mono flex-shrink-0">
+              <span className="text-[10px] px-1.5 py-0.5 bg-accent-soft text-accent rounded font-mono flex-shrink-0">
                 eval
               </span>
             )}
           </div>
-          <p className="text-[11px] text-slate-400 mt-0.5">{relativeTime}</p>
+          <p className="text-[11px] text-muted mt-0.5">{relativeTime}</p>
         </div>
-        <div className="flex items-center gap-4 text-xs text-slate-500 flex-shrink-0">
+        <div className="flex items-center gap-4 text-xs text-muted flex-shrink-0">
           <span className="font-mono">{op.total_duration_ms}ms</span>
-          <span className="text-slate-400">{op.span_count} spans</span>
+          <span className="text-muted">{op.span_count} spans</span>
         </div>
         <svg
           className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ${expanded ? "rotate-180" : ""}`}
@@ -294,28 +294,28 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
       </button>
 
       {expanded && (
-        <div className="border-t border-slate-100 dark:border-white/[0.04] bg-slate-50/30 dark:bg-white/[0.01]">
+        <div className="border-t border-border-soft bg-slate-50/30">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary-200 border-t-primary-600" />
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-accent border-t-primary-600" />
             </div>
           ) : (
             <>
               {/* Per-operation summary header */}
               {allSpans.length > 0 && (
-                <div className="px-5 py-3 border-b border-slate-100 dark:border-white/[0.04] space-y-3">
+                <div className="px-5 py-3 border-b border-border-soft space-y-3">
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
                     {(stats.totalInputTokens > 0 || stats.totalOutputTokens > 0) && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-slate-400">Tokens</span>
-                        <span className="font-mono text-slate-700 dark:text-slate-200 font-medium">
+                        <span className="text-muted">Tokens</span>
+                        <span className="font-mono text-text font-medium">
                           {_fmtTokens(stats.totalInputTokens)} → {_fmtTokens(stats.totalOutputTokens)}
                         </span>
                       </div>
                     )}
                     {stats.modelsTouched.length > 0 && (
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-slate-400">Models</span>
+                        <span className="text-muted">Models</span>
                         {stats.modelsTouched.map((m) => (
                           <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 font-mono border border-blue-200/60 dark:border-blue-500/20">
                             {m}
@@ -325,13 +325,13 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
                     )}
                     {stats.toolCount > 0 && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-slate-400">🔧 Tools</span>
+                        <span className="text-muted">🔧 Tools</span>
                         <span className="font-mono text-emerald-700 dark:text-emerald-400 font-medium">{stats.toolCount}</span>
                       </div>
                     )}
                     {stats.errorCount > 0 && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-slate-400">Errors</span>
+                        <span className="text-muted">Errors</span>
                         <span className="font-mono text-red-600 dark:text-red-400 font-medium">{stats.errorCount}</span>
                       </div>
                     )}
@@ -362,7 +362,7 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
                         >
                           <span>{spanCategoryEmoji[cat]}</span>
                           <span>{cat}</span>
-                          <span className="font-mono text-slate-400">·</span>
+                          <span className="font-mono text-muted">·</span>
                           <span className="font-mono">{cnt}</span>
                         </button>
                       ))}
@@ -378,15 +378,15 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
                   ))}
                 </div>
               ) : allSpans.length > 0 ? (
-                <p className="text-xs text-slate-400 text-center py-6">No spans match the active filter</p>
+                <p className="text-xs text-muted text-center py-6">No spans match the active filter</p>
               ) : (
-                <p className="text-xs text-slate-400 text-center py-6">No span data available</p>
+                <p className="text-xs text-muted text-center py-6">No span data available</p>
               )}
 
               {/* Logs */}
               {opData.logs && opData.logs.length > 0 && (
-                <div className="px-5 pb-4 space-y-2 border-t border-slate-100 dark:border-white/[0.04] pt-4">
-                  <h5 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Logs</h5>
+                <div className="px-5 pb-4 space-y-2 border-t border-border-soft pt-4">
+                  <h5 className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">Logs</h5>
                   {[...opData.logs]
                     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
                     .map((log, i) => (
@@ -396,7 +396,7 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
                         }`}>
                           {new Date(log.timestamp).toLocaleTimeString()}
                         </span>
-                        <span className="text-xs text-slate-600 dark:text-slate-400 break-words">{log.message}</span>
+                        <span className="text-xs text-text break-words">{log.message}</span>
                       </div>
                     ))}
                 </div>
@@ -447,40 +447,40 @@ export function TracesAdminPanel({ useCase }: Props): JSX.Element {
       {/* Toolbar */}
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Conversation ID</label>
+          <label className="block text-xs font-medium text-muted mb-1">Conversation ID</label>
           <input
             type="text"
             value={conversationId}
             onChange={(e) => setConversationId(e.target.value)}
             placeholder="Filter by conversation…"
-            className="w-48 px-3 py-2 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all placeholder:text-slate-400"
+            className="w-48 px-3 py-2 bg-surface border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all placeholder:text-muted"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Eval Run ID</label>
+          <label className="block text-xs font-medium text-muted mb-1">Eval Run ID</label>
           <input
             type="text"
             value={evalRunId}
             onChange={(e) => setEvalRunId(e.target.value)}
             placeholder="Filter by eval run…"
-            className="w-48 px-3 py-2 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all placeholder:text-slate-400"
+            className="w-48 px-3 py-2 bg-surface border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all placeholder:text-muted"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Lookback (hours)</label>
+          <label className="block text-xs font-medium text-muted mb-1">Lookback (hours)</label>
           <input
             type="number"
             min={1}
             max={720}
             value={lookbackHours}
             onChange={(e) => setLookbackHours(Math.max(1, parseInt(e.target.value, 10) || 24))}
-            className="w-24 px-3 py-2 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+            className="w-24 px-3 py-2 bg-surface border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
           />
         </div>
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
@@ -506,43 +506,43 @@ export function TracesAdminPanel({ useCase }: Props): JSX.Element {
       {/* Loading */}
       {loading && !traceData && (
         <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-200 border-t-primary-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-primary-600" />
         </div>
       )}
 
       {/* Summary card */}
       {summary && !summary.error && (
-        <div className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-2xl p-5">
+        <div className="bg-surface border border-border-soft rounded-2xl p-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{summary.total_operations}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Operations</p>
+              <p className="text-2xl font-bold text-text">{summary.total_operations}</p>
+              <p className="text-xs text-muted mt-0.5">Operations</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+              <p className="text-2xl font-bold text-text">
                 {summary.avg_latency_ms > 0 ? `${Math.round(summary.avg_latency_ms)}ms` : "—"}
               </p>
-              <p className="text-xs text-slate-500 mt-0.5">Avg Latency</p>
+              <p className="text-xs text-muted mt-0.5">Avg Latency</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+              <p className="text-2xl font-bold text-text">
                 {summary.total_tokens > 0 ? summary.total_tokens.toLocaleString() : "—"}
               </p>
-              <p className="text-xs text-slate-500 mt-0.5">Total Tokens</p>
+              <p className="text-xs text-muted mt-0.5">Total Tokens</p>
             </div>
             <div className="text-center">
               <div className="flex flex-wrap items-center justify-center gap-1.5 min-h-[2rem]">
                 {summary.models_used.length > 0 ? (
                   summary.models_used.map((m) => (
-                    <span key={m} className="text-[10px] px-2 py-0.5 bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 rounded-full font-mono">
+                    <span key={m} className="text-[10px] px-2 py-0.5 bg-surface-2 text-text rounded-full font-mono">
                       {m}
                     </span>
                   ))
                 ) : (
-                  <span className="text-xs text-slate-400">—</span>
+                  <span className="text-xs text-muted">—</span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">Models</p>
+              <p className="text-xs text-muted mt-0.5">Models</p>
             </div>
           </div>
         </div>
@@ -550,7 +550,7 @@ export function TracesAdminPanel({ useCase }: Props): JSX.Element {
 
       {/* Summary error */}
       {summary?.error && (
-        <div className="px-4 py-3 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm rounded-xl border border-amber-100 dark:border-amber-500/20">
+        <div className="px-4 py-3 bg-ask-bg dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm rounded-xl border border-amber-100 dark:border-amber-500/20">
           <p className="font-medium mb-0.5">App Insights Notice</p>
           <p className="text-xs">{summary.error}</p>
         </div>
@@ -560,33 +560,33 @@ export function TracesAdminPanel({ useCase }: Props): JSX.Element {
       {traceData && (
         operations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-white/[0.06] dark:to-white/[0.02] flex items-center justify-center mb-4">
-              <svg className="w-7 h-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="w-14 h-14 rounded-2xl bg-accent from-slate-100 to-slate-50 dark:from-white/[0.06] dark:to-white/[0.02] flex items-center justify-center mb-4">
+              <svg className="w-7 h-7 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
             </div>
-            <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">No traces found</h4>
-            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
+            <h4 className="text-sm font-semibold text-text mb-1">No traces found</h4>
+            <p className="text-xs text-muted max-w-xs leading-relaxed">
               {summary?.error
                 ? "App Insights is not configured or returned no data."
                 : `No operations found in the last ${lookbackHours}h for this use-case.`}
             </p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.06]">
-              <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Operations</h3>
-              <span className="text-xs font-mono text-slate-400 bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 rounded-full">
+          <div className="bg-surface border border-border-soft rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border-soft">
+              <h3 className="text-sm font-semibold text-text">Operations</h3>
+              <span className="text-xs font-mono text-muted bg-surface-2 px-2 py-0.5 rounded-full">
                 {operations.length}
               </span>
             </div>
 
             {/* Category legend */}
-            <div className="flex flex-wrap gap-3 px-5 py-3 border-b border-slate-100 dark:border-white/[0.04] bg-slate-50/30 dark:bg-white/[0.01]">
+            <div className="flex flex-wrap gap-3 px-5 py-3 border-b border-border-soft bg-slate-50/30">
               {(Object.entries(spanCategoryColors) as [SpanCategory, string][]).map(([cat, color]) => (
                 <div key={cat} className="flex items-center gap-1.5">
                   <div className={`w-2.5 h-2.5 rounded-sm ${color}`} />
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">{cat}</span>
+                  <span className="text-[10px] text-muted">{cat}</span>
                 </div>
               ))}
             </div>
