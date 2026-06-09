@@ -1,0 +1,5710 @@
+{
+  "DEV-1001": [
+    {
+      "timestamp": "2026-06-06T11:00:00-04:00",
+      "signals": {
+        "load_pct": 76.51,
+        "motor_temp_c": 58.14,
+        "cycle_time_s": 42.34
+      }
+    },
+    {
+      "timestamp": "2026-06-06T12:00:00-04:00",
+      "signals": {
+        "load_pct": 80.72,
+        "motor_temp_c": 58.8,
+        "cycle_time_s": 42.13
+      }
+    },
+    {
+      "timestamp": "2026-06-06T13:00:00-04:00",
+      "signals": {
+        "load_pct": 80.42,
+        "motor_temp_c": 58.62,
+        "cycle_time_s": 42.77
+      }
+    },
+    {
+      "timestamp": "2026-06-06T14:00:00-04:00",
+      "signals": {
+        "load_pct": 78.11,
+        "motor_temp_c": 58.85,
+        "cycle_time_s": 42.69
+      }
+    },
+    {
+      "timestamp": "2026-06-06T15:00:00-04:00",
+      "signals": {
+        "load_pct": 76.29,
+        "motor_temp_c": 57.74,
+        "cycle_time_s": 42.3
+      }
+    },
+    {
+      "timestamp": "2026-06-06T16:00:00-04:00",
+      "signals": {
+        "load_pct": 77.45,
+        "motor_temp_c": 56.54,
+        "cycle_time_s": 42.02
+      }
+    },
+    {
+      "timestamp": "2026-06-06T17:00:00-04:00",
+      "signals": {
+        "load_pct": 78.09,
+        "motor_temp_c": 59.5,
+        "cycle_time_s": 42.26
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00-04:00",
+      "signals": {
+        "load_pct": 80.73,
+        "motor_temp_c": 58.87,
+        "cycle_time_s": 42.45
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00-04:00",
+      "signals": {
+        "load_pct": 75.84,
+        "motor_temp_c": 58.9,
+        "cycle_time_s": 43
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00-04:00",
+      "signals": {
+        "load_pct": 77.95,
+        "motor_temp_c": 57.84,
+        "cycle_time_s": 42.32
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00-04:00",
+      "signals": {
+        "load_pct": 77.54,
+        "motor_temp_c": 56.93,
+        "cycle_time_s": 42.83
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00-04:00",
+      "signals": {
+        "load_pct": 77.12,
+        "motor_temp_c": 57.44,
+        "cycle_time_s": 42.95
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00-04:00",
+      "signals": {
+        "load_pct": 79.18,
+        "motor_temp_c": 57.61,
+        "cycle_time_s": 42.1
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00-04:00",
+      "signals": {
+        "load_pct": 80.23,
+        "motor_temp_c": 58.69,
+        "cycle_time_s": 42.69
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00-04:00",
+      "signals": {
+        "load_pct": 76.76,
+        "motor_temp_c": 58.93,
+        "cycle_time_s": 42.14
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00-04:00",
+      "signals": {
+        "load_pct": 77.29,
+        "motor_temp_c": 56.57,
+        "cycle_time_s": 42.87
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00-04:00",
+      "signals": {
+        "load_pct": 78.29,
+        "motor_temp_c": 58.88,
+        "cycle_time_s": 42.28
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00-04:00",
+      "signals": {
+        "load_pct": 76.29,
+        "motor_temp_c": 58.1,
+        "cycle_time_s": 42.81
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00-04:00",
+      "signals": {
+        "load_pct": 79.77,
+        "motor_temp_c": 58.47,
+        "cycle_time_s": 42.86
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00-04:00",
+      "signals": {
+        "load_pct": 79.23,
+        "motor_temp_c": 58.26,
+        "cycle_time_s": 42.85
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00-04:00",
+      "signals": {
+        "load_pct": 77.18,
+        "motor_temp_c": 58.71,
+        "cycle_time_s": 42.2
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00-04:00",
+      "signals": {
+        "load_pct": 76.12,
+        "motor_temp_c": 58.06,
+        "cycle_time_s": 42.33
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00-04:00",
+      "signals": {
+        "load_pct": 78.55,
+        "motor_temp_c": 57.58,
+        "cycle_time_s": 42.65
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00-04:00",
+      "signals": {
+        "load_pct": 80.96,
+        "motor_temp_c": 58.5,
+        "cycle_time_s": 42.58
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00-04:00",
+      "signals": {
+        "load_pct": 79.85,
+        "motor_temp_c": 59.09,
+        "cycle_time_s": 42.53
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00-04:00",
+      "signals": {
+        "load_pct": 77.74,
+        "motor_temp_c": 57.58,
+        "cycle_time_s": 42.93
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00-04:00",
+      "signals": {
+        "load_pct": 77.1,
+        "motor_temp_c": 58.24,
+        "cycle_time_s": 42.18
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00-04:00",
+      "signals": {
+        "load_pct": 80.46,
+        "motor_temp_c": 59.3,
+        "cycle_time_s": 42.71
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00-04:00",
+      "signals": {
+        "load_pct": 78.3,
+        "motor_temp_c": 59.02,
+        "cycle_time_s": 42.93
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00-04:00",
+      "signals": {
+        "load_pct": 79.13,
+        "motor_temp_c": 58.66,
+        "cycle_time_s": 42.26
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00-04:00",
+      "signals": {
+        "load_pct": 79.44,
+        "motor_temp_c": 59.45,
+        "cycle_time_s": 42.12
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00-04:00",
+      "signals": {
+        "load_pct": 75.74,
+        "motor_temp_c": 56.65,
+        "cycle_time_s": 42.92
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00-04:00",
+      "signals": {
+        "load_pct": 76.52,
+        "motor_temp_c": 57.52,
+        "cycle_time_s": 42.07
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00-04:00",
+      "signals": {
+        "load_pct": 78.3,
+        "motor_temp_c": 57.29,
+        "cycle_time_s": 42.01
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00-04:00",
+      "signals": {
+        "load_pct": 77.55,
+        "motor_temp_c": 57.22,
+        "cycle_time_s": 42.13
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00-04:00",
+      "signals": {
+        "load_pct": 76.8,
+        "motor_temp_c": 58.56,
+        "cycle_time_s": 42.86
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00-04:00",
+      "signals": {
+        "load_pct": 78.53,
+        "motor_temp_c": 56.56,
+        "cycle_time_s": 42.62
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00-04:00",
+      "signals": {
+        "load_pct": 79.24,
+        "motor_temp_c": 58.47,
+        "cycle_time_s": 42.82
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00-04:00",
+      "signals": {
+        "load_pct": 75.44,
+        "motor_temp_c": 56.54,
+        "cycle_time_s": 42.88
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00-04:00",
+      "signals": {
+        "load_pct": 75.63,
+        "motor_temp_c": 58.02,
+        "cycle_time_s": 42.22
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00-04:00",
+      "signals": {
+        "load_pct": 76.31,
+        "motor_temp_c": 58.17,
+        "cycle_time_s": 42.25
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00-04:00",
+      "signals": {
+        "load_pct": 79.97,
+        "motor_temp_c": 58.22,
+        "cycle_time_s": 42.38
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00-04:00",
+      "signals": {
+        "load_pct": 77.11,
+        "motor_temp_c": 59.43,
+        "cycle_time_s": 42.05
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00-04:00",
+      "signals": {
+        "load_pct": 76.25,
+        "motor_temp_c": 57.04,
+        "cycle_time_s": 42.65
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00-04:00",
+      "signals": {
+        "load_pct": 79.86,
+        "motor_temp_c": 58.32,
+        "cycle_time_s": 42.61
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00-04:00",
+      "signals": {
+        "load_pct": 78.47,
+        "motor_temp_c": 58.51,
+        "cycle_time_s": 42.35
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00-04:00",
+      "signals": {
+        "load_pct": 80.56,
+        "motor_temp_c": 58.86,
+        "cycle_time_s": 42.28
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00-04:00",
+      "signals": {
+        "load_pct": 76.64,
+        "motor_temp_c": 57.62,
+        "cycle_time_s": 42.82
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00-04:00",
+      "signals": {
+        "load_pct": 75.2,
+        "motor_temp_c": 59.04,
+        "cycle_time_s": 42.38
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00-04:00",
+      "signals": {
+        "load_pct": 78.75,
+        "motor_temp_c": 58.37,
+        "cycle_time_s": 42.39
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00-04:00",
+      "signals": {
+        "load_pct": 77.78,
+        "motor_temp_c": 56.85,
+        "cycle_time_s": 42.26
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00-04:00",
+      "signals": {
+        "load_pct": 80.81,
+        "motor_temp_c": 58.75,
+        "cycle_time_s": 42.4
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00-04:00",
+      "signals": {
+        "load_pct": 78.31,
+        "motor_temp_c": 59.31,
+        "cycle_time_s": 42.23
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00-04:00",
+      "signals": {
+        "load_pct": 78.81,
+        "motor_temp_c": 56.77,
+        "cycle_time_s": 42.17
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00-04:00",
+      "signals": {
+        "load_pct": 78.79,
+        "motor_temp_c": 58.4,
+        "cycle_time_s": 42.64
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00-04:00",
+      "signals": {
+        "load_pct": 80.75,
+        "motor_temp_c": 59.44,
+        "cycle_time_s": 42.05
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00-04:00",
+      "signals": {
+        "load_pct": 75.2,
+        "motor_temp_c": 58.13,
+        "cycle_time_s": 42.82
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00-04:00",
+      "signals": {
+        "load_pct": 76.64,
+        "motor_temp_c": 58.74,
+        "cycle_time_s": 42.36
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00-04:00",
+      "signals": {
+        "load_pct": 75.57,
+        "motor_temp_c": 56.5,
+        "cycle_time_s": 42.1
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00-04:00",
+      "signals": {
+        "load_pct": 80.48,
+        "motor_temp_c": 58.68,
+        "cycle_time_s": 42.44
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00-04:00",
+      "signals": {
+        "load_pct": 75.87,
+        "motor_temp_c": 57.51,
+        "cycle_time_s": 42.81
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00-04:00",
+      "signals": {
+        "load_pct": 76.26,
+        "motor_temp_c": 57.26,
+        "cycle_time_s": 42.62
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00-04:00",
+      "signals": {
+        "load_pct": 78.12,
+        "motor_temp_c": 59.16,
+        "cycle_time_s": 42.29
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00-04:00",
+      "signals": {
+        "load_pct": 77.98,
+        "motor_temp_c": 58.48,
+        "cycle_time_s": 42.24
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00-04:00",
+      "signals": {
+        "load_pct": 78.32,
+        "motor_temp_c": 59.45,
+        "cycle_time_s": 42.88
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00-04:00",
+      "signals": {
+        "load_pct": 75.65,
+        "motor_temp_c": 57.33,
+        "cycle_time_s": 42.63
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00-04:00",
+      "signals": {
+        "load_pct": 78.46,
+        "motor_temp_c": 59.38,
+        "cycle_time_s": 42.9
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00-04:00",
+      "signals": {
+        "load_pct": 77.26,
+        "motor_temp_c": 57.83,
+        "cycle_time_s": 42.11
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00-04:00",
+      "signals": {
+        "load_pct": 80.54,
+        "motor_temp_c": 56.94,
+        "cycle_time_s": 42.69
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00-04:00",
+      "signals": {
+        "load_pct": 78.82,
+        "motor_temp_c": 57.96,
+        "cycle_time_s": 42.04
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00-04:00",
+      "signals": {
+        "load_pct": 80.57,
+        "motor_temp_c": 59.15,
+        "cycle_time_s": 42.58
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00-04:00",
+      "signals": {
+        "load_pct": 76.32,
+        "motor_temp_c": 58.74,
+        "cycle_time_s": 42.73
+      }
+    }
+  ],
+  "DEV-1002": [
+    {
+      "timestamp": "2026-06-06T11:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.85,
+        "motor_temp_c": 44.99
+      }
+    },
+    {
+      "timestamp": "2026-06-06T12:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.81,
+        "motor_temp_c": 44.92
+      }
+    },
+    {
+      "timestamp": "2026-06-06T13:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.1,
+        "motor_temp_c": 45.04
+      }
+    },
+    {
+      "timestamp": "2026-06-06T14:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.49,
+        "motor_temp_c": 44.65
+      }
+    },
+    {
+      "timestamp": "2026-06-06T15:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 49,
+        "motor_temp_c": 45.38
+      }
+    },
+    {
+      "timestamp": "2026-06-06T16:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.47,
+        "motor_temp_c": 45.5
+      }
+    },
+    {
+      "timestamp": "2026-06-06T17:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.44,
+        "motor_temp_c": 45.39
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.39,
+        "motor_temp_c": 44.5
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.26,
+        "motor_temp_c": 45.5
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.38,
+        "motor_temp_c": 45.9
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.65,
+        "motor_temp_c": 44.92
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.15,
+        "motor_temp_c": 45.69
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.96,
+        "motor_temp_c": 44.83
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.45,
+        "motor_temp_c": 45.33
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.79,
+        "motor_temp_c": 44.76
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.86,
+        "motor_temp_c": 44.86
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.46,
+        "motor_temp_c": 44.39
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.86,
+        "motor_temp_c": 45.37
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.74,
+        "motor_temp_c": 44.64
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.33,
+        "motor_temp_c": 44.76
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.03,
+        "motor_temp_c": 44.18
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.27,
+        "motor_temp_c": 44.85
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.74,
+        "motor_temp_c": 45.11
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.95,
+        "motor_temp_c": 45.86
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.11,
+        "motor_temp_c": 44.16
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.35,
+        "motor_temp_c": 44.11
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.3,
+        "motor_temp_c": 45.07
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.94,
+        "motor_temp_c": 45.22
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.84,
+        "motor_temp_c": 44.42
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.74,
+        "motor_temp_c": 44.49
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.41,
+        "motor_temp_c": 44.71
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.86,
+        "motor_temp_c": 44.72
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.94,
+        "motor_temp_c": 44.78
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.2,
+        "motor_temp_c": 45.29
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.09,
+        "motor_temp_c": 45.67
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.57,
+        "motor_temp_c": 44.61
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.96,
+        "motor_temp_c": 45.63
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.18,
+        "motor_temp_c": 45.92
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.29,
+        "motor_temp_c": 44.64
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.38,
+        "motor_temp_c": 44.39
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.82,
+        "motor_temp_c": 44.17
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.77,
+        "motor_temp_c": 45.54
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.11,
+        "motor_temp_c": 44.25
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.65,
+        "motor_temp_c": 45.06
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.67,
+        "motor_temp_c": 45.98
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.83,
+        "motor_temp_c": 45.87
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.36,
+        "motor_temp_c": 45.26
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.67,
+        "motor_temp_c": 44.62
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.19,
+        "motor_temp_c": 45.91
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.6,
+        "motor_temp_c": 45.44
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.43,
+        "motor_temp_c": 44.14
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.86,
+        "motor_temp_c": 45.05
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.05,
+        "motor_temp_c": 44.28
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.61,
+        "motor_temp_c": 45.19
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.52,
+        "motor_temp_c": 45.94
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.37,
+        "motor_temp_c": 44.43
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.88,
+        "motor_temp_c": 44.44
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.83,
+        "motor_temp_c": 45.26
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.23,
+        "motor_temp_c": 44.56
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.92,
+        "motor_temp_c": 44.56
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.45,
+        "motor_temp_c": 45.68
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.29,
+        "motor_temp_c": 45.34
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.38,
+        "motor_temp_c": 44.22
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.05,
+        "motor_temp_c": 45.85
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.21,
+        "motor_temp_c": 45.43
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.93,
+        "motor_temp_c": 44.09
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.3,
+        "motor_temp_c": 44.45
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.68,
+        "motor_temp_c": 45.5
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.24,
+        "motor_temp_c": 44.82
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 48.87,
+        "motor_temp_c": 44.14
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.35,
+        "motor_temp_c": 44.23
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 47.98,
+        "motor_temp_c": 45.1
+      }
+    }
+  ],
+  "DEV-2001": [
+    {
+      "timestamp": "2026-06-06T11:00:00-04:00",
+      "signals": {
+        "load_pct": 81.24,
+        "motor_temp_c": 60.89,
+        "cycle_time_s": 38.36
+      }
+    },
+    {
+      "timestamp": "2026-06-06T12:00:00-04:00",
+      "signals": {
+        "load_pct": 77.79,
+        "motor_temp_c": 59.72,
+        "cycle_time_s": 38.23
+      }
+    },
+    {
+      "timestamp": "2026-06-06T13:00:00-04:00",
+      "signals": {
+        "load_pct": 81.82,
+        "motor_temp_c": 60.71,
+        "cycle_time_s": 37.99
+      }
+    },
+    {
+      "timestamp": "2026-06-06T14:00:00-04:00",
+      "signals": {
+        "load_pct": 77.84,
+        "motor_temp_c": 59.1,
+        "cycle_time_s": 37.97
+      }
+    },
+    {
+      "timestamp": "2026-06-06T15:00:00-04:00",
+      "signals": {
+        "load_pct": 80.35,
+        "motor_temp_c": 59.16,
+        "cycle_time_s": 37.7
+      }
+    },
+    {
+      "timestamp": "2026-06-06T16:00:00-04:00",
+      "signals": {
+        "load_pct": 79.85,
+        "motor_temp_c": 59.13,
+        "cycle_time_s": 38.32
+      }
+    },
+    {
+      "timestamp": "2026-06-06T17:00:00-04:00",
+      "signals": {
+        "load_pct": 78.83,
+        "motor_temp_c": 60.25,
+        "cycle_time_s": 37.76
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00-04:00",
+      "signals": {
+        "load_pct": 79.79,
+        "motor_temp_c": 60.79,
+        "cycle_time_s": 37.95
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00-04:00",
+      "signals": {
+        "load_pct": 79.24,
+        "motor_temp_c": 58.99,
+        "cycle_time_s": 37.64
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00-04:00",
+      "signals": {
+        "load_pct": 79.68,
+        "motor_temp_c": 59.09,
+        "cycle_time_s": 37.94
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00-04:00",
+      "signals": {
+        "load_pct": 77.61,
+        "motor_temp_c": 59.36,
+        "cycle_time_s": 38.39
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00-04:00",
+      "signals": {
+        "load_pct": 81.52,
+        "motor_temp_c": 61.03,
+        "cycle_time_s": 37.74
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00-04:00",
+      "signals": {
+        "load_pct": 81.91,
+        "motor_temp_c": 59.37,
+        "cycle_time_s": 37.9
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00-04:00",
+      "signals": {
+        "load_pct": 81.29,
+        "motor_temp_c": 58.61,
+        "cycle_time_s": 37.61
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00-04:00",
+      "signals": {
+        "load_pct": 82.16,
+        "motor_temp_c": 60.01,
+        "cycle_time_s": 38.02
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00-04:00",
+      "signals": {
+        "load_pct": 81.02,
+        "motor_temp_c": 58.83,
+        "cycle_time_s": 37.84
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00-04:00",
+      "signals": {
+        "load_pct": 80.36,
+        "motor_temp_c": 59.3,
+        "cycle_time_s": 38.22
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00-04:00",
+      "signals": {
+        "load_pct": 82.69,
+        "motor_temp_c": 59.69,
+        "cycle_time_s": 37.88
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00-04:00",
+      "signals": {
+        "load_pct": 78.5,
+        "motor_temp_c": 61.23,
+        "cycle_time_s": 37.97
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00-04:00",
+      "signals": {
+        "load_pct": 82.3,
+        "motor_temp_c": 59.18,
+        "cycle_time_s": 38.01
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00-04:00",
+      "signals": {
+        "load_pct": 78.58,
+        "motor_temp_c": 60.79,
+        "cycle_time_s": 38.33
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00-04:00",
+      "signals": {
+        "load_pct": 81.85,
+        "motor_temp_c": 61.32,
+        "cycle_time_s": 37.68
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00-04:00",
+      "signals": {
+        "load_pct": 82.61,
+        "motor_temp_c": 59,
+        "cycle_time_s": 37.98
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00-04:00",
+      "signals": {
+        "load_pct": 77.36,
+        "motor_temp_c": 61.09,
+        "cycle_time_s": 37.97
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00-04:00",
+      "signals": {
+        "load_pct": 80.58,
+        "motor_temp_c": 59.84,
+        "cycle_time_s": 37.97
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00-04:00",
+      "signals": {
+        "load_pct": 82.8,
+        "motor_temp_c": 59.5,
+        "cycle_time_s": 38.33
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00-04:00",
+      "signals": {
+        "load_pct": 80.5,
+        "motor_temp_c": 61.32,
+        "cycle_time_s": 37.78
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00-04:00",
+      "signals": {
+        "load_pct": 82.19,
+        "motor_temp_c": 60.55,
+        "cycle_time_s": 38.25
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00-04:00",
+      "signals": {
+        "load_pct": 78.36,
+        "motor_temp_c": 61.44,
+        "cycle_time_s": 37.67
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00-04:00",
+      "signals": {
+        "load_pct": 77.53,
+        "motor_temp_c": 59.24,
+        "cycle_time_s": 37.98
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00-04:00",
+      "signals": {
+        "load_pct": 82.17,
+        "motor_temp_c": 61.2,
+        "cycle_time_s": 37.91
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00-04:00",
+      "signals": {
+        "load_pct": 82.8,
+        "motor_temp_c": 59.57,
+        "cycle_time_s": 37.79
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00-04:00",
+      "signals": {
+        "load_pct": 81.92,
+        "motor_temp_c": 58.6,
+        "cycle_time_s": 37.96
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00-04:00",
+      "signals": {
+        "load_pct": 82.03,
+        "motor_temp_c": 59.54,
+        "cycle_time_s": 37.95
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00-04:00",
+      "signals": {
+        "load_pct": 79.62,
+        "motor_temp_c": 60.64,
+        "cycle_time_s": 38.1
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00-04:00",
+      "signals": {
+        "load_pct": 77.2,
+        "motor_temp_c": 60.15,
+        "cycle_time_s": 37.93
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00-04:00",
+      "signals": {
+        "load_pct": 77.26,
+        "motor_temp_c": 59.32,
+        "cycle_time_s": 37.78
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00-04:00",
+      "signals": {
+        "load_pct": 82.31,
+        "motor_temp_c": 59.39,
+        "cycle_time_s": 37.99
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00-04:00",
+      "signals": {
+        "load_pct": 82.84,
+        "motor_temp_c": 58.63,
+        "cycle_time_s": 38.08
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00-04:00",
+      "signals": {
+        "load_pct": 81.36,
+        "motor_temp_c": 61.28,
+        "cycle_time_s": 38.39
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00-04:00",
+      "signals": {
+        "load_pct": 80.37,
+        "motor_temp_c": 59.59,
+        "cycle_time_s": 37.66
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00-04:00",
+      "signals": {
+        "load_pct": 82.36,
+        "motor_temp_c": 60.8,
+        "cycle_time_s": 37.81
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00-04:00",
+      "signals": {
+        "load_pct": 77.84,
+        "motor_temp_c": 60.18,
+        "cycle_time_s": 38.39
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00-04:00",
+      "signals": {
+        "load_pct": 81.31,
+        "motor_temp_c": 58.97,
+        "cycle_time_s": 38.11
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00-04:00",
+      "signals": {
+        "load_pct": 77.26,
+        "motor_temp_c": 61.41,
+        "cycle_time_s": 38.13
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00-04:00",
+      "signals": {
+        "load_pct": 80.2,
+        "motor_temp_c": 59.77,
+        "cycle_time_s": 37.96
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00-04:00",
+      "signals": {
+        "load_pct": 80.62,
+        "motor_temp_c": 61.28,
+        "cycle_time_s": 37.95
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00-04:00",
+      "signals": {
+        "load_pct": 81.03,
+        "motor_temp_c": 61.21,
+        "cycle_time_s": 37.63
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00-04:00",
+      "signals": {
+        "load_pct": 77.93,
+        "motor_temp_c": 60.79,
+        "cycle_time_s": 38.12
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00-04:00",
+      "signals": {
+        "load_pct": 79.81,
+        "motor_temp_c": 61.29,
+        "cycle_time_s": 38.17
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00-04:00",
+      "signals": {
+        "load_pct": 77.18,
+        "motor_temp_c": 60.94,
+        "cycle_time_s": 38.11
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00-04:00",
+      "signals": {
+        "load_pct": 78.54,
+        "motor_temp_c": 61.01,
+        "cycle_time_s": 38.27
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00-04:00",
+      "signals": {
+        "load_pct": 80.38,
+        "motor_temp_c": 59.73,
+        "cycle_time_s": 38.18
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00-04:00",
+      "signals": {
+        "load_pct": 79.2,
+        "motor_temp_c": 61.36,
+        "cycle_time_s": 38.18
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00-04:00",
+      "signals": {
+        "load_pct": 77.52,
+        "motor_temp_c": 61.16,
+        "cycle_time_s": 37.79
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00-04:00",
+      "signals": {
+        "load_pct": 77.82,
+        "motor_temp_c": 60.36,
+        "cycle_time_s": 38.17
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00-04:00",
+      "signals": {
+        "load_pct": 82.6,
+        "motor_temp_c": 60.22,
+        "cycle_time_s": 38.02
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00-04:00",
+      "signals": {
+        "load_pct": 82.37,
+        "motor_temp_c": 58.99,
+        "cycle_time_s": 37.7
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00-04:00",
+      "signals": {
+        "load_pct": 79.63,
+        "motor_temp_c": 60.92,
+        "cycle_time_s": 38.34
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00-04:00",
+      "signals": {
+        "load_pct": 82.87,
+        "motor_temp_c": 61.27,
+        "cycle_time_s": 37.86
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00-04:00",
+      "signals": {
+        "load_pct": 82.6,
+        "motor_temp_c": 61.27,
+        "cycle_time_s": 38.2
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00-04:00",
+      "signals": {
+        "load_pct": 81.32,
+        "motor_temp_c": 59.18,
+        "cycle_time_s": 38.09
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00-04:00",
+      "signals": {
+        "load_pct": 81.52,
+        "motor_temp_c": 59.25,
+        "cycle_time_s": 37.87
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00-04:00",
+      "signals": {
+        "load_pct": 79.71,
+        "motor_temp_c": 59.73,
+        "cycle_time_s": 37.87
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00-04:00",
+      "signals": {
+        "load_pct": 78.38,
+        "motor_temp_c": 58.87,
+        "cycle_time_s": 37.63
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00-04:00",
+      "signals": {
+        "load_pct": 80.04,
+        "motor_temp_c": 60.92,
+        "cycle_time_s": 38.27
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00-04:00",
+      "signals": {
+        "load_pct": 81.19,
+        "motor_temp_c": 61.13,
+        "cycle_time_s": 37.74
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00-04:00",
+      "signals": {
+        "load_pct": 78.32,
+        "motor_temp_c": 60.75,
+        "cycle_time_s": 37.95
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00-04:00",
+      "signals": {
+        "load_pct": 79.94,
+        "motor_temp_c": 61.03,
+        "cycle_time_s": 37.66
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00-04:00",
+      "signals": {
+        "load_pct": 82.55,
+        "motor_temp_c": 60.22,
+        "cycle_time_s": 37.98
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00-04:00",
+      "signals": {
+        "load_pct": 82.64,
+        "motor_temp_c": 59.57,
+        "cycle_time_s": 37.66
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00-04:00",
+      "signals": {
+        "load_pct": 82.71,
+        "motor_temp_c": 60.33,
+        "cycle_time_s": 37.82
+      }
+    }
+  ],
+  "DEV-2002": [
+    {
+      "timestamp": "2026-06-06T11:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.15,
+        "ambient_lux": 627.43,
+        "images_processed_per_min": 110.03
+      }
+    },
+    {
+      "timestamp": "2026-06-06T12:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.3,
+        "ambient_lux": 610.71,
+        "images_processed_per_min": 108.72
+      }
+    },
+    {
+      "timestamp": "2026-06-06T13:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.15,
+        "ambient_lux": 615.59,
+        "images_processed_per_min": 110.85
+      }
+    },
+    {
+      "timestamp": "2026-06-06T14:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.27,
+        "ambient_lux": 624.56,
+        "images_processed_per_min": 110.08
+      }
+    },
+    {
+      "timestamp": "2026-06-06T15:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.42,
+        "ambient_lux": 620.13,
+        "images_processed_per_min": 108.08
+      }
+    },
+    {
+      "timestamp": "2026-06-06T16:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.37,
+        "ambient_lux": 614.8,
+        "images_processed_per_min": 110.52
+      }
+    },
+    {
+      "timestamp": "2026-06-06T17:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.68,
+        "ambient_lux": 621.06,
+        "images_processed_per_min": 111.05
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.72,
+        "ambient_lux": 621.42,
+        "images_processed_per_min": 111.36
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.67,
+        "ambient_lux": 628.38,
+        "images_processed_per_min": 109.1
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.68,
+        "ambient_lux": 624.44,
+        "images_processed_per_min": 109.94
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.52,
+        "ambient_lux": 622.09,
+        "images_processed_per_min": 111.55
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.76,
+        "ambient_lux": 633.84,
+        "images_processed_per_min": 111.59
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.77,
+        "ambient_lux": 612.19,
+        "images_processed_per_min": 111.74
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.71,
+        "ambient_lux": 629.63,
+        "images_processed_per_min": 109.65
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.75,
+        "ambient_lux": 608.68,
+        "images_processed_per_min": 111.01
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.06,
+        "ambient_lux": 621.81,
+        "images_processed_per_min": 109.46
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 1.99,
+        "ambient_lux": 621.55,
+        "images_processed_per_min": 110.68
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.13,
+        "ambient_lux": 620.39,
+        "images_processed_per_min": 108.33
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.23,
+        "ambient_lux": 630.82,
+        "images_processed_per_min": 108.09
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.07,
+        "ambient_lux": 605.34,
+        "images_processed_per_min": 111.62
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.2,
+        "ambient_lux": 616.47,
+        "images_processed_per_min": 108.58
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.4,
+        "ambient_lux": 616.69,
+        "images_processed_per_min": 108.64
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.43,
+        "ambient_lux": 618.51,
+        "images_processed_per_min": 109.48
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.46,
+        "ambient_lux": 634.43,
+        "images_processed_per_min": 108.74
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.26,
+        "ambient_lux": 616.94,
+        "images_processed_per_min": 108.11
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.39,
+        "ambient_lux": 608.55,
+        "images_processed_per_min": 109.25
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.61,
+        "ambient_lux": 621.76,
+        "images_processed_per_min": 109.82
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.31,
+        "ambient_lux": 609.07,
+        "images_processed_per_min": 111.5
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.43,
+        "ambient_lux": 612.97,
+        "images_processed_per_min": 111.94
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.76,
+        "ambient_lux": 615.97,
+        "images_processed_per_min": 108.82
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.65,
+        "ambient_lux": 630.57,
+        "images_processed_per_min": 111.8
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.67,
+        "ambient_lux": 609.27,
+        "images_processed_per_min": 110.55
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.6,
+        "ambient_lux": 624.56,
+        "images_processed_per_min": 110.73
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.58,
+        "ambient_lux": 628.95,
+        "images_processed_per_min": 110.02
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.81,
+        "ambient_lux": 634.93,
+        "images_processed_per_min": 110.07
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.02,
+        "ambient_lux": 625.02,
+        "images_processed_per_min": 108.56
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.01,
+        "ambient_lux": 611.7,
+        "images_processed_per_min": 111.16
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.93,
+        "ambient_lux": 607.48,
+        "images_processed_per_min": 111.51
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 2.95,
+        "ambient_lux": 624.85,
+        "images_processed_per_min": 111.31
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.23,
+        "ambient_lux": 616.32,
+        "images_processed_per_min": 108.21
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.14,
+        "ambient_lux": 624.39,
+        "images_processed_per_min": 111.87
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.26,
+        "ambient_lux": 631.56,
+        "images_processed_per_min": 111.97
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.34,
+        "ambient_lux": 620.33,
+        "images_processed_per_min": 110.18
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.15,
+        "ambient_lux": 633.19,
+        "images_processed_per_min": 108.15
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.26,
+        "ambient_lux": 622.65,
+        "images_processed_per_min": 111.55
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.44,
+        "ambient_lux": 631.2,
+        "images_processed_per_min": 110.06
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.45,
+        "ambient_lux": 611.35,
+        "images_processed_per_min": 109.34
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.46,
+        "ambient_lux": 605.6,
+        "images_processed_per_min": 111.05
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.63,
+        "ambient_lux": 626.45,
+        "images_processed_per_min": 108.86
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.74,
+        "ambient_lux": 626.4,
+        "images_processed_per_min": 108.45
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.54,
+        "ambient_lux": 617.94,
+        "images_processed_per_min": 111.46
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.61,
+        "ambient_lux": 613.58,
+        "images_processed_per_min": 111.58
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.72,
+        "ambient_lux": 625.82,
+        "images_processed_per_min": 110.47
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.62,
+        "ambient_lux": 607.15,
+        "images_processed_per_min": 109.79
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.89,
+        "ambient_lux": 630.08,
+        "images_processed_per_min": 111.22
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.89,
+        "ambient_lux": 617.11,
+        "images_processed_per_min": 108.41
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.79,
+        "ambient_lux": 610.73,
+        "images_processed_per_min": 111.04
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.76,
+        "ambient_lux": 623.46,
+        "images_processed_per_min": 108.77
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 3.96,
+        "ambient_lux": 607.78,
+        "images_processed_per_min": 111.27
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.15,
+        "ambient_lux": 606.19,
+        "images_processed_per_min": 108.2
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.12,
+        "ambient_lux": 631.21,
+        "images_processed_per_min": 109.24
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.01,
+        "ambient_lux": 605.32,
+        "images_processed_per_min": 108.04
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.01,
+        "ambient_lux": 631.03,
+        "images_processed_per_min": 110.28
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.27,
+        "ambient_lux": 630.83,
+        "images_processed_per_min": 109.62
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.16,
+        "ambient_lux": 617.24,
+        "images_processed_per_min": 111.73
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.25,
+        "ambient_lux": 632.74,
+        "images_processed_per_min": 110.28
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.31,
+        "ambient_lux": 629.83,
+        "images_processed_per_min": 110.93
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.5,
+        "ambient_lux": 621.03,
+        "images_processed_per_min": 111.34
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.59,
+        "ambient_lux": 618.82,
+        "images_processed_per_min": 109.19
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.34,
+        "ambient_lux": 605.71,
+        "images_processed_per_min": 110.14
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.73,
+        "ambient_lux": 624.2,
+        "images_processed_per_min": 111.86
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00-04:00",
+      "signals": {
+        "false_reject_pct": 4.72,
+        "ambient_lux": 626.78,
+        "images_processed_per_min": 108.02
+      }
+    }
+  ],
+  "DEV-3001": [
+    {
+      "timestamp": "2026-06-06T11:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.67,
+        "spindle_temp_c": 56.24,
+        "load_pct": 79.85,
+        "rpm": 11964
+      }
+    },
+    {
+      "timestamp": "2026-06-06T12:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.94,
+        "spindle_temp_c": 56.09,
+        "load_pct": 81.92,
+        "rpm": 12047
+      }
+    },
+    {
+      "timestamp": "2026-06-06T13:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.93,
+        "spindle_temp_c": 55.98,
+        "load_pct": 80.01,
+        "rpm": 12008
+      }
+    },
+    {
+      "timestamp": "2026-06-06T14:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.82,
+        "spindle_temp_c": 56.35,
+        "load_pct": 84.08,
+        "rpm": 11965
+      }
+    },
+    {
+      "timestamp": "2026-06-06T15:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.78,
+        "spindle_temp_c": 55.83,
+        "load_pct": 82.75,
+        "rpm": 11999
+      }
+    },
+    {
+      "timestamp": "2026-06-06T16:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.75,
+        "spindle_temp_c": 55.97,
+        "load_pct": 81.16,
+        "rpm": 11973
+      }
+    },
+    {
+      "timestamp": "2026-06-06T17:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.67,
+        "spindle_temp_c": 55.88,
+        "load_pct": 82.01,
+        "rpm": 12029
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.68,
+        "spindle_temp_c": 56.06,
+        "load_pct": 80.07,
+        "rpm": 12035
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.88,
+        "spindle_temp_c": 55.92,
+        "load_pct": 79.89,
+        "rpm": 12013
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.7,
+        "spindle_temp_c": 55.63,
+        "load_pct": 81.98,
+        "rpm": 12023
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.83,
+        "spindle_temp_c": 56.37,
+        "load_pct": 82.2,
+        "rpm": 12024
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.94,
+        "spindle_temp_c": 55.42,
+        "load_pct": 79.56,
+        "rpm": 11993
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.82,
+        "spindle_temp_c": 56.4,
+        "load_pct": 82.33,
+        "rpm": 12013
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.84,
+        "spindle_temp_c": 56.37,
+        "load_pct": 82.48,
+        "rpm": 12031
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.83,
+        "spindle_temp_c": 56.48,
+        "load_pct": 83.48,
+        "rpm": 11980
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.93,
+        "spindle_temp_c": 56.6,
+        "load_pct": 81.37,
+        "rpm": 11966
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.9,
+        "spindle_temp_c": 55.67,
+        "load_pct": 84.24,
+        "rpm": 12023
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.73,
+        "spindle_temp_c": 56.29,
+        "load_pct": 79.99,
+        "rpm": 12041
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.93,
+        "spindle_temp_c": 55.82,
+        "load_pct": 82.45,
+        "rpm": 12048
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.92,
+        "spindle_temp_c": 56.25,
+        "load_pct": 80.82,
+        "rpm": 11968
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.86,
+        "spindle_temp_c": 55.65,
+        "load_pct": 82.43,
+        "rpm": 12044
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.72,
+        "spindle_temp_c": 56.06,
+        "load_pct": 83.9,
+        "rpm": 12027
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.8,
+        "spindle_temp_c": 56.52,
+        "load_pct": 80.54,
+        "rpm": 12030
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.8,
+        "spindle_temp_c": 56.58,
+        "load_pct": 84.13,
+        "rpm": 11953
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.8,
+        "spindle_temp_c": 55.72,
+        "load_pct": 84.06,
+        "rpm": 11968
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.79,
+        "spindle_temp_c": 56.25,
+        "load_pct": 81.75,
+        "rpm": 11978
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.9,
+        "spindle_temp_c": 56.6,
+        "load_pct": 83.42,
+        "rpm": 12037
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.95,
+        "spindle_temp_c": 56.13,
+        "load_pct": 81.25,
+        "rpm": 12040
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.15,
+        "spindle_temp_c": 56.42,
+        "load_pct": 82.77,
+        "rpm": 11978
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 1.97,
+        "spindle_temp_c": 56.36,
+        "load_pct": 83.64,
+        "rpm": 11961
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.19,
+        "spindle_temp_c": 57.56,
+        "load_pct": 83.82,
+        "rpm": 12007
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.08,
+        "spindle_temp_c": 57.48,
+        "load_pct": 81.94,
+        "rpm": 11996
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.17,
+        "spindle_temp_c": 57.67,
+        "load_pct": 83.12,
+        "rpm": 11993
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.41,
+        "spindle_temp_c": 57.21,
+        "load_pct": 80.08,
+        "rpm": 12038
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.36,
+        "spindle_temp_c": 57.83,
+        "load_pct": 82.59,
+        "rpm": 12000
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.39,
+        "spindle_temp_c": 57.74,
+        "load_pct": 80.19,
+        "rpm": 11999
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.53,
+        "spindle_temp_c": 58.29,
+        "load_pct": 83.39,
+        "rpm": 11998
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.59,
+        "spindle_temp_c": 58.27,
+        "load_pct": 83.05,
+        "rpm": 11955
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.53,
+        "spindle_temp_c": 58.56,
+        "load_pct": 83.18,
+        "rpm": 12046
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.74,
+        "spindle_temp_c": 59.18,
+        "load_pct": 82.06,
+        "rpm": 11955
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.68,
+        "spindle_temp_c": 58.39,
+        "load_pct": 81.66,
+        "rpm": 12029
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.79,
+        "spindle_temp_c": 58.54,
+        "load_pct": 80.44,
+        "rpm": 12000
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.93,
+        "spindle_temp_c": 59.5,
+        "load_pct": 84.44,
+        "rpm": 11974
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 2.83,
+        "spindle_temp_c": 59.01,
+        "load_pct": 81.76,
+        "rpm": 11988
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.08,
+        "spindle_temp_c": 59.67,
+        "load_pct": 80.29,
+        "rpm": 12028
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.01,
+        "spindle_temp_c": 60.04,
+        "load_pct": 83.86,
+        "rpm": 12023
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.23,
+        "spindle_temp_c": 59.71,
+        "load_pct": 81.67,
+        "rpm": 11999
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.29,
+        "spindle_temp_c": 60.36,
+        "load_pct": 81.06,
+        "rpm": 11997
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.32,
+        "spindle_temp_c": 60.23,
+        "load_pct": 83.64,
+        "rpm": 11969
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.35,
+        "spindle_temp_c": 60.06,
+        "load_pct": 79.55,
+        "rpm": 12028
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.51,
+        "spindle_temp_c": 60.29,
+        "load_pct": 80.75,
+        "rpm": 11973
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.56,
+        "spindle_temp_c": 60.41,
+        "load_pct": 81.61,
+        "rpm": 11977
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.74,
+        "spindle_temp_c": 61.33,
+        "load_pct": 83.57,
+        "rpm": 12042
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.94,
+        "spindle_temp_c": 61.68,
+        "load_pct": 82.85,
+        "rpm": 12023
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 3.99,
+        "spindle_temp_c": 62.01,
+        "load_pct": 81.62,
+        "rpm": 12015
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.09,
+        "spindle_temp_c": 62.7,
+        "load_pct": 82.4,
+        "rpm": 12009
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4,
+        "spindle_temp_c": 62.63,
+        "load_pct": 80.88,
+        "rpm": 12014
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.21,
+        "spindle_temp_c": 62.23,
+        "load_pct": 81.99,
+        "rpm": 12049
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.29,
+        "spindle_temp_c": 62.55,
+        "load_pct": 79.38,
+        "rpm": 11994
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.47,
+        "spindle_temp_c": 63.93,
+        "load_pct": 78.17,
+        "rpm": 12013
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.41,
+        "spindle_temp_c": 63.07,
+        "load_pct": 81.07,
+        "rpm": 12047
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.55,
+        "spindle_temp_c": 64.09,
+        "load_pct": 77.84,
+        "rpm": 11964
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.67,
+        "spindle_temp_c": 63.99,
+        "load_pct": 78.05,
+        "rpm": 11986
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 0,
+        "spindle_temp_c": 58.57,
+        "load_pct": 0,
+        "rpm": 0
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.89,
+        "spindle_temp_c": 64.44,
+        "load_pct": 77.01,
+        "rpm": 11974
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.85,
+        "spindle_temp_c": 64.82,
+        "load_pct": 80.94,
+        "rpm": 11986
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 0,
+        "spindle_temp_c": 59.48,
+        "load_pct": 0,
+        "rpm": 0
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 4.96,
+        "spindle_temp_c": 65.41,
+        "load_pct": 78.51,
+        "rpm": 11999
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 0,
+        "spindle_temp_c": 60.09,
+        "load_pct": 0,
+        "rpm": 0
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 5.25,
+        "spindle_temp_c": 65.94,
+        "load_pct": 78.15,
+        "rpm": 11997
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 5.39,
+        "spindle_temp_c": 66.75,
+        "load_pct": 77.02,
+        "rpm": 12026
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00-04:00",
+      "signals": {
+        "vibration_rms_mm_s": 0,
+        "spindle_temp_c": 61,
+        "load_pct": 0,
+        "rpm": 0
+      }
+    }
+  ],
+  "DEV-3002": [
+    {
+      "timestamp": "2026-06-06T11:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.29,
+        "motor_temp_c": 43.8
+      }
+    },
+    {
+      "timestamp": "2026-06-06T12:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.16,
+        "motor_temp_c": 44.39
+      }
+    },
+    {
+      "timestamp": "2026-06-06T13:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.57,
+        "motor_temp_c": 44.24
+      }
+    },
+    {
+      "timestamp": "2026-06-06T14:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.21,
+        "motor_temp_c": 43.66
+      }
+    },
+    {
+      "timestamp": "2026-06-06T15:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.58,
+        "motor_temp_c": 43.57
+      }
+    },
+    {
+      "timestamp": "2026-06-06T16:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.91,
+        "motor_temp_c": 43.04
+      }
+    },
+    {
+      "timestamp": "2026-06-06T17:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.32,
+        "motor_temp_c": 44.16
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.43,
+        "motor_temp_c": 44.29
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.23,
+        "motor_temp_c": 43.6
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.3,
+        "motor_temp_c": 43.97
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.37,
+        "motor_temp_c": 43.21
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.21,
+        "motor_temp_c": 44.59
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.83,
+        "motor_temp_c": 43.77
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.08,
+        "motor_temp_c": 45
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.49,
+        "motor_temp_c": 44.67
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.55,
+        "motor_temp_c": 44.21
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.2,
+        "motor_temp_c": 44.33
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.76,
+        "motor_temp_c": 44.51
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.15,
+        "motor_temp_c": 43.97
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.42,
+        "motor_temp_c": 43.86
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.68,
+        "motor_temp_c": 44.77
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.28,
+        "motor_temp_c": 43.71
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.4,
+        "motor_temp_c": 44.26
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.91,
+        "motor_temp_c": 44.13
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.62,
+        "motor_temp_c": 44.1
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.8,
+        "motor_temp_c": 44.2
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.12,
+        "motor_temp_c": 43.25
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.83,
+        "motor_temp_c": 43.81
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.3,
+        "motor_temp_c": 44.34
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.99,
+        "motor_temp_c": 44.79
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.57,
+        "motor_temp_c": 43.49
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.56,
+        "motor_temp_c": 43.35
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.16,
+        "motor_temp_c": 43.43
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.52,
+        "motor_temp_c": 43.83
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.24,
+        "motor_temp_c": 43.9
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.32,
+        "motor_temp_c": 43.83
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.34,
+        "motor_temp_c": 43.48
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.02,
+        "motor_temp_c": 44.65
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.13,
+        "motor_temp_c": 44.65
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.69,
+        "motor_temp_c": 43.11
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.55,
+        "motor_temp_c": 44.28
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.25,
+        "motor_temp_c": 44.56
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.25,
+        "motor_temp_c": 43.38
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.51,
+        "motor_temp_c": 43.44
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.35,
+        "motor_temp_c": 44.23
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.68,
+        "motor_temp_c": 44.98
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.56,
+        "motor_temp_c": 44.8
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.1,
+        "motor_temp_c": 44.33
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.65,
+        "motor_temp_c": 44.55
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.38,
+        "motor_temp_c": 43.04
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.16,
+        "motor_temp_c": 43.52
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.82,
+        "motor_temp_c": 44.77
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.61,
+        "motor_temp_c": 44.81
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.21,
+        "motor_temp_c": 44.48
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.86,
+        "motor_temp_c": 44.31
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.94,
+        "motor_temp_c": 44.79
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.91,
+        "motor_temp_c": 43.85
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.43,
+        "motor_temp_c": 43.83
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.03,
+        "motor_temp_c": 43.63
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.92,
+        "motor_temp_c": 44.32
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.22,
+        "motor_temp_c": 44
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.55,
+        "motor_temp_c": 44.02
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.91,
+        "motor_temp_c": 44.55
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.87,
+        "motor_temp_c": 43.48
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.16,
+        "motor_temp_c": 44.6
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.55,
+        "motor_temp_c": 43.21
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.06,
+        "motor_temp_c": 44.94
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.53,
+        "motor_temp_c": 44.06
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.5,
+        "motor_temp_c": 44.95
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.45,
+        "motor_temp_c": 43.05
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 45.32,
+        "motor_temp_c": 43.05
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00-04:00",
+      "signals": {
+        "speed_m_per_min": 46.44,
+        "motor_temp_c": 44.46
+      }
+    }
+  ],
+  "DEV-A001": [
+    {
+      "timestamp": "2026-06-06T17:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1424.26,
+        "coolant_flow_l_min": 95.72,
+        "power_kw": 2384.11
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.51,
+        "coolant_flow_l_min": 95.03,
+        "power_kw": 2407.84
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1423.06,
+        "coolant_flow_l_min": 94.83,
+        "power_kw": 2417.02
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.92,
+        "coolant_flow_l_min": 96.38,
+        "power_kw": 2388.34
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1423.08,
+        "coolant_flow_l_min": 94.92,
+        "power_kw": 2418.45
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1419.55,
+        "coolant_flow_l_min": 94.7,
+        "power_kw": 2404.02
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1416.33,
+        "coolant_flow_l_min": 93.97,
+        "power_kw": 2401.73
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1418.41,
+        "coolant_flow_l_min": 93.99,
+        "power_kw": 2388.23
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1418.79,
+        "coolant_flow_l_min": 96,
+        "power_kw": 2380.19
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1422.48,
+        "coolant_flow_l_min": 95.25,
+        "power_kw": 2394.28
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1422.48,
+        "coolant_flow_l_min": 96,
+        "power_kw": 2407.17
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1423.78,
+        "coolant_flow_l_min": 96.49,
+        "power_kw": 2395.53
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1419.39,
+        "coolant_flow_l_min": 94.97,
+        "power_kw": 2416.01
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1414.3,
+        "coolant_flow_l_min": 95.7,
+        "power_kw": 2405.29
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1425.52,
+        "coolant_flow_l_min": 93.92,
+        "power_kw": 2380.03
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1422.04,
+        "coolant_flow_l_min": 93.88,
+        "power_kw": 2396.9
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1420.87,
+        "coolant_flow_l_min": 93.84,
+        "power_kw": 2392.57
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1415.01,
+        "coolant_flow_l_min": 95.03,
+        "power_kw": 2383.7
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.45,
+        "coolant_flow_l_min": 95.72,
+        "power_kw": 2386.96
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.2,
+        "coolant_flow_l_min": 94.16,
+        "power_kw": 2419.01
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1419.25,
+        "coolant_flow_l_min": 94.59,
+        "power_kw": 2416.53
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1420.61,
+        "coolant_flow_l_min": 95.26,
+        "power_kw": 2396.18
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1418.27,
+        "coolant_flow_l_min": 94.42,
+        "power_kw": 2414.62
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1417.24,
+        "coolant_flow_l_min": 96.33,
+        "power_kw": 2408.53
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1422.51,
+        "coolant_flow_l_min": 96.23,
+        "power_kw": 2394.57
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1415.09,
+        "coolant_flow_l_min": 95.37,
+        "power_kw": 2389.4
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1423.98,
+        "coolant_flow_l_min": 95,
+        "power_kw": 2409.7
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1418.17,
+        "coolant_flow_l_min": 96.38,
+        "power_kw": 2392.13
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1414.66,
+        "coolant_flow_l_min": 94.76,
+        "power_kw": 2393.35
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1418.47,
+        "coolant_flow_l_min": 94.37,
+        "power_kw": 2390.04
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1422.57,
+        "coolant_flow_l_min": 96.48,
+        "power_kw": 2398.85
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1419.99,
+        "coolant_flow_l_min": 96.33,
+        "power_kw": 2396.46
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1415.71,
+        "coolant_flow_l_min": 95.17,
+        "power_kw": 2399.54
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1414.73,
+        "coolant_flow_l_min": 94.26,
+        "power_kw": 2384.74
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1422.06,
+        "coolant_flow_l_min": 94.84,
+        "power_kw": 2408.74
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1418.7,
+        "coolant_flow_l_min": 95.16,
+        "power_kw": 2408.21
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.64,
+        "coolant_flow_l_min": 96.48,
+        "power_kw": 2399.8
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1423.88,
+        "coolant_flow_l_min": 94.04,
+        "power_kw": 2400.19
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1418.43,
+        "coolant_flow_l_min": 95.09,
+        "power_kw": 2386.04
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1422.29,
+        "coolant_flow_l_min": 94.89,
+        "power_kw": 2414.02
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1416.46,
+        "coolant_flow_l_min": 94.68,
+        "power_kw": 2380.8
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1417.92,
+        "coolant_flow_l_min": 95.71,
+        "power_kw": 2383.04
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1419.7,
+        "coolant_flow_l_min": 96.23,
+        "power_kw": 2397.41
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1414.78,
+        "coolant_flow_l_min": 94.5,
+        "power_kw": 2400.58
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1420.16,
+        "coolant_flow_l_min": 94.76,
+        "power_kw": 2409.21
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1416.85,
+        "coolant_flow_l_min": 95.26,
+        "power_kw": 2399.97
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.85,
+        "coolant_flow_l_min": 94.26,
+        "power_kw": 2389.53
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1416.15,
+        "coolant_flow_l_min": 96,
+        "power_kw": 2394.54
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1416.76,
+        "coolant_flow_l_min": 95.73,
+        "power_kw": 2391.69
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1416.67,
+        "coolant_flow_l_min": 94.71,
+        "power_kw": 2397.64
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1420.89,
+        "coolant_flow_l_min": 94.18,
+        "power_kw": 2389.05
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1422.42,
+        "coolant_flow_l_min": 95.39,
+        "power_kw": 2382.58
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1414.25,
+        "coolant_flow_l_min": 93.6,
+        "power_kw": 2394.92
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1425.38,
+        "coolant_flow_l_min": 96.04,
+        "power_kw": 2402.71
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1424.82,
+        "coolant_flow_l_min": 94.98,
+        "power_kw": 2382.64
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1417.57,
+        "coolant_flow_l_min": 94.67,
+        "power_kw": 2391.36
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1420.62,
+        "coolant_flow_l_min": 96.35,
+        "power_kw": 2405.55
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1414.98,
+        "coolant_flow_l_min": 95.27,
+        "power_kw": 2401.86
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1417.64,
+        "coolant_flow_l_min": 95.68,
+        "power_kw": 2396.98
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.61,
+        "coolant_flow_l_min": 95.84,
+        "power_kw": 2407.55
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1419.88,
+        "coolant_flow_l_min": 93.99,
+        "power_kw": 2410.26
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1417.46,
+        "coolant_flow_l_min": 94.38,
+        "power_kw": 2381.76
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1419.35,
+        "coolant_flow_l_min": 95.26,
+        "power_kw": 2418.72
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1418.54,
+        "coolant_flow_l_min": 94.89,
+        "power_kw": 2417.81
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1420.04,
+        "coolant_flow_l_min": 94.52,
+        "power_kw": 2395.7
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1416.84,
+        "coolant_flow_l_min": 95.38,
+        "power_kw": 2409.05
+      }
+    },
+    {
+      "timestamp": "2026-06-09T11:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1425.95,
+        "coolant_flow_l_min": 95.74,
+        "power_kw": 2394.54
+      }
+    },
+    {
+      "timestamp": "2026-06-09T12:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1416.36,
+        "coolant_flow_l_min": 93.84,
+        "power_kw": 2408.81
+      }
+    },
+    {
+      "timestamp": "2026-06-09T13:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1417.08,
+        "coolant_flow_l_min": 93.93,
+        "power_kw": 2388.56
+      }
+    },
+    {
+      "timestamp": "2026-06-09T14:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.1,
+        "coolant_flow_l_min": 94.27,
+        "power_kw": 2390.43
+      }
+    },
+    {
+      "timestamp": "2026-06-09T15:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1421.43,
+        "coolant_flow_l_min": 96.1,
+        "power_kw": 2391.09
+      }
+    },
+    {
+      "timestamp": "2026-06-09T16:00:00+02:00",
+      "signals": {
+        "bath_temp_c": 1423.07,
+        "coolant_flow_l_min": 94.67,
+        "power_kw": 2407.22
+      }
+    }
+  ],
+  "DEV-A002": [
+    {
+      "timestamp": "2026-06-06T17:00:00+02:00",
+      "signals": {
+        "load_pct": 73.59,
+        "motor_temp_c": 61.24,
+        "pour_cycle_time_s": 28.23
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00+02:00",
+      "signals": {
+        "load_pct": 71.61,
+        "motor_temp_c": 63.05,
+        "pour_cycle_time_s": 27.89
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00+02:00",
+      "signals": {
+        "load_pct": 76.42,
+        "motor_temp_c": 62.35,
+        "pour_cycle_time_s": 27.93
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00+02:00",
+      "signals": {
+        "load_pct": 75.11,
+        "motor_temp_c": 63.4,
+        "pour_cycle_time_s": 28
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00+02:00",
+      "signals": {
+        "load_pct": 74.76,
+        "motor_temp_c": 61.44,
+        "pour_cycle_time_s": 27.75
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00+02:00",
+      "signals": {
+        "load_pct": 72.46,
+        "motor_temp_c": 60.72,
+        "pour_cycle_time_s": 28.03
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00+02:00",
+      "signals": {
+        "load_pct": 75.28,
+        "motor_temp_c": 62.49,
+        "pour_cycle_time_s": 27.9
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00+02:00",
+      "signals": {
+        "load_pct": 75.31,
+        "motor_temp_c": 62.01,
+        "pour_cycle_time_s": 28.19
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00+02:00",
+      "signals": {
+        "load_pct": 74.64,
+        "motor_temp_c": 60.52,
+        "pour_cycle_time_s": 27.97
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00+02:00",
+      "signals": {
+        "load_pct": 75.34,
+        "motor_temp_c": 62.27,
+        "pour_cycle_time_s": 28.08
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00+02:00",
+      "signals": {
+        "load_pct": 74.51,
+        "motor_temp_c": 62.52,
+        "pour_cycle_time_s": 28.18
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00+02:00",
+      "signals": {
+        "load_pct": 74.22,
+        "motor_temp_c": 62.51,
+        "pour_cycle_time_s": 27.9
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00+02:00",
+      "signals": {
+        "load_pct": 71.56,
+        "motor_temp_c": 63.49,
+        "pour_cycle_time_s": 28.11
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00+02:00",
+      "signals": {
+        "load_pct": 73.6,
+        "motor_temp_c": 60.72,
+        "pour_cycle_time_s": 27.85
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00+02:00",
+      "signals": {
+        "load_pct": 72.44,
+        "motor_temp_c": 61.44,
+        "pour_cycle_time_s": 27.97
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00+02:00",
+      "signals": {
+        "load_pct": 75.16,
+        "motor_temp_c": 60.9,
+        "pour_cycle_time_s": 28.12
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00+02:00",
+      "signals": {
+        "load_pct": 73.84,
+        "motor_temp_c": 63.35,
+        "pour_cycle_time_s": 27.96
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00+02:00",
+      "signals": {
+        "load_pct": 75.56,
+        "motor_temp_c": 61.05,
+        "pour_cycle_time_s": 27.73
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00+02:00",
+      "signals": {
+        "load_pct": 72.41,
+        "motor_temp_c": 61.24,
+        "pour_cycle_time_s": 28.27
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00+02:00",
+      "signals": {
+        "load_pct": 76.48,
+        "motor_temp_c": 62.18,
+        "pour_cycle_time_s": 28.06
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00+02:00",
+      "signals": {
+        "load_pct": 74.83,
+        "motor_temp_c": 62.11,
+        "pour_cycle_time_s": 27.92
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00+02:00",
+      "signals": {
+        "load_pct": 74.56,
+        "motor_temp_c": 62.28,
+        "pour_cycle_time_s": 28.11
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00+02:00",
+      "signals": {
+        "load_pct": 72.76,
+        "motor_temp_c": 60.94,
+        "pour_cycle_time_s": 28.29
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00+02:00",
+      "signals": {
+        "load_pct": 76.49,
+        "motor_temp_c": 62.35,
+        "pour_cycle_time_s": 28.1
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00+02:00",
+      "signals": {
+        "load_pct": 72.86,
+        "motor_temp_c": 61.75,
+        "pour_cycle_time_s": 27.79
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00+02:00",
+      "signals": {
+        "load_pct": 73.93,
+        "motor_temp_c": 63.39,
+        "pour_cycle_time_s": 28.21
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00+02:00",
+      "signals": {
+        "load_pct": 71.8,
+        "motor_temp_c": 62.52,
+        "pour_cycle_time_s": 27.82
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00+02:00",
+      "signals": {
+        "load_pct": 73.55,
+        "motor_temp_c": 63.4,
+        "pour_cycle_time_s": 28.05
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00+02:00",
+      "signals": {
+        "load_pct": 76.25,
+        "motor_temp_c": 61.27,
+        "pour_cycle_time_s": 27.97
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00+02:00",
+      "signals": {
+        "load_pct": 72,
+        "motor_temp_c": 63.39,
+        "pour_cycle_time_s": 27.82
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00+02:00",
+      "signals": {
+        "load_pct": 72.88,
+        "motor_temp_c": 62,
+        "pour_cycle_time_s": 27.85
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00+02:00",
+      "signals": {
+        "load_pct": 75.97,
+        "motor_temp_c": 61.35,
+        "pour_cycle_time_s": 27.72
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00+02:00",
+      "signals": {
+        "load_pct": 73.35,
+        "motor_temp_c": 62.69,
+        "pour_cycle_time_s": 28.26
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00+02:00",
+      "signals": {
+        "load_pct": 72.11,
+        "motor_temp_c": 61.28,
+        "pour_cycle_time_s": 27.94
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00+02:00",
+      "signals": {
+        "load_pct": 74.34,
+        "motor_temp_c": 61.36,
+        "pour_cycle_time_s": 28.2
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00+02:00",
+      "signals": {
+        "load_pct": 72.1,
+        "motor_temp_c": 61.18,
+        "pour_cycle_time_s": 28.09
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00+02:00",
+      "signals": {
+        "load_pct": 72.49,
+        "motor_temp_c": 62,
+        "pour_cycle_time_s": 27.87
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00+02:00",
+      "signals": {
+        "load_pct": 72.59,
+        "motor_temp_c": 62.06,
+        "pour_cycle_time_s": 27.77
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00+02:00",
+      "signals": {
+        "load_pct": 74.49,
+        "motor_temp_c": 62.61,
+        "pour_cycle_time_s": 28.06
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00+02:00",
+      "signals": {
+        "load_pct": 75.27,
+        "motor_temp_c": 61.91,
+        "pour_cycle_time_s": 27.78
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00+02:00",
+      "signals": {
+        "load_pct": 72,
+        "motor_temp_c": 61.19,
+        "pour_cycle_time_s": 27.78
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00+02:00",
+      "signals": {
+        "load_pct": 71.78,
+        "motor_temp_c": 61.73,
+        "pour_cycle_time_s": 27.72
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00+02:00",
+      "signals": {
+        "load_pct": 71.68,
+        "motor_temp_c": 61.75,
+        "pour_cycle_time_s": 27.83
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00+02:00",
+      "signals": {
+        "load_pct": 73.8,
+        "motor_temp_c": 62.52,
+        "pour_cycle_time_s": 27.78
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00+02:00",
+      "signals": {
+        "load_pct": 75.21,
+        "motor_temp_c": 62.28,
+        "pour_cycle_time_s": 27.81
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00+02:00",
+      "signals": {
+        "load_pct": 73,
+        "motor_temp_c": 62.28,
+        "pour_cycle_time_s": 28.17
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00+02:00",
+      "signals": {
+        "load_pct": 74.25,
+        "motor_temp_c": 60.78,
+        "pour_cycle_time_s": 27.91
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00+02:00",
+      "signals": {
+        "load_pct": 76.04,
+        "motor_temp_c": 62.02,
+        "pour_cycle_time_s": 27.89
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00+02:00",
+      "signals": {
+        "load_pct": 75.46,
+        "motor_temp_c": 61.25,
+        "pour_cycle_time_s": 27.75
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00+02:00",
+      "signals": {
+        "load_pct": 74.59,
+        "motor_temp_c": 62.73,
+        "pour_cycle_time_s": 27.74
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00+02:00",
+      "signals": {
+        "load_pct": 75.52,
+        "motor_temp_c": 61.7,
+        "pour_cycle_time_s": 28.11
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00+02:00",
+      "signals": {
+        "load_pct": 75.32,
+        "motor_temp_c": 62.41,
+        "pour_cycle_time_s": 27.91
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00+02:00",
+      "signals": {
+        "load_pct": 76.08,
+        "motor_temp_c": 63.11,
+        "pour_cycle_time_s": 27.99
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00+02:00",
+      "signals": {
+        "load_pct": 74.89,
+        "motor_temp_c": 62.06,
+        "pour_cycle_time_s": 28.01
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00+02:00",
+      "signals": {
+        "load_pct": 73.82,
+        "motor_temp_c": 60.5,
+        "pour_cycle_time_s": 28.21
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00+02:00",
+      "signals": {
+        "load_pct": 74.96,
+        "motor_temp_c": 62.69,
+        "pour_cycle_time_s": 28.24
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00+02:00",
+      "signals": {
+        "load_pct": 75.4,
+        "motor_temp_c": 60.87,
+        "pour_cycle_time_s": 27.75
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00+02:00",
+      "signals": {
+        "load_pct": 72.22,
+        "motor_temp_c": 62.29,
+        "pour_cycle_time_s": 28.2
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00+02:00",
+      "signals": {
+        "load_pct": 72.49,
+        "motor_temp_c": 62.2,
+        "pour_cycle_time_s": 28.03
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00+02:00",
+      "signals": {
+        "load_pct": 73.31,
+        "motor_temp_c": 61.86,
+        "pour_cycle_time_s": 28.08
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00+02:00",
+      "signals": {
+        "load_pct": 71.76,
+        "motor_temp_c": 62.51,
+        "pour_cycle_time_s": 28.02
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00+02:00",
+      "signals": {
+        "load_pct": 74.92,
+        "motor_temp_c": 62.4,
+        "pour_cycle_time_s": 28.1
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00+02:00",
+      "signals": {
+        "load_pct": 74.87,
+        "motor_temp_c": 62.78,
+        "pour_cycle_time_s": 27.95
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00+02:00",
+      "signals": {
+        "load_pct": 73.7,
+        "motor_temp_c": 61.91,
+        "pour_cycle_time_s": 27.84
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00+02:00",
+      "signals": {
+        "load_pct": 73.49,
+        "motor_temp_c": 61.03,
+        "pour_cycle_time_s": 28.01
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00+02:00",
+      "signals": {
+        "load_pct": 76.33,
+        "motor_temp_c": 61.4,
+        "pour_cycle_time_s": 28.11
+      }
+    },
+    {
+      "timestamp": "2026-06-09T11:00:00+02:00",
+      "signals": {
+        "load_pct": 74.29,
+        "motor_temp_c": 61.26,
+        "pour_cycle_time_s": 27.79
+      }
+    },
+    {
+      "timestamp": "2026-06-09T12:00:00+02:00",
+      "signals": {
+        "load_pct": 74.46,
+        "motor_temp_c": 61.86,
+        "pour_cycle_time_s": 27.9
+      }
+    },
+    {
+      "timestamp": "2026-06-09T13:00:00+02:00",
+      "signals": {
+        "load_pct": 73.93,
+        "motor_temp_c": 61.45,
+        "pour_cycle_time_s": 28.1
+      }
+    },
+    {
+      "timestamp": "2026-06-09T14:00:00+02:00",
+      "signals": {
+        "load_pct": 74.77,
+        "motor_temp_c": 61.29,
+        "pour_cycle_time_s": 28.03
+      }
+    },
+    {
+      "timestamp": "2026-06-09T15:00:00+02:00",
+      "signals": {
+        "load_pct": 74.07,
+        "motor_temp_c": 62.62,
+        "pour_cycle_time_s": 27.94
+      }
+    },
+    {
+      "timestamp": "2026-06-09T16:00:00+02:00",
+      "signals": {
+        "load_pct": 73.92,
+        "motor_temp_c": 60.69,
+        "pour_cycle_time_s": 28.08
+      }
+    }
+  ],
+  "DEV-B001": [
+    {
+      "timestamp": "2026-06-06T17:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.44,
+        "vibration_rms_mm_s": 1.68,
+        "feed_rate_mm_min": 421.71
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.75,
+        "vibration_rms_mm_s": 1.51,
+        "feed_rate_mm_min": 424.31
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.14,
+        "vibration_rms_mm_s": 1.69,
+        "feed_rate_mm_min": 423.27
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.85,
+        "vibration_rms_mm_s": 1.74,
+        "feed_rate_mm_min": 422.77
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.14,
+        "vibration_rms_mm_s": 1.5,
+        "feed_rate_mm_min": 416.96
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.26,
+        "vibration_rms_mm_s": 1.67,
+        "feed_rate_mm_min": 420.02
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.45,
+        "vibration_rms_mm_s": 1.5,
+        "feed_rate_mm_min": 416.12
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.97,
+        "vibration_rms_mm_s": 1.7,
+        "feed_rate_mm_min": 419.41
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.07,
+        "vibration_rms_mm_s": 1.5,
+        "feed_rate_mm_min": 424.07
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.99,
+        "vibration_rms_mm_s": 1.63,
+        "feed_rate_mm_min": 424.26
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.99,
+        "vibration_rms_mm_s": 1.6,
+        "feed_rate_mm_min": 424.15
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.32,
+        "vibration_rms_mm_s": 1.55,
+        "feed_rate_mm_min": 417.9
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.22,
+        "vibration_rms_mm_s": 1.6,
+        "feed_rate_mm_min": 419.69
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.95,
+        "vibration_rms_mm_s": 1.57,
+        "feed_rate_mm_min": 423.67
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.75,
+        "vibration_rms_mm_s": 1.6,
+        "feed_rate_mm_min": 424.03
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.88,
+        "vibration_rms_mm_s": 1.49,
+        "feed_rate_mm_min": 424.91
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.59,
+        "vibration_rms_mm_s": 1.69,
+        "feed_rate_mm_min": 420.49
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.12,
+        "vibration_rms_mm_s": 1.71,
+        "feed_rate_mm_min": 424.94
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.73,
+        "vibration_rms_mm_s": 1.68,
+        "feed_rate_mm_min": 422.42
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.67,
+        "vibration_rms_mm_s": 1.72,
+        "feed_rate_mm_min": 417.1
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.18,
+        "vibration_rms_mm_s": 1.66,
+        "feed_rate_mm_min": 423.15
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.52,
+        "vibration_rms_mm_s": 1.63,
+        "feed_rate_mm_min": 424.73
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.94,
+        "vibration_rms_mm_s": 1.75,
+        "feed_rate_mm_min": 416.01
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.68,
+        "vibration_rms_mm_s": 1.54,
+        "feed_rate_mm_min": 421.15
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53,
+        "vibration_rms_mm_s": 1.73,
+        "feed_rate_mm_min": 424.33
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.15,
+        "vibration_rms_mm_s": 1.54,
+        "feed_rate_mm_min": 419.7
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.37,
+        "vibration_rms_mm_s": 1.7,
+        "feed_rate_mm_min": 421.44
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.91,
+        "vibration_rms_mm_s": 1.74,
+        "feed_rate_mm_min": 423.72
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.04,
+        "vibration_rms_mm_s": 1.48,
+        "feed_rate_mm_min": 420.69
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.99,
+        "vibration_rms_mm_s": 1.64,
+        "feed_rate_mm_min": 416.53
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.02,
+        "vibration_rms_mm_s": 1.45,
+        "feed_rate_mm_min": 415.4
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.37,
+        "vibration_rms_mm_s": 1.64,
+        "feed_rate_mm_min": 421.47
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.3,
+        "vibration_rms_mm_s": 1.72,
+        "feed_rate_mm_min": 418.9
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.05,
+        "vibration_rms_mm_s": 1.53,
+        "feed_rate_mm_min": 421.87
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.89,
+        "vibration_rms_mm_s": 1.49,
+        "feed_rate_mm_min": 424.54
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.05,
+        "vibration_rms_mm_s": 1.72,
+        "feed_rate_mm_min": 421.07
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.78,
+        "vibration_rms_mm_s": 1.45,
+        "feed_rate_mm_min": 415.63
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.34,
+        "vibration_rms_mm_s": 1.71,
+        "feed_rate_mm_min": 422.4
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.98,
+        "vibration_rms_mm_s": 1.71,
+        "feed_rate_mm_min": 415.53
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.95,
+        "vibration_rms_mm_s": 1.59,
+        "feed_rate_mm_min": 419.19
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.49,
+        "vibration_rms_mm_s": 1.47,
+        "feed_rate_mm_min": 417.55
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.85,
+        "vibration_rms_mm_s": 1.47,
+        "feed_rate_mm_min": 424.78
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.3,
+        "vibration_rms_mm_s": 1.73,
+        "feed_rate_mm_min": 415.04
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.07,
+        "vibration_rms_mm_s": 1.45,
+        "feed_rate_mm_min": 422.5
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.41,
+        "vibration_rms_mm_s": 1.68,
+        "feed_rate_mm_min": 421.32
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.59,
+        "vibration_rms_mm_s": 1.63,
+        "feed_rate_mm_min": 415.68
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.83,
+        "vibration_rms_mm_s": 1.73,
+        "feed_rate_mm_min": 419.73
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.41,
+        "vibration_rms_mm_s": 1.5,
+        "feed_rate_mm_min": 417.65
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.56,
+        "vibration_rms_mm_s": 1.68,
+        "feed_rate_mm_min": 423.61
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.54,
+        "vibration_rms_mm_s": 1.47,
+        "feed_rate_mm_min": 421.76
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.6,
+        "vibration_rms_mm_s": 1.62,
+        "feed_rate_mm_min": 416.28
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.98,
+        "vibration_rms_mm_s": 1.64,
+        "feed_rate_mm_min": 421.33
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.93,
+        "vibration_rms_mm_s": 1.66,
+        "feed_rate_mm_min": 421.08
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.72,
+        "vibration_rms_mm_s": 1.51,
+        "feed_rate_mm_min": 419.7
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.58,
+        "vibration_rms_mm_s": 1.6,
+        "feed_rate_mm_min": 421.35
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.76,
+        "vibration_rms_mm_s": 1.47,
+        "feed_rate_mm_min": 420.19
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.53,
+        "vibration_rms_mm_s": 1.54,
+        "feed_rate_mm_min": 420.41
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.12,
+        "vibration_rms_mm_s": 1.63,
+        "feed_rate_mm_min": 416.15
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.78,
+        "vibration_rms_mm_s": 1.57,
+        "feed_rate_mm_min": 421.6
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.77,
+        "vibration_rms_mm_s": 1.49,
+        "feed_rate_mm_min": 420.91
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.34,
+        "vibration_rms_mm_s": 1.5,
+        "feed_rate_mm_min": 418.25
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.74,
+        "vibration_rms_mm_s": 1.74,
+        "feed_rate_mm_min": 417.79
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.21,
+        "vibration_rms_mm_s": 1.73,
+        "feed_rate_mm_min": 423.7
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.01,
+        "vibration_rms_mm_s": 1.59,
+        "feed_rate_mm_min": 420.14
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.38,
+        "vibration_rms_mm_s": 1.46,
+        "feed_rate_mm_min": 421.28
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.58,
+        "vibration_rms_mm_s": 1.74,
+        "feed_rate_mm_min": 421.28
+      }
+    },
+    {
+      "timestamp": "2026-06-09T11:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 50.86,
+        "vibration_rms_mm_s": 1.68,
+        "feed_rate_mm_min": 424.32
+      }
+    },
+    {
+      "timestamp": "2026-06-09T12:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 53.46,
+        "vibration_rms_mm_s": 1.69,
+        "feed_rate_mm_min": 424.56
+      }
+    },
+    {
+      "timestamp": "2026-06-09T13:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.64,
+        "vibration_rms_mm_s": 1.6,
+        "feed_rate_mm_min": 416.16
+      }
+    },
+    {
+      "timestamp": "2026-06-09T14:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 52.65,
+        "vibration_rms_mm_s": 1.53,
+        "feed_rate_mm_min": 423.29
+      }
+    },
+    {
+      "timestamp": "2026-06-09T15:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.73,
+        "vibration_rms_mm_s": 1.61,
+        "feed_rate_mm_min": 420.13
+      }
+    },
+    {
+      "timestamp": "2026-06-09T16:00:00+02:00",
+      "signals": {
+        "spindle_temp_c": 51.14,
+        "vibration_rms_mm_s": 1.67,
+        "feed_rate_mm_min": 420.82
+      }
+    }
+  ],
+  "DEV-B002": [
+    {
+      "timestamp": "2026-06-06T17:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.52,
+        "humidity_pct": 44.52,
+        "parts_measured": 7.96
+      }
+    },
+    {
+      "timestamp": "2026-06-06T18:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.62,
+        "humidity_pct": 45.06,
+        "parts_measured": 8.05
+      }
+    },
+    {
+      "timestamp": "2026-06-06T19:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.48,
+        "humidity_pct": 45.93,
+        "parts_measured": 7.78
+      }
+    },
+    {
+      "timestamp": "2026-06-06T20:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.64,
+        "humidity_pct": 45.96,
+        "parts_measured": 7.56
+      }
+    },
+    {
+      "timestamp": "2026-06-06T21:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.48,
+        "humidity_pct": 45.98,
+        "parts_measured": 7.81
+      }
+    },
+    {
+      "timestamp": "2026-06-06T22:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.56,
+        "humidity_pct": 44.84,
+        "parts_measured": 7.95
+      }
+    },
+    {
+      "timestamp": "2026-06-06T23:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.65,
+        "humidity_pct": 45.35,
+        "parts_measured": 8.4
+      }
+    },
+    {
+      "timestamp": "2026-06-07T00:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.52,
+        "humidity_pct": 44.37,
+        "parts_measured": 7.56
+      }
+    },
+    {
+      "timestamp": "2026-06-07T01:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.33,
+        "humidity_pct": 44.71,
+        "parts_measured": 7.86
+      }
+    },
+    {
+      "timestamp": "2026-06-07T02:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.66,
+        "humidity_pct": 45.21,
+        "parts_measured": 7.71
+      }
+    },
+    {
+      "timestamp": "2026-06-07T03:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.46,
+        "humidity_pct": 44.71,
+        "parts_measured": 7.53
+      }
+    },
+    {
+      "timestamp": "2026-06-07T04:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.3,
+        "humidity_pct": 44.03,
+        "parts_measured": 7.74
+      }
+    },
+    {
+      "timestamp": "2026-06-07T05:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.35,
+        "humidity_pct": 44.02,
+        "parts_measured": 7.75
+      }
+    },
+    {
+      "timestamp": "2026-06-07T06:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.38,
+        "humidity_pct": 45.51,
+        "parts_measured": 7.98
+      }
+    },
+    {
+      "timestamp": "2026-06-07T07:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.56,
+        "humidity_pct": 45.32,
+        "parts_measured": 7.85
+      }
+    },
+    {
+      "timestamp": "2026-06-07T08:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.64,
+        "humidity_pct": 44.29,
+        "parts_measured": 7.78
+      }
+    },
+    {
+      "timestamp": "2026-06-07T09:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.4,
+        "humidity_pct": 45.26,
+        "parts_measured": 8.17
+      }
+    },
+    {
+      "timestamp": "2026-06-07T10:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.41,
+        "humidity_pct": 45.06,
+        "parts_measured": 8.45
+      }
+    },
+    {
+      "timestamp": "2026-06-07T11:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.42,
+        "humidity_pct": 44.52,
+        "parts_measured": 8.03
+      }
+    },
+    {
+      "timestamp": "2026-06-07T12:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.61,
+        "humidity_pct": 44.48,
+        "parts_measured": 8.33
+      }
+    },
+    {
+      "timestamp": "2026-06-07T13:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.35,
+        "humidity_pct": 45.76,
+        "parts_measured": 7.77
+      }
+    },
+    {
+      "timestamp": "2026-06-07T14:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.59,
+        "humidity_pct": 45.21,
+        "parts_measured": 7.76
+      }
+    },
+    {
+      "timestamp": "2026-06-07T15:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.32,
+        "humidity_pct": 45.65,
+        "parts_measured": 7.72
+      }
+    },
+    {
+      "timestamp": "2026-06-07T16:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.48,
+        "humidity_pct": 45.92,
+        "parts_measured": 8.07
+      }
+    },
+    {
+      "timestamp": "2026-06-07T17:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.46,
+        "humidity_pct": 44.86,
+        "parts_measured": 8.22
+      }
+    },
+    {
+      "timestamp": "2026-06-07T18:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.41,
+        "humidity_pct": 45.28,
+        "parts_measured": 7.59
+      }
+    },
+    {
+      "timestamp": "2026-06-07T19:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.51,
+        "humidity_pct": 44.04,
+        "parts_measured": 7.6
+      }
+    },
+    {
+      "timestamp": "2026-06-07T20:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.51,
+        "humidity_pct": 45.96,
+        "parts_measured": 7.66
+      }
+    },
+    {
+      "timestamp": "2026-06-07T21:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.6,
+        "humidity_pct": 45.88,
+        "parts_measured": 8.19
+      }
+    },
+    {
+      "timestamp": "2026-06-07T22:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.52,
+        "humidity_pct": 44.62,
+        "parts_measured": 7.6
+      }
+    },
+    {
+      "timestamp": "2026-06-07T23:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.46,
+        "humidity_pct": 45.02,
+        "parts_measured": 8.32
+      }
+    },
+    {
+      "timestamp": "2026-06-08T00:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.57,
+        "humidity_pct": 45.92,
+        "parts_measured": 7.76
+      }
+    },
+    {
+      "timestamp": "2026-06-08T01:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.63,
+        "humidity_pct": 44.15,
+        "parts_measured": 8.34
+      }
+    },
+    {
+      "timestamp": "2026-06-08T02:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.4,
+        "humidity_pct": 44.55,
+        "parts_measured": 8.47
+      }
+    },
+    {
+      "timestamp": "2026-06-08T03:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.44,
+        "humidity_pct": 45.93,
+        "parts_measured": 7.57
+      }
+    },
+    {
+      "timestamp": "2026-06-08T04:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.53,
+        "humidity_pct": 45.15,
+        "parts_measured": 8.06
+      }
+    },
+    {
+      "timestamp": "2026-06-08T05:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.43,
+        "humidity_pct": 45.03,
+        "parts_measured": 8.35
+      }
+    },
+    {
+      "timestamp": "2026-06-08T06:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.3,
+        "humidity_pct": 44.4,
+        "parts_measured": 7.86
+      }
+    },
+    {
+      "timestamp": "2026-06-08T07:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.32,
+        "humidity_pct": 44.1,
+        "parts_measured": 8
+      }
+    },
+    {
+      "timestamp": "2026-06-08T08:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.65,
+        "humidity_pct": 44.96,
+        "parts_measured": 8.2
+      }
+    },
+    {
+      "timestamp": "2026-06-08T09:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.66,
+        "humidity_pct": 45.82,
+        "parts_measured": 7.87
+      }
+    },
+    {
+      "timestamp": "2026-06-08T10:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.51,
+        "humidity_pct": 45.51,
+        "parts_measured": 8.43
+      }
+    },
+    {
+      "timestamp": "2026-06-08T11:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.36,
+        "humidity_pct": 44.86,
+        "parts_measured": 8.29
+      }
+    },
+    {
+      "timestamp": "2026-06-08T12:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.4,
+        "humidity_pct": 44.7,
+        "parts_measured": 7.87
+      }
+    },
+    {
+      "timestamp": "2026-06-08T13:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.38,
+        "humidity_pct": 45.88,
+        "parts_measured": 7.58
+      }
+    },
+    {
+      "timestamp": "2026-06-08T14:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.47,
+        "humidity_pct": 45.21,
+        "parts_measured": 7.85
+      }
+    },
+    {
+      "timestamp": "2026-06-08T15:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.44,
+        "humidity_pct": 45.55,
+        "parts_measured": 8.09
+      }
+    },
+    {
+      "timestamp": "2026-06-08T16:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.45,
+        "humidity_pct": 45.71,
+        "parts_measured": 7.72
+      }
+    },
+    {
+      "timestamp": "2026-06-08T17:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.67,
+        "humidity_pct": 44.53,
+        "parts_measured": 8.15
+      }
+    },
+    {
+      "timestamp": "2026-06-08T18:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.46,
+        "humidity_pct": 44.84,
+        "parts_measured": 7.79
+      }
+    },
+    {
+      "timestamp": "2026-06-08T19:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.4,
+        "humidity_pct": 45.49,
+        "parts_measured": 8.08
+      }
+    },
+    {
+      "timestamp": "2026-06-08T20:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.65,
+        "humidity_pct": 45.3,
+        "parts_measured": 8.42
+      }
+    },
+    {
+      "timestamp": "2026-06-08T21:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.58,
+        "humidity_pct": 45.1,
+        "parts_measured": 8.23
+      }
+    },
+    {
+      "timestamp": "2026-06-08T22:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.35,
+        "humidity_pct": 45.73,
+        "parts_measured": 7.92
+      }
+    },
+    {
+      "timestamp": "2026-06-08T23:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.54,
+        "humidity_pct": 44.03,
+        "parts_measured": 7.92
+      }
+    },
+    {
+      "timestamp": "2026-06-09T00:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.49,
+        "humidity_pct": 44.82,
+        "parts_measured": 7.64
+      }
+    },
+    {
+      "timestamp": "2026-06-09T01:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.4,
+        "humidity_pct": 44.94,
+        "parts_measured": 8.49
+      }
+    },
+    {
+      "timestamp": "2026-06-09T02:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.41,
+        "humidity_pct": 45.22,
+        "parts_measured": 7.9
+      }
+    },
+    {
+      "timestamp": "2026-06-09T03:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.7,
+        "humidity_pct": 44.49,
+        "parts_measured": 8.28
+      }
+    },
+    {
+      "timestamp": "2026-06-09T04:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.63,
+        "humidity_pct": 45.6,
+        "parts_measured": 8.04
+      }
+    },
+    {
+      "timestamp": "2026-06-09T05:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.37,
+        "humidity_pct": 45.36,
+        "parts_measured": 7.61
+      }
+    },
+    {
+      "timestamp": "2026-06-09T06:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.49,
+        "humidity_pct": 44.62,
+        "parts_measured": 8.4
+      }
+    },
+    {
+      "timestamp": "2026-06-09T07:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.35,
+        "humidity_pct": 44.22,
+        "parts_measured": 7.82
+      }
+    },
+    {
+      "timestamp": "2026-06-09T08:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.53,
+        "humidity_pct": 44.97,
+        "parts_measured": 8.3
+      }
+    },
+    {
+      "timestamp": "2026-06-09T09:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.38,
+        "humidity_pct": 45.72,
+        "parts_measured": 8.25
+      }
+    },
+    {
+      "timestamp": "2026-06-09T10:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.47,
+        "humidity_pct": 45.29,
+        "parts_measured": 8.08
+      }
+    },
+    {
+      "timestamp": "2026-06-09T11:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.57,
+        "humidity_pct": 44.53,
+        "parts_measured": 8.22
+      }
+    },
+    {
+      "timestamp": "2026-06-09T12:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.45,
+        "humidity_pct": 44.26,
+        "parts_measured": 8.07
+      }
+    },
+    {
+      "timestamp": "2026-06-09T13:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.68,
+        "humidity_pct": 45.33,
+        "parts_measured": 8.07
+      }
+    },
+    {
+      "timestamp": "2026-06-09T14:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.61,
+        "humidity_pct": 44.55,
+        "parts_measured": 7.61
+      }
+    },
+    {
+      "timestamp": "2026-06-09T15:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.42,
+        "humidity_pct": 44.77,
+        "parts_measured": 8.13
+      }
+    },
+    {
+      "timestamp": "2026-06-09T16:00:00+02:00",
+      "signals": {
+        "ambient_temp_c": 20.68,
+        "humidity_pct": 44.82,
+        "parts_measured": 8.03
+      }
+    }
+  ]
+}

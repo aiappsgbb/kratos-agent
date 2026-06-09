@@ -1,0 +1,41 @@
+[
+  { "plant_id": "P-CLE", "line": "Line 1 — Assembly",  "date": "2026-06-03", "availability_pct": 89.0, "performance_pct": 95.0, "quality_pct": 98.5, "oee_pct": 83.2, "target_oee_pct": 80.0, "units_produced": 28, "units_target": 30 },
+  { "plant_id": "P-CLE", "line": "Line 1 — Assembly",  "date": "2026-06-04", "availability_pct": 96.0, "performance_pct": 96.0, "quality_pct": 99.0, "oee_pct": 91.3, "target_oee_pct": 80.0, "units_produced": 32, "units_target": 30 },
+  { "plant_id": "P-CLE", "line": "Line 1 — Assembly",  "date": "2026-06-05", "availability_pct": 95.0, "performance_pct": 95.0, "quality_pct": 98.5, "oee_pct": 88.9, "target_oee_pct": 80.0, "units_produced": 31, "units_target": 30 },
+  { "plant_id": "P-CLE", "line": "Line 1 — Assembly",  "date": "2026-06-06", "availability_pct": 94.0, "performance_pct": 94.0, "quality_pct": 98.0, "oee_pct": 86.6, "target_oee_pct": 80.0, "units_produced": 30, "units_target": 30 },
+  { "plant_id": "P-CLE", "line": "Line 1 — Assembly",  "date": "2026-06-07", "availability_pct": 95.0, "performance_pct": 95.0, "quality_pct": 98.5, "oee_pct": 88.9, "target_oee_pct": 80.0, "units_produced": 31, "units_target": 30 },
+  { "plant_id": "P-CLE", "line": "Line 1 — Assembly",  "date": "2026-06-08", "availability_pct": 92.0, "performance_pct": 94.0, "quality_pct": 98.0, "oee_pct": 84.7, "target_oee_pct": 80.0, "units_produced": 29, "units_target": 30 },
+  { "plant_id": "P-CLE", "line": "Line 1 — Assembly",  "date": "2026-06-09", "availability_pct": 94.0, "performance_pct": 95.0, "quality_pct": 98.5, "oee_pct": 87.9, "target_oee_pct": 80.0, "units_produced": 12, "units_target": 13 },
+
+  { "plant_id": "P-CLE", "line": "Line 2 — Assembly",  "date": "2026-06-03", "availability_pct": 88.0, "performance_pct": 91.0, "quality_pct": 96.0, "oee_pct": 76.9, "target_oee_pct": 80.0, "units_produced": 46, "units_target": 50 },
+  { "plant_id": "P-CLE", "line": "Line 2 — Assembly",  "date": "2026-06-04", "availability_pct": 89.0, "performance_pct": 90.0, "quality_pct": 95.5, "oee_pct": 76.5, "target_oee_pct": 80.0, "units_produced": 46, "units_target": 50 },
+  { "plant_id": "P-CLE", "line": "Line 2 — Assembly",  "date": "2026-06-05", "availability_pct": 87.0, "performance_pct": 90.0, "quality_pct": 96.0, "oee_pct": 75.2, "target_oee_pct": 80.0, "units_produced": 45, "units_target": 50 },
+  { "plant_id": "P-CLE", "line": "Line 2 — Assembly",  "date": "2026-06-06", "availability_pct": 89.0, "performance_pct": 91.0, "quality_pct": 96.0, "oee_pct": 77.8, "target_oee_pct": 80.0, "units_produced": 47, "units_target": 50 },
+  { "plant_id": "P-CLE", "line": "Line 2 — Assembly",  "date": "2026-06-07", "availability_pct": 84.0, "performance_pct": 91.0, "quality_pct": 94.0, "oee_pct": 71.8, "target_oee_pct": 80.0, "units_produced": 43, "units_target": 50 },
+  { "plant_id": "P-CLE", "line": "Line 2 — Assembly",  "date": "2026-06-08", "availability_pct": 90.0, "performance_pct": 91.0, "quality_pct": 95.0, "oee_pct": 77.8, "target_oee_pct": 80.0, "units_produced": 47, "units_target": 50 },
+  { "plant_id": "P-CLE", "line": "Line 2 — Assembly",  "date": "2026-06-09", "availability_pct": 89.0, "performance_pct": 90.0, "quality_pct": 94.5, "oee_pct": 75.7, "target_oee_pct": 80.0, "units_produced": 18, "units_target": 22 },
+
+  { "plant_id": "P-CLE", "line": "Line 3 — Precision", "date": "2026-06-03", "availability_pct": 92.0, "performance_pct": 92.0, "quality_pct": 96.0, "oee_pct": 81.3, "target_oee_pct": 80.0, "units_produced": 25, "units_target": 25 },
+  { "plant_id": "P-CLE", "line": "Line 3 — Precision", "date": "2026-06-04", "availability_pct": 90.0, "performance_pct": 91.0, "quality_pct": 95.5, "oee_pct": 78.2, "target_oee_pct": 80.0, "units_produced": 24, "units_target": 25 },
+  { "plant_id": "P-CLE", "line": "Line 3 — Precision", "date": "2026-06-05", "availability_pct": 88.0, "performance_pct": 90.0, "quality_pct": 93.0, "oee_pct": 73.7, "target_oee_pct": 80.0, "units_produced": 22, "units_target": 25 },
+  { "plant_id": "P-CLE", "line": "Line 3 — Precision", "date": "2026-06-06", "availability_pct": 86.0, "performance_pct": 89.0, "quality_pct": 91.0, "oee_pct": 69.7, "target_oee_pct": 80.0, "units_produced": 21, "units_target": 25 },
+  { "plant_id": "P-CLE", "line": "Line 3 — Precision", "date": "2026-06-07", "availability_pct": 84.0, "performance_pct": 88.0, "quality_pct": 88.0, "oee_pct": 65.0, "target_oee_pct": 80.0, "units_produced": 20, "units_target": 25 },
+  { "plant_id": "P-CLE", "line": "Line 3 — Precision", "date": "2026-06-08", "availability_pct": 80.0, "performance_pct": 87.0, "quality_pct": 84.0, "oee_pct": 58.5, "target_oee_pct": 80.0, "units_produced": 18, "units_target": 25 },
+  { "plant_id": "P-CLE", "line": "Line 3 — Precision", "date": "2026-06-09", "availability_pct": 72.0, "performance_pct": 85.0, "quality_pct": 80.0, "oee_pct": 49.0, "target_oee_pct": 80.0, "units_produced":  5, "units_target": 11 },
+
+  { "plant_id": "P-MUN", "line": "Line A — Casting",   "date": "2026-06-03", "availability_pct": 96.0, "performance_pct": 97.0, "quality_pct": 99.0, "oee_pct": 92.2, "target_oee_pct": 80.0, "units_produced": 60, "units_target": 60 },
+  { "plant_id": "P-MUN", "line": "Line A — Casting",   "date": "2026-06-04", "availability_pct": 95.0, "performance_pct": 96.0, "quality_pct": 99.0, "oee_pct": 90.3, "target_oee_pct": 80.0, "units_produced": 59, "units_target": 60 },
+  { "plant_id": "P-MUN", "line": "Line A — Casting",   "date": "2026-06-05", "availability_pct": 94.0, "performance_pct": 96.0, "quality_pct": 98.5, "oee_pct": 88.9, "target_oee_pct": 80.0, "units_produced": 58, "units_target": 60 },
+  { "plant_id": "P-MUN", "line": "Line A — Casting",   "date": "2026-06-06", "availability_pct": 95.0, "performance_pct": 97.0, "quality_pct": 99.0, "oee_pct": 91.2, "target_oee_pct": 80.0, "units_produced": 60, "units_target": 60 },
+  { "plant_id": "P-MUN", "line": "Line A — Casting",   "date": "2026-06-07", "availability_pct": 94.0, "performance_pct": 96.0, "quality_pct": 98.5, "oee_pct": 88.9, "target_oee_pct": 80.0, "units_produced": 58, "units_target": 60 },
+  { "plant_id": "P-MUN", "line": "Line A — Casting",   "date": "2026-06-08", "availability_pct": 96.0, "performance_pct": 97.0, "quality_pct": 99.0, "oee_pct": 92.2, "target_oee_pct": 80.0, "units_produced": 60, "units_target": 60 },
+  { "plant_id": "P-MUN", "line": "Line A — Casting",   "date": "2026-06-09", "availability_pct": 95.0, "performance_pct": 97.0, "quality_pct": 99.0, "oee_pct": 91.2, "target_oee_pct": 80.0, "units_produced": 27, "units_target": 28 },
+
+  { "plant_id": "P-MUN", "line": "Line B — Machining", "date": "2026-06-03", "availability_pct": 93.0, "performance_pct": 95.0, "quality_pct": 97.0, "oee_pct": 85.7, "target_oee_pct": 80.0, "units_produced": 36, "units_target": 36 },
+  { "plant_id": "P-MUN", "line": "Line B — Machining", "date": "2026-06-04", "availability_pct": 92.0, "performance_pct": 94.0, "quality_pct": 97.0, "oee_pct": 83.9, "target_oee_pct": 80.0, "units_produced": 35, "units_target": 36 },
+  { "plant_id": "P-MUN", "line": "Line B — Machining", "date": "2026-06-05", "availability_pct": 94.0, "performance_pct": 95.0, "quality_pct": 97.5, "oee_pct": 87.1, "target_oee_pct": 80.0, "units_produced": 37, "units_target": 36 },
+  { "plant_id": "P-MUN", "line": "Line B — Machining", "date": "2026-06-06", "availability_pct": 92.0, "performance_pct": 94.0, "quality_pct": 97.0, "oee_pct": 83.9, "target_oee_pct": 80.0, "units_produced": 35, "units_target": 36 },
+  { "plant_id": "P-MUN", "line": "Line B — Machining", "date": "2026-06-07", "availability_pct": 91.0, "performance_pct": 94.0, "quality_pct": 96.5, "oee_pct": 82.6, "target_oee_pct": 80.0, "units_produced": 34, "units_target": 36 },
+  { "plant_id": "P-MUN", "line": "Line B — Machining", "date": "2026-06-08", "availability_pct": 93.0, "performance_pct": 95.0, "quality_pct": 97.0, "oee_pct": 85.7, "target_oee_pct": 80.0, "units_produced": 36, "units_target": 36 },
+  { "plant_id": "P-MUN", "line": "Line B — Machining", "date": "2026-06-09", "availability_pct": 92.0, "performance_pct": 94.0, "quality_pct": 97.0, "oee_pct": 83.9, "target_oee_pct": 80.0, "units_produced": 17, "units_target": 17 }
+]

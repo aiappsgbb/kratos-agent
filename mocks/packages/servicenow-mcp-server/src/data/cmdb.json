@@ -1,9 +1,117 @@
 [
-  { "id": "CI-IDP-01",       "name": "Olympus Identity Platform",            "type": "Application",    "environment": "Production", "owner_group": "Identity & Access",   "status": "Operational",   "depends_on": ["CI-AZ-TENANT"]                  },
-  { "id": "CI-EXO-01",       "name": "Exchange Online (olympus.com)",        "type": "Application",    "environment": "Production", "owner_group": "Mobile Productivity", "status": "Operational",   "depends_on": ["CI-AZ-TENANT"]                  },
-  { "id": "CI-AZ-TENANT",    "name": "Azure tenant — olympus.onmicrosoft",    "type": "Tenant",         "environment": "Production", "owner_group": "Identity & Access",   "status": "Operational",   "depends_on": []                                 },
-  { "id": "CI-GITHUB-ORG",   "name": "github.com/olympus organization",      "type": "SaaS",           "environment": "Production", "owner_group": "Identity & Access",   "status": "Operational",   "depends_on": ["CI-IDP-01"]                      },
-  { "id": "CI-WAP-CLE-03",   "name": "Cleveland Plant — WAP cluster 3",      "type": "Network Device", "environment": "Production", "owner_group": "Network",             "status": "Degraded",      "depends_on": ["CI-NET-CLE-CORE"]                },
-  { "id": "CI-NET-CLE-CORE", "name": "Cleveland Plant — Core network",       "type": "Network",        "environment": "Production", "owner_group": "Network",             "status": "Operational",   "depends_on": []                                 },
-  { "id": "CI-LAP-MBP-2002", "name": "MacBook Pro — Elena Morales (EMP-2002)","type": "Laptop",        "environment": "Production", "owner_group": "Endpoint",            "status": "Operational",   "depends_on": []                                 }
+  {
+    "id": "CI-IDP-01",
+    "name": "Olympus Identity Platform",
+    "type": "Application",
+    "environment": "Production",
+    "owner_group": "Identity & Access",
+    "status": "Operational",
+    "depends_on": [
+      "CI-AZ-TENANT"
+    ]
+  },
+  {
+    "id": "CI-EXO-01",
+    "name": "Exchange Online (olympus.com)",
+    "type": "Application",
+    "environment": "Production",
+    "owner_group": "Mobile Productivity",
+    "status": "Operational",
+    "depends_on": [
+      "CI-AZ-TENANT"
+    ]
+  },
+  {
+    "id": "CI-AZ-TENANT",
+    "name": "Azure tenant \u2014 olympus.onmicrosoft",
+    "type": "Tenant",
+    "environment": "Production",
+    "owner_group": "Identity & Access",
+    "status": "Operational",
+    "depends_on": []
+  },
+  {
+    "id": "CI-GITHUB-ORG",
+    "name": "github.com/olympus organization",
+    "type": "SaaS",
+    "environment": "Production",
+    "owner_group": "Identity & Access",
+    "status": "Operational",
+    "depends_on": [
+      "CI-IDP-01"
+    ]
+  },
+  {
+    "id": "CI-WAP-CLE-03",
+    "name": "Cleveland Plant \u2014 WAP cluster 3",
+    "type": "Network Device",
+    "environment": "Production",
+    "owner_group": "Network",
+    "status": "Degraded",
+    "depends_on": [
+      "CI-NET-CLE-CORE"
+    ]
+  },
+  {
+    "id": "CI-NET-CLE-CORE",
+    "name": "Cleveland Plant \u2014 Core network",
+    "type": "Network",
+    "environment": "Production",
+    "owner_group": "Network",
+    "status": "Operational",
+    "depends_on": []
+  },
+  {
+    "id": "CI-LAP-MBP-2002",
+    "name": "MacBook Pro \u2014 Elena Morales (EMP-2002)",
+    "type": "Laptop",
+    "environment": "Production",
+    "owner_group": "Endpoint",
+    "status": "Operational",
+    "depends_on": []
+  },
+  {
+    "id": "CI-DEV-3001",
+    "name": "Cleveland Plant \u2014 Line 3 Precision Spindle (DEV-3001)",
+    "type": "Plant Equipment",
+    "environment": "Production",
+    "owner_group": "Plant Maintenance",
+    "status": "Degraded",
+    "depends_on": [
+      "CI-NET-CLE-CORE"
+    ]
+  },
+  {
+    "id": "CI-DEV-3002",
+    "name": "Cleveland Plant \u2014 Line 3 Conveyor (DEV-3002)",
+    "type": "Plant Equipment",
+    "environment": "Production",
+    "owner_group": "Plant Maintenance",
+    "status": "Operational",
+    "depends_on": [
+      "CI-NET-CLE-CORE"
+    ]
+  },
+  {
+    "id": "CI-DEV-2002",
+    "name": "Cleveland Plant \u2014 Line 2 Vision Inspection (DEV-2002)",
+    "type": "Plant Equipment",
+    "environment": "Production",
+    "owner_group": "Plant Maintenance",
+    "status": "Operational",
+    "depends_on": [
+      "CI-NET-CLE-CORE"
+    ]
+  },
+  {
+    "id": "CI-DEV-1001",
+    "name": "Cleveland Plant \u2014 Line 1 Robotic Arm (DEV-1001)",
+    "type": "Plant Equipment",
+    "environment": "Production",
+    "owner_group": "Plant Maintenance",
+    "status": "Operational",
+    "depends_on": [
+      "CI-NET-CLE-CORE"
+    ]
+  }
 ]

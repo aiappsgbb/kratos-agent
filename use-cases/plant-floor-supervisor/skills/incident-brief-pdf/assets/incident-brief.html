@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Olympus Industries — Plant Floor Incident Brief · {{LINE}} · {{DATE}}</title>
+  <style>
+    @page { size: A4; margin: 12mm 14mm; }
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: #1a1a1a;
+      font-size: 10pt;
+      line-height: 1.45;
+      margin: 0;
+    }
+    .cover {
+      background: linear-gradient(135deg, #0b1f3a 0%, #1e3a5f 100%);
+      color: #fff;
+      padding: 24mm 14mm 18mm 14mm;
+      margin: -12mm -14mm 0 -14mm;
+    }
+    .cover .firm  { font-size: 11pt; letter-spacing: 4px; color: #d4a017; font-weight: 600; }
+    .cover h1    { font-size: 26pt; margin: 8mm 0 3mm 0; font-weight: 300; line-height: 1.15; }
+    .cover .sub  { font-size: 12pt; color: #cfd8dc; margin-bottom: 16mm; }
+    .cover .meta {
+      display: flex; justify-content: space-between;
+      font-size: 9pt; color: #cfd8dc;
+      border-top: 1px solid #d4a017; padding-top: 5mm;
+    }
+    .cover .meta strong { color: #fff; }
+
+    h2 {
+      font-size: 13pt; color: #0b1f3a; margin-top: 9mm; margin-bottom: 3mm;
+      border-bottom: 2px solid #d4a017; padding-bottom: 2mm;
+    }
+    h3 { font-size: 11pt; color: #0b1f3a; margin-top: 6mm; margin-bottom: 2mm; }
+
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm;
+      margin: 6mm 0 6mm 0;
+    }
+    .kpi {
+      background: #f5f7fa; border-left: 4px solid #d4a017;
+      padding: 3mm 4mm; border-radius: 2px;
+    }
+    .kpi .label { font-size: 8pt; text-transform: uppercase; color: #607d8b; letter-spacing: 1px; }
+    .kpi .value { font-size: 18pt; color: #0b1f3a; font-weight: 600; }
+
+    table {
+      border-collapse: collapse; width: 100%; margin: 3mm 0 4mm 0;
+      font-size: 9pt;
+    }
+    th, td {
+      padding: 1.6mm 2mm; border-bottom: 1px solid #e0e6ed;
+      text-align: left; vertical-align: top;
+    }
+    th { background: #f5f7fa; color: #0b1f3a; font-weight: 600; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .chart { text-align: center; margin: 4mm 0 6mm 0; }
+    .chart img { max-width: 100%; height: auto; border: 1px solid #e0e6ed; }
+
+    .callout {
+      background: #fff3e0; border-left: 4px solid #d4a017;
+      padding: 4mm; margin: 4mm 0;
+    }
+    .callout ul { margin: 0; padding-left: 5mm; }
+
+    .flag-block { color: #c62828; font-weight: 700; }
+    .flag-ok    { color: #2e7d32; font-weight: 700; }
+
+    .section-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6mm;
+      margin: 3mm 0 5mm 0;
+    }
+    .section-grid .card {
+      background: #fafbfc; border: 1px solid #e0e6ed; padding: 3mm 4mm; border-radius: 3px;
+    }
+
+    .narrative {
+      background: #f5f7fa; padding: 4mm 5mm; border-left: 3px solid #0b1f3a;
+      font-size: 10pt; line-height: 1.6;
+    }
+
+    .recs { padding-left: 5mm; }
+    .recs li { margin-bottom: 2mm; }
+
+    .signoff {
+      margin-top: 8mm; display: grid; grid-template-columns: 1fr 1fr; gap: 8mm;
+    }
+    .signoff .box {
+      border: 1px solid #0b1f3a; padding: 5mm; min-height: 26mm;
+    }
+    .signoff .box .role  { font-size: 8pt; color: #607d8b; text-transform: uppercase; letter-spacing: 1px; }
+    .signoff .box .name  { font-size: 11pt; color: #0b1f3a; margin-top: 11mm; font-weight: 600; }
+    .signoff .box .email { font-size: 8pt; color: #607d8b; }
+    .signoff .box .date  { font-size: 8pt; color: #607d8b; margin-top: 2mm; }
+
+    .footer {
+      margin-top: 12mm; padding-top: 3mm; border-top: 1px solid #e0e6ed;
+      font-size: 8pt; color: #607d8b;
+    }
+
+    .pagebreak { page-break-after: always; }
+  </style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="firm">OLYMPUS INDUSTRIES · PLANT OPERATIONS</div>
+  <h1>{{HEADLINE}}</h1>
+  <div class="sub">{{LINE}} · Plant {{PLANT}} · {{DATE}}</div>
+  <div class="meta">
+    <span>Plant Floor Incident Brief · per SOP §7</span>
+    <span>Generated {{GENERATED_AT}}</span>
+  </div>
+</div>
+
+<h2>Today at a glance</h2>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">OEE today</div><div class="value">{{KPI_OEE}}</div></div>
+  <div class="kpi"><div class="label">vs target</div><div class="value">{{KPI_VS_TARGET}}</div></div>
+  <div class="kpi"><div class="label">vs last week</div><div class="value">{{KPI_WOW}}</div></div>
+  <div class="kpi"><div class="label">Downtime</div><div class="value">{{KPI_DOWNTIME}}</div></div>
+</div>
+
+<div class="callout">
+  <strong>Top callouts:</strong>
+  <ul>{{CALLOUTS}}</ul>
+</div>
+
+<h2>OEE trend — last 7 days</h2>
+<div class="chart">
+  <img src="data:image/png;base64,{{CHART_B64}}" alt="OEE trend chart for {{LINE}} as of {{DATE}}" />
+</div>
+
+<h2>Downtime timeline</h2>
+<table>
+  <thead><tr>
+    <th>Event</th><th>Started</th><th>Duration</th><th>Cause</th><th>PO link</th>
+  </tr></thead>
+  <tbody>{{DOWNTIME_ROWS}}</tbody>
+</table>
+
+<div class="pagebreak"></div>
+
+<h2>Root cause — what we know, what we suspect</h2>
+
+<div class="narrative">{{NARRATIVE}}</div>
+
+<div class="section-grid">
+  <div class="card"><h3>Equipment in focus</h3>{{DEVICE_BLOCK}}</div>
+  <div class="card"><h3>Production order</h3>{{PO_BLOCK}}</div>
+</div>
+
+<h3>Supplier / material signal</h3>
+{{SUPPLIER_BLOCK}}
+
+<h2>Recommended actions</h2>
+<ol class="recs">
+  {{RECOMMENDATIONS}}
+</ol>
+
+<div class="signoff">
+  <div class="box">
+    <div class="role">Plant Floor Supervisor</div>
+    <div class="name">{{SUPERVISOR_NAME}}</div>
+    <div class="email">{{SUPERVISOR_EMAIL}}</div>
+    <div class="date">Signed: _____________</div>
+  </div>
+  <div class="box">
+    <div class="role">Director, Plant Operations</div>
+    <div class="name">{{MANAGER_NAME}}</div>
+    <div class="email">{{MANAGER_EMAIL}}</div>
+    <div class="date">Signed: _____________</div>
+  </div>
+</div>
+
+<div class="footer">
+  Strictly Private &amp; Confidential · Olympus Industries Plant Operations · Cleveland Plant · Generated by Kratos Plant Floor Co-pilot · {{GENERATED_AT}}
+</div>
+
+</body>
+</html>

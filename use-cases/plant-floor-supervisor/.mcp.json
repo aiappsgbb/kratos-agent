@@ -1,0 +1,32 @@
+{
+  "sap-s4": {
+    "type": "local",
+    "command": "sap-s4-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  },
+  "azure-iot": {
+    "type": "local",
+    "command": "azure-iot-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  },
+  "workday": {
+    "type": "local",
+    "command": "workday-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  },
+  "servicenow": {
+    "type": "local",
+    "command": "servicenow-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  },
+  "m365-graph": {
+    "type": "local",
+    "command": "m365-graph-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  }
+}

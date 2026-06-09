@@ -1,7 +1,44 @@
 [
-  { "id": "AGT-301", "name": "Aaron Cole",      "email": "aaron.cole@olympus.example.com",      "group": "Endpoint",            "shift": "Day"   },
-  { "id": "AGT-302", "name": "Bea Lindgren",    "email": "bea.lindgren@olympus.example.com",    "group": "Mobile Productivity", "shift": "Day"   },
-  { "id": "AGT-303", "name": "Chen Wu",         "email": "chen.wu@olympus.example.com",         "group": "Identity & Access",   "shift": "Day"   },
-  { "id": "AGT-304", "name": "Daria Petrescu",  "email": "daria.petrescu@olympus.example.com",  "group": "Collaboration Tools", "shift": "Day"   },
-  { "id": "AGT-305", "name": "Eddie Sutherland","email": "eddie.sutherland@olympus.example.com","group": "Network",             "shift": "Night" }
+  {
+    "id": "AGT-301",
+    "name": "Aaron Cole",
+    "email": "aaron.cole@olympus.example.com",
+    "group": "Endpoint",
+    "shift": "Day"
+  },
+  {
+    "id": "AGT-302",
+    "name": "Bea Lindgren",
+    "email": "bea.lindgren@olympus.example.com",
+    "group": "Mobile Productivity",
+    "shift": "Day"
+  },
+  {
+    "id": "AGT-303",
+    "name": "Chen Wu",
+    "email": "chen.wu@olympus.example.com",
+    "group": "Identity & Access",
+    "shift": "Day"
+  },
+  {
+    "id": "AGT-304",
+    "name": "Daria Petrescu",
+    "email": "daria.petrescu@olympus.example.com",
+    "group": "Collaboration Tools",
+    "shift": "Day"
+  },
+  {
+    "id": "AGT-305",
+    "name": "Eddie Sutherland",
+    "email": "eddie.sutherland@olympus.example.com",
+    "group": "Network",
+    "shift": "Night"
+  },
+  {
+    "id": "AGT-401",
+    "name": "Reggie Bellamy",
+    "email": "reggie.bellamy@olympus.example.com",
+    "group": "Plant Maintenance",
+    "shift": "Day"
+  }
 ]
