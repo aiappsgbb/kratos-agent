@@ -5,7 +5,7 @@
   { "id": "ORG-012", "name": "Product Engineering",         "type": "Department", "parent_org_id": "ORG-010", "head_employee_id": "EMP-1012", "cost_centre": "CC-0012" },
   { "id": "ORG-020", "name": "Sales",                       "type": "Function",   "parent_org_id": "ORG-001", "head_employee_id": "EMP-1020", "cost_centre": "CC-0020" },
   { "id": "ORG-021", "name": "Field Sales — Americas",      "type": "Department", "parent_org_id": "ORG-020", "head_employee_id": "EMP-1021", "cost_centre": "CC-0021" },
-  { "id": "ORG-030", "name": "Operations",                  "type": "Function",   "parent_org_id": "ORG-001", "head_employee_id": "EMP-1030", "cost_centre": "CC-0030" },
+  { "id": "ORG-030", "name": "Operations",                  "type": "Function",   "parent_org_id": "ORG-001", "head_employee_id": "EMP-1040", "cost_centre": "CC-0030" },
   { "id": "ORG-031", "name": "Plant Operations — Cleveland","type": "Department", "parent_org_id": "ORG-030", "head_employee_id": "EMP-1031", "cost_centre": "CC-0031" },
-  { "id": "ORG-040", "name": "People",                      "type": "Function",   "parent_org_id": "ORG-001", "head_employee_id": "EMP-1040", "cost_centre": "CC-0040" }
+  { "id": "ORG-040", "name": "People",                      "type": "Function",   "parent_org_id": "ORG-001", "head_employee_id": "EMP-1030", "cost_centre": "CC-0040" }
 ]

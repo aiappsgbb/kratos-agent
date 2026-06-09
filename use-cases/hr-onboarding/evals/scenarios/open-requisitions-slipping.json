@@ -1,0 +1,12 @@
+{
+  "name": "open-requisitions-slipping",
+  "category": "happy-path",
+  "description": "Aaron-style queue overview but for HR: open reqs in Engineering, which are at risk of slipping vs target start date.",
+  "input_message": "Open requisitions in Engineering — which are slipping and who do I chase?",
+  "input_data": {
+    "expected_reqs_to_surface": ["POS-2004", "POS-2103"]
+  },
+  "expected_behavior": "Calls workday_list_positions with status='Open', filtered to org in Engineering (ORG-010, ORG-011, ORG-012). For each open req, looks up the hiring manager and computes days-to-target-start vs today (2026-06-08). Surfaces which reqs are at risk (within 2 weeks of target with no signed offer). Names the hiring manager to chase. Does NOT invent reqs.",
+  "expected_tool_calls": ["open-requisitions", "workday"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}
