@@ -15,7 +15,7 @@ same shape: a single binary on PATH, no HTTP, no auth, JSON-RPC over stdio.
 | `salesforce-mcp-server` | Salesforce CRM — accounts, opportunities, contacts, activities, cases | `use-cases/sales-account-review` |
 | `workday-mcp-server` | Workday HCM — orgs, positions, employees, time-off, payroll, shifts (+ write tools for create-employee and approve-time-off) | `use-cases/hr-onboarding` |
 | `servicenow-mcp-server` | ServiceNow ITSM — users, incidents/requests/change, work notes, KB articles, CMDB (+ write tools for create-incident, update-state, assign, add-work-note) | `use-cases/it-service-desk` |
-| `core-banking-mcp-server` | Retail core-banking — customers, accounts, transactions, cards, products, disputes (+ write tools for raise-dispute, block-card, refund-transaction, transfer-between-accounts) | `use-cases/retail-banking-csr` |
+| `core-banking-mcp-server` | Retail core-banking — customers, accounts, transactions, cards, products, disputes (+ write tools for raise-dispute, block-card, refund-transaction, transfer-between-accounts) | `use-cases/retail-banking` |
 | `epic-fhir-mcp-server` | Epic-style EHR (FHIR R4) — patients, practitioners, encounters, conditions, medications, observations (vitals + labs), allergies. Read-only by design — chart writes go in a separate persona. | `use-cases/clinician-visit-prep` |
 
 ## Build
