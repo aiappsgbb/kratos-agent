@@ -340,7 +340,7 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
     <div className="border border-border-soft rounded-xl overflow-hidden">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50/50 hover:bg-slate-100/80 transition-colors text-left"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-surface-2 hover:bg-hover transition-colors text-left"
       >
         <span className={`flex-shrink-0 w-2 h-2 rounded-full ${statusDotCls}`} />
         <span className="flex-1 text-sm font-medium text-text truncate">
@@ -372,7 +372,7 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
 
       {/* Failed-evaluator badges visible even when collapsed */}
       {!expanded && stat.failedEvaluators.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-4 pb-2 pt-1 -mt-1 bg-slate-50/50">
+        <div className="flex flex-wrap gap-1.5 px-4 pb-2 pt-1 -mt-1 bg-surface-2">
           {stat.failedEvaluators.map((name) => (
             <span
               key={name}
@@ -568,8 +568,8 @@ function EditScenarioModal({ scenario, onSave, onClose }: EditScenarioModalProps
                   onClick={() => toggleEvaluator(ev)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                     draft.evaluators.includes(ev)
-                      ? "bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-400 border-primary-200 dark:border-primary-500/30"
-                      : "bg-slate-50 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/[0.08] hover:border-slate-300"
+                      ? "bg-accent-soft text-accent border-accent"
+                      : "bg-surface text-muted border-border-soft hover:border-border"
                   }`}
                 >
                   {ev}
@@ -803,7 +803,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-primary-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
         </div>
       )}
 
@@ -844,7 +844,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
                 {scenarios.map((scenario) => (
-                  <div key={scenario.name} className="flex items-start gap-3 px-5 py-4 hover:bg-slate-50/50 transition-colors">
+                  <div key={scenario.name} className="flex items-start gap-3 px-5 py-4 hover:bg-hover transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-text truncate">{scenario.name}</span>
@@ -915,7 +915,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
               </div>
 
               {latestRun.progress && (
-                <div className="px-5 py-2 text-xs text-muted border-b border-border-soft bg-slate-50/50">
+                <div className="px-5 py-2 text-xs text-muted border-b border-border-soft bg-surface-2">
                   {latestRun.progress}
                 </div>
               )}
@@ -1028,7 +1028,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
                   <button
                     key={run.run_id}
                     onClick={() => setLatestRun(run)}
-                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-slate-50/50 transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-hover transition-colors text-left"
                   >
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusConfig[run.status].color}`}>
                       {statusConfig[run.status].label}

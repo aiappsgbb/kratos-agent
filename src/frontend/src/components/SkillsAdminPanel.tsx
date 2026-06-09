@@ -427,7 +427,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
 
       {/* Left sidebar navigation */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-[280px] bg-navy-950 border-r border-white/[0.06] flex flex-col
+        fixed inset-y-0 left-0 z-50 w-[280px] bg-surface-2 border-r border-border-soft flex flex-col
         transform transition-transform duration-300 ease-out
         md:relative md:translate-x-0 md:z-auto
         ${mobileNavOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
@@ -445,7 +445,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
               </svg>
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="font-semibold text-accent-fg text-sm tracking-tight">Agent Manager</h1>
+              <h1 className="font-semibold text-text-strong text-sm tracking-tight">Agent Manager</h1>
               <p className="text-[11px] text-muted">Configure skills, prompts &amp; MCP</p>
             </div>
             {/* Mobile close */}
@@ -470,7 +470,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
               <select
                 value={useCase}
                 onChange={(e) => onSelectUseCase?.(e.target.value)}
-                className="w-full text-sm text-text-strong bg-hover border border-border-soft rounded-lg pl-3 pr-9 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent appearance-none cursor-pointer hover:bg-hover hover:border-white/[0.14] transition-all"
+                className="w-full text-sm text-text-strong bg-hover border border-border-soft rounded-lg pl-3 pr-9 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent appearance-none cursor-pointer hover:bg-hover hover:border-border transition-all"
               >
                 {useCases.map((uc) => (
                   <option key={uc.name} value={uc.name} className="bg-surface-2">
@@ -497,11 +497,11 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
               onClick={() => { setTab(item.id); setMobileNavOpen(false); setEditingSkill(null); setShowCreate(false); setEditingMcp(null); setShowMcpCreate(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 ${
                 tab === item.id
-                  ? "bg-white/[0.12] text-white font-medium"
-                  : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
+                  ? "bg-hover text-text-strong font-medium"
+                  : "text-muted hover:text-text-strong hover:bg-hover"
               }`}
             >
-              <span className={tab === item.id ? "text-primary-400" : "text-slate-400"}>
+              <span className={tab === item.id ? "text-accent" : "text-muted"}>
                 {renderNavIcon(item.icon)}
               </span>
               {item.label}
@@ -641,7 +641,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
             /* ── MCP Servers tab ── */
             mcpLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-primary-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
               </div>
             ) : editingMcp ? (
               /* ── MCP Edit view ── */
@@ -918,7 +918,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
                 <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
                   <div className="relative mb-6">
                     <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-primary-500" />
+                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent-fg/30 border-t-accent-fg" />
                     </div>
                   </div>
                   <p className="text-sm text-muted">Analyzing system prompt and {skills.length} skills for inconsistencies...</p>
@@ -1188,7 +1188,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
               {/* Empty state */}
               {!analysisResult && !analysisLoading && (
                 <div className="flex flex-col items-center justify-center py-16">
-                  <div className="w-16 h-16 rounded-2xl bg-accent dark:from-primary-500/5 dark:to-cyan-500/5 flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-accent-soft flex items-center justify-center mb-4">
                     <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                     </svg>
@@ -1296,8 +1296,8 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
                     key={skill.name}
                     className={`flex flex-col p-5 border rounded-2xl transition-all ${
                       isEditing
-                        ? "col-span-full border-primary-300 dark:border-primary-500/30 bg-white dark:bg-navy-800 shadow-lg ring-1 ring-primary-200 dark:ring-primary-500/20"
-                        : "border-slate-200 dark:border-white/[0.06] bg-white dark:bg-navy-800 hover:border-slate-300 dark:hover:border-white/[0.1] hover:shadow-card-hover group"
+                        ? "col-span-full border-accent bg-surface shadow-lg ring-1 ring-accent/30"
+                        : "border-border-soft bg-surface hover:border-border hover:shadow-card-hover group"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3 mb-3">
@@ -1331,7 +1331,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
                       <button
                         onClick={() => handleToggle(skill)}
                         className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors ${
-                          skill.enabled ? "bg-primary-600" : "bg-slate-300 dark:bg-slate-600"
+                          skill.enabled ? "bg-accent" : "bg-border"
                         }`}
                       >
                         <span
