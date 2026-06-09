@@ -108,7 +108,7 @@ function SpanRow({ span, maxEndMs }: { span: TraceSpan; maxEndMs: number }) {
     <div>
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-2 px-4 py-2 hover:bg-slate-50/50 transition-colors text-left group"
+        className="w-full flex items-center gap-2 px-4 py-2 hover:bg-hover transition-colors text-left group"
       >
         <div style={{ width: indent, flexShrink: 0 }} />
         <SpanIcon category={span.category} />
@@ -266,7 +266,7 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
     <div className="border-b border-border-soft last:border-b-0">
       <button
         onClick={handleExpand}
-        className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50/50 transition-colors text-left"
+        className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-hover transition-colors text-left"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -294,10 +294,10 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
       </button>
 
       {expanded && (
-        <div className="border-t border-border-soft bg-slate-50/30">
+        <div className="border-t border-border-soft bg-surface-2">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-accent border-t-primary-600" />
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-accent border-t-transparent" />
             </div>
           ) : (
             <>
@@ -342,8 +342,8 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
                       onClick={() => setActiveFilter(null)}
                       className={`text-[10px] px-2 py-1 rounded-full font-medium transition-colors border ${
                         activeFilter === null
-                          ? "bg-primary-50 dark:bg-primary-500/15 text-primary-700 dark:text-primary-300 border-primary-200 dark:border-primary-500/30"
-                          : "bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/[0.08] hover:border-slate-300"
+                          ? "bg-accent-soft text-accent border-accent"
+                          : "bg-surface text-muted border-border-soft hover:border-border"
                       }`}
                     >
                       all · {allSpans.length}
@@ -356,8 +356,8 @@ function OperationRow({ op, lookbackHours }: { op: TraceOperation; lookbackHours
                           onClick={() => setActiveFilter((cur) => (cur === cat ? null : cat))}
                           className={`text-[10px] px-2 py-1 rounded-full font-medium transition-colors flex items-center gap-1 border ${
                             activeFilter === cat
-                              ? "bg-primary-50 dark:bg-primary-500/15 text-primary-700 dark:text-primary-300 border-primary-200 dark:border-primary-500/30"
-                              : "bg-white dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/[0.08] hover:border-slate-300"
+                              ? "bg-accent-soft text-accent border-accent"
+                              : "bg-surface text-muted border-border-soft hover:border-border"
                           }`}
                         >
                           <span>{spanCategoryEmoji[cat]}</span>
@@ -506,7 +506,7 @@ export function TracesAdminPanel({ useCase }: Props): JSX.Element {
       {/* Loading */}
       {loading && !traceData && (
         <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-primary-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
         </div>
       )}
 
@@ -582,7 +582,7 @@ export function TracesAdminPanel({ useCase }: Props): JSX.Element {
             </div>
 
             {/* Category legend */}
-            <div className="flex flex-wrap gap-3 px-5 py-3 border-b border-border-soft bg-slate-50/30">
+            <div className="flex flex-wrap gap-3 px-5 py-3 border-b border-border-soft bg-surface-2">
               {(Object.entries(spanCategoryColors) as [SpanCategory, string][]).map(([cat, color]) => (
                 <div key={cat} className="flex items-center gap-1.5">
                   <div className={`w-2.5 h-2.5 rounded-sm ${color}`} />

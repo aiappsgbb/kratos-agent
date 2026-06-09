@@ -163,8 +163,8 @@ export function MessageBubble({ message }: Props) {
       <div
         className={`max-w-[75%] ${
           isUser
-            ? "rounded-2xl rounded-br-sm px-4 py-3 bg-gradient-to-br from-primary-600 to-violet-600 text-white shadow-md shadow-primary-500/20"
-            : "rounded-2xl rounded-bl-sm px-4 py-3 bg-white dark:bg-navy-900/80 border border-slate-100 dark:border-white/[0.06] text-slate-800 dark:text-slate-200 shadow-sm shadow-slate-100/50 dark:shadow-black/10"
+            ? "rounded-2xl rounded-br-sm px-4 py-3 bg-gradient-to-br from-accent to-accent-hover text-accent-fg shadow-md"
+            : "rounded-2xl rounded-bl-sm px-4 py-3 bg-surface border border-border-soft text-text shadow-sm"
         }`}
       >
         {isUser ? (
@@ -175,7 +175,7 @@ export function MessageBubble({ message }: Props) {
             )}
           </>
         ) : (
-          <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-li:my-0 prose-table:my-2 prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-th:text-left prose-th:bg-slate-50 dark:prose-th:bg-white/[0.04] prose-th:font-semibold prose-table:border-collapse prose-table:w-full prose-headings:text-slate-900 dark:prose-headings:text-white prose-a:text-primary-600 dark:prose-a:text-primary-400 prose-strong:text-slate-900 dark:prose-strong:text-white">
+          <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-li:my-0 prose-table:my-2 prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-th:text-left prose-th:bg-surface-2 prose-th:font-semibold prose-table:border-collapse prose-table:w-full prose-headings:text-text-strong prose-a:text-accent prose-strong:text-text-strong">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -212,7 +212,7 @@ export function MessageBubble({ message }: Props) {
                         href={href}
                         download={urlFilename}
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-accent hover:text-accent underline decoration-primary-300 underline-offset-2 cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit transition-colors"
+                        className="inline-flex items-center gap-1.5 text-accent hover:text-accent underline decoration-accent/40 underline-offset-2 cursor-pointer bg-transparent border-none p-0 font-inherit text-inherit transition-colors"
                       >
                         <svg className="w-4 h-4 inline-block flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -226,7 +226,7 @@ export function MessageBubble({ message }: Props) {
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-accent hover:text-accent underline decoration-primary-300 underline-offset-2 transition-colors"
+                      className="inline-flex items-center gap-1 text-accent hover:text-accent underline decoration-accent/40 underline-offset-2 transition-colors"
                     >
                       {children}
                     </a>

@@ -139,7 +139,7 @@ export default function Home() {
       {/* Skip to content link for accessibility */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-accent focus:text-accent-fg focus:rounded-lg focus:text-sm focus:font-medium focus:shadow-lg"
       >
         Skip to content
       </a>
@@ -234,7 +234,7 @@ export default function Home() {
 
                 {/* Chat input bar */}
                 <div className="relative mb-8">
-                  <div className="flex items-end gap-2 p-2 bg-surface border border-border-soft rounded-2xl shadow-lg focus-within:border-primary-400/60 dark:focus-within:border-primary-500/40 focus-within:shadow-[0_0_0_3px_rgba(99,102,241,0.1),0_8px_32px_rgba(0,0,0,0.06)] transition-all duration-300">
+                  <div className="flex items-end gap-2 p-2 bg-surface border border-border-soft rounded-2xl shadow-lg focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-soft),0_8px_32px_rgba(0,0,0,0.06)] transition-all duration-300">
                     <textarea
                       ref={landingInputRef}
                       value={landingInput}
@@ -278,15 +278,15 @@ export default function Home() {
                       <button
                         key={i}
                         onClick={() => handleSampleQuestion(q)}
-                        className="group text-left px-4 py-3.5 rounded-xl border border-border-soft bg-surface hover:border-accent hover:bg-hover transition-all duration-300 hover:shadow-md hover:shadow-primary-500/[0.06] dark:hover:shadow-primary-500/[0.08] animate-slide-up-stagger active:scale-[0.98] backdrop-blur-sm"
+                        className="group text-left px-4 py-3.5 rounded-xl border border-border-soft bg-surface hover:border-accent hover:bg-hover transition-all duration-300 hover:shadow-md animate-slide-up-stagger active:scale-[0.98] backdrop-blur-sm"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-accent-soft flex items-center justify-center flex-shrink-0 group-hover:bg-primary-100 dark:group-hover:bg-primary-500/20 transition-colors">
+                          <div className="w-7 h-7 rounded-lg bg-accent-soft flex items-center justify-center flex-shrink-0 group-hover:bg-accent-soft transition-colors">
                             <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
                             </svg>
                           </div>
-                          <span className="text-sm text-text group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors leading-snug">{q}</span>
+                          <span className="text-sm text-text group-hover:text-text-strong transition-colors leading-snug">{q}</span>
                         </div>
                       </button>
                     ))}

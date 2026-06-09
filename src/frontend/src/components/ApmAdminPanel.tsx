@@ -297,7 +297,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
           </div>
           <h3 className="text-sm font-semibold text-text">APM is disabled</h3>
           <p className="mt-1 text-xs text-muted">
-            Set <code className="px-1 py-0.5 rounded bg-slate-200/80 font-mono text-[11px]">APM_ENABLED=true</code> in the backend environment to manage packages from the UI.
+            Set <code className="px-1 py-0.5 rounded bg-surface-2 font-mono text-[11px]">APM_ENABLED=true</code> in the backend environment to manage packages from the UI.
           </p>
         </div>
       </div>
@@ -363,7 +363,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
       <div className="bg-surface border border-border-soft rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-primary-600" />
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
           </div>
         ) : dependencies.length === 0 ? (
           <div className="px-6 py-10 text-center text-sm text-muted">
@@ -385,7 +385,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                 {dependencies.map((dep) => {
                   const tag = `uninstall:${dep.name}`;
                   return (
-                    <tr key={dep.name} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={dep.name} className="hover:bg-hover transition-colors">
                       <td className="px-4 py-2.5 font-mono text-text">{dep.name}</td>
                       <td className="px-4 py-2.5 font-mono text-text">{dep.ref ?? "—"}</td>
                       <td className="px-4 py-2.5 font-mono text-text truncate max-w-[220px]" title={dep.resolved ?? ""}>
@@ -452,7 +452,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
                   const pending = !s.command && !s.url;
                   const tag = `uninstall-mcp:${s.name}`;
                   return (
-                    <tr key={s.name} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={s.name} className="hover:bg-hover transition-colors">
                       <td className="px-4 py-2.5 font-mono text-text">{s.name}</td>
                       <td className="px-4 py-2.5">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium ${
@@ -508,7 +508,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
             return (
               <div
                 key={s.id}
-                className="flex flex-col gap-2 p-4 bg-slate-50/70 border border-border-soft rounded-xl"
+                className="flex flex-col gap-2 p-4 bg-surface-2 border border-border-soft rounded-xl"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -684,7 +684,7 @@ export function ApmAdminPanel({ useCase, onMcpChange }: Props) {
             return (
               <div
                 key={pkg.id}
-                className="flex flex-col gap-2 p-4 bg-slate-50/70 border border-border-soft rounded-xl"
+                className="flex flex-col gap-2 p-4 bg-surface-2 border border-border-soft rounded-xl"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

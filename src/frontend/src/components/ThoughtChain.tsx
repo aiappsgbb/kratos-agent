@@ -112,7 +112,7 @@ function formatToolLabel(rawName: string): string {
 
 /** Colour palette for tool status badges */
 const STATUS_COLORS = {
-  started: { bg: "bg-primary-50", text: "text-primary-600", border: "border-primary-200", dot: "bg-primary-400" },
+  started: { bg: "bg-accent-soft", text: "text-accent", border: "border-accent", dot: "bg-accent" },
   completed: { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-200", dot: "bg-emerald-400" },
   failed: { bg: "bg-red-50", text: "text-red-600", border: "border-red-200", dot: "bg-red-400" },
 } as const;
@@ -435,7 +435,7 @@ export function ThoughtChain({
         <div className="rounded-xl border border-border-soft bg-surface shadow-card dark:shadow-none overflow-hidden text-sm">
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50/80 transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-hover transition-colors cursor-pointer"
           >
             <svg
               className="w-3.5 h-3.5 text-accent flex-shrink-0"
@@ -550,7 +550,7 @@ function MetricCell({
   };
 
   return (
-    <div className="rounded-xl border border-border-soft bg-slate-50/50 px-3 py-2.5 flex items-center gap-2.5">
+    <div className="rounded-xl border border-border-soft bg-surface-2 px-3 py-2.5 flex items-center gap-2.5">
       {iconSvg[icon]}
       <div>
         <div className="text-[10px] text-muted leading-tight font-medium">{label}</div>
