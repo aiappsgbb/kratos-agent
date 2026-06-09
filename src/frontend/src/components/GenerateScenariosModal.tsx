@@ -79,26 +79,26 @@ export function GenerateScenariosModal({ useCase, open, onClose, onGenerated }: 
       onClick={handleClose}
     >
       <div
-        className="bg-white dark:bg-navy-900 rounded-2xl shadow-glass-lg max-w-2xl w-full border border-slate-200/50 dark:border-white/[0.08] animate-slide-up flex flex-col max-h-[90vh]"
+        className="bg-surface rounded-2xl shadow-card max-w-2xl w-full border border-border-soft animate-slide-up flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/[0.06] flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-soft flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500/20 to-cyan-500/20 dark:from-primary-500/10 dark:to-cyan-500/10 flex items-center justify-center border border-primary-200 dark:border-primary-500/20">
-              <svg className="w-4 h-4 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="w-9 h-9 rounded-xl bg-accent dark:from-primary-500/10 dark:to-cyan-500/10 flex items-center justify-center border border-accent">
+              <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
               </svg>
             </div>
             <div>
-              <h2 className="text-base font-semibold text-slate-900 dark:text-white">Generate Scenarios</h2>
-              <p className="text-xs text-slate-400">AI-generated eval scenarios for <span className="font-mono">{useCase}</span></p>
+              <h2 className="text-base font-semibold text-text">Generate Scenarios</h2>
+              <p className="text-xs text-muted">AI-generated eval scenarios for <span className="font-mono">{useCase}</span></p>
             </div>
           </div>
           <button
             onClick={handleClose}
             disabled={generating || saving}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-lg transition-all disabled:opacity-40"
+            className="p-2 text-muted hover:text-text hover:bg-hover rounded-lg transition-all disabled:opacity-40"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -122,7 +122,7 @@ export function GenerateScenariosModal({ useCase, open, onClose, onGenerated }: 
           {/* Generation params */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium text-text mb-1.5">
                 Number of scenarios
               </label>
               <input
@@ -131,19 +131,19 @@ export function GenerateScenariosModal({ useCase, open, onClose, onGenerated }: 
                 max={50}
                 value={count}
                 onChange={(e) => setCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+                className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
               />
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Instructions <span className="text-slate-400 font-normal">(optional)</span>
+              <label className="block text-sm font-medium text-text mb-1.5">
+                Instructions <span className="text-muted font-normal">(optional)</span>
               </label>
               <textarea
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
                 rows={2}
                 placeholder="Focus on edge cases around authentication flows..."
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all resize-none"
+                className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all resize-none"
               />
             </div>
           </div>
@@ -152,7 +152,7 @@ export function GenerateScenariosModal({ useCase, open, onClose, onGenerated }: 
             <button
               onClick={handleGenerate}
               disabled={generating || saving}
-              className="flex items-center gap-2 px-5 py-2.5 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-5 py-2.5 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {generating ? (
                 <>
@@ -174,27 +174,27 @@ export function GenerateScenariosModal({ useCase, open, onClose, onGenerated }: 
           {drafts.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Draft scenarios <span className="font-mono text-xs text-slate-400">({drafts.length})</span>
+                <h3 className="text-sm font-semibold text-text">
+                  Draft scenarios <span className="font-mono text-xs text-muted">({drafts.length})</span>
                 </h3>
-                <p className="text-xs text-slate-400">Edit inline or remove before saving</p>
+                <p className="text-xs text-muted">Edit inline or remove before saving</p>
               </div>
               {drafts.map((scenario, idx) => (
                 <div
                   key={idx}
-                  className="border border-slate-200 dark:border-white/[0.08] rounded-xl p-4 space-y-3 bg-slate-50/50 dark:bg-white/[0.02]"
+                  className="border border-border-soft rounded-xl p-4 space-y-3 bg-slate-50/50"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <input
                       type="text"
                       value={scenario.name}
                       onChange={(e) => updateDraft(idx, { name: e.target.value })}
-                      className="flex-1 px-2.5 py-1.5 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-lg text-sm font-medium text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-primary-400"
+                      className="flex-1 px-2.5 py-1.5 bg-surface border border-border-soft rounded-lg text-sm font-medium text-text focus:outline-none focus:ring-1 focus:ring-accent"
                       placeholder="Scenario name"
                     />
                     <button
                       onClick={() => removeDraft(idx)}
-                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                      className="p-1.5 text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
                       title="Remove"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -207,14 +207,14 @@ export function GenerateScenariosModal({ useCase, open, onClose, onGenerated }: 
                     onChange={(e) => updateDraft(idx, { input_message: e.target.value })}
                     rows={2}
                     placeholder="Input message…"
-                    className="w-full px-2.5 py-1.5 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-lg text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-primary-400 resize-none"
+                    className="w-full px-2.5 py-1.5 bg-surface border border-border-soft rounded-lg text-sm text-text focus:outline-none focus:ring-1 focus:ring-accent resize-none"
                   />
                   <textarea
                     value={scenario.expected_behavior}
                     onChange={(e) => updateDraft(idx, { expected_behavior: e.target.value })}
                     rows={2}
                     placeholder="Expected behavior…"
-                    className="w-full px-2.5 py-1.5 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-lg text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-primary-400 resize-none"
+                    className="w-full px-2.5 py-1.5 bg-surface border border-border-soft rounded-lg text-sm text-text focus:outline-none focus:ring-1 focus:ring-accent resize-none"
                   />
                 </div>
               ))}
@@ -223,11 +223,11 @@ export function GenerateScenariosModal({ useCase, open, onClose, onGenerated }: 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-white/[0.06] flex-shrink-0">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-soft flex-shrink-0">
           <button
             onClick={handleClose}
             disabled={generating || saving}
-            className="px-4 py-2 text-sm text-slate-500 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-all font-medium disabled:opacity-40"
+            className="px-4 py-2 text-sm text-muted bg-surface-2 border border-border-soft rounded-xl hover:bg-hover transition-all font-medium disabled:opacity-40"
           >
             Cancel
           </button>
@@ -235,7 +235,7 @@ export function GenerateScenariosModal({ useCase, open, onClose, onGenerated }: 
             <button
               onClick={handleSaveAll}
               disabled={saving || generating}
-              className="flex items-center gap-2 px-5 py-2 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium disabled:opacity-50"
             >
               {saving ? (
                 <>

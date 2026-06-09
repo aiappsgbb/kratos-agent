@@ -337,13 +337,13 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
     : "bg-slate-50 dark:bg-white/[0.05] text-slate-500 border-slate-200/60 dark:border-white/[0.08]";
 
   return (
-    <div className="border border-slate-200 dark:border-white/[0.06] rounded-xl overflow-hidden">
+    <div className="border border-border-soft rounded-xl overflow-hidden">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50/50 dark:bg-white/[0.02] hover:bg-slate-100/80 dark:hover:bg-white/[0.04] transition-colors text-left"
+        className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50/50 hover:bg-slate-100/80 transition-colors text-left"
       >
         <span className={`flex-shrink-0 w-2 h-2 rounded-full ${statusDotCls}`} />
-        <span className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
+        <span className="flex-1 text-sm font-medium text-text truncate">
           {result.scenario.replace(/_/g, " ")}
         </span>
         {toolCalls.length > 0 && (
@@ -352,7 +352,7 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
           </span>
         )}
         {result.duration_ms > 0 && (
-          <span className="text-xs text-slate-400 font-mono flex-shrink-0">{result.duration_ms}ms</span>
+          <span className="text-xs text-muted font-mono flex-shrink-0">{result.duration_ms}ms</span>
         )}
         {hasScores && (
           <span className={`text-[11px] font-mono border rounded-full px-2 py-0.5 flex-shrink-0 font-medium tabular-nums ${chipTone}`}>
@@ -372,7 +372,7 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
 
       {/* Failed-evaluator badges visible even when collapsed */}
       {!expanded && stat.failedEvaluators.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-4 pb-2 pt-1 -mt-1 bg-slate-50/50 dark:bg-white/[0.02]">
+        <div className="flex flex-wrap gap-1.5 px-4 pb-2 pt-1 -mt-1 bg-slate-50/50">
           {stat.failedEvaluators.map((name) => (
             <span
               key={name}
@@ -385,21 +385,21 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
       )}
 
       {expanded && (
-        <div className="px-4 py-4 space-y-3 border-t border-slate-100 dark:border-white/[0.04]">
+        <div className="px-4 py-4 space-y-3 border-t border-border-soft">
           {result.error && (
             <div className="px-3 py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs rounded-lg font-mono">{result.error}</div>
           )}
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Query</p>
-            <p className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-white/[0.03] rounded-lg px-3 py-2">{result.query}</p>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Query</p>
+            <p className="text-sm text-text bg-surface-2 rounded-lg px-3 py-2">{result.query}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Response</p>
-            <p className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-white/[0.03] rounded-lg px-3 py-2 whitespace-pre-wrap max-h-40 overflow-y-auto">{result.response}</p>
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Response</p>
+            <p className="text-sm text-text bg-surface-2 rounded-lg px-3 py-2 whitespace-pre-wrap max-h-40 overflow-y-auto">{result.response}</p>
           </div>
           {toolCalls.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">🔧 Tool Calls ({toolCalls.length})</p>
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">🔧 Tool Calls ({toolCalls.length})</p>
               <div className="space-y-1.5">
                 {toolCalls.map((tc, i) => {
                   const ok = tc.status === "completed";
@@ -408,17 +408,17 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
                   return (
                     <div
                       key={i}
-                      className="rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.05] overflow-hidden"
+                      className="rounded-lg bg-surface-2 border border-border-soft overflow-hidden"
                     >
-                      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-slate-200/60 dark:border-white/[0.05] bg-white/40 dark:bg-white/[0.02]">
+                      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border-soft bg-surface">
                         <span className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${dotCls}`} />
-                        <span className="text-xs font-mono font-medium text-primary-600 dark:text-primary-400 truncate">{tc.skillName}</span>
+                        <span className="text-xs font-mono font-medium text-accent truncate">{tc.skillName}</span>
                         {tc.source && (
-                          <span className="text-[10px] text-slate-400 font-mono">{tc.source}</span>
+                          <span className="text-[10px] text-muted font-mono">{tc.source}</span>
                         )}
                         <span className="flex-1" />
                         {tc.durationMs > 0 && (
-                          <span className="text-[10px] text-slate-400 font-mono">{tc.durationMs}ms</span>
+                          <span className="text-[10px] text-muted font-mono">{tc.durationMs}ms</span>
                         )}
                         <span className={`text-[10px] font-mono ${ok ? "text-emerald-600 dark:text-emerald-400" : failed ? "text-red-500 dark:text-red-400" : "text-slate-400"}`}>
                           {tc.status}
@@ -428,14 +428,14 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
                         <div className="px-3 py-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                           {tc.input && (
                             <div className="min-w-0">
-                              <p className="text-slate-400 uppercase tracking-wider mb-0.5 text-[9px]">Input</p>
-                              <pre className="font-mono text-slate-600 dark:text-slate-300 whitespace-pre-wrap break-words max-h-24 overflow-y-auto">{tc.input}</pre>
+                              <p className="text-muted uppercase tracking-wider mb-0.5 text-[9px]">Input</p>
+                              <pre className="font-mono text-text whitespace-pre-wrap break-words max-h-24 overflow-y-auto">{tc.input}</pre>
                             </div>
                           )}
                           {tc.output && (
                             <div className="min-w-0">
-                              <p className="text-slate-400 uppercase tracking-wider mb-0.5 text-[9px]">Output</p>
-                              <pre className="font-mono text-slate-600 dark:text-slate-300 whitespace-pre-wrap break-words max-h-24 overflow-y-auto">{tc.output}</pre>
+                              <p className="text-muted uppercase tracking-wider mb-0.5 text-[9px]">Output</p>
+                              <pre className="font-mono text-text whitespace-pre-wrap break-words max-h-24 overflow-y-auto">{tc.output}</pre>
                             </div>
                           )}
                         </div>
@@ -448,7 +448,7 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
           )}
           {scoreEntries.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Evaluator Scores</p>
+              <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Evaluator Scores</p>
               <div className="grid grid-cols-2 gap-2">
                 {scoreEntries.map(([criterion, score]) => {
                   const scoreObj = score as Record<string, unknown>;
@@ -458,20 +458,20 @@ function ScenarioResultRow({ result, stat }: { result: ScenarioResult; stat: Per
                   const threshold = _extractThreshold(scoreObj, criterion);
                   const err = (scoreObj.error ?? "") as string;
                   return (
-                    <div key={criterion} className="bg-slate-50 dark:bg-white/[0.03] rounded-lg px-3 py-2">
+                    <div key={criterion} className="bg-surface-2 rounded-lg px-3 py-2">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium truncate">{formatEvaluatorName(criterion)}</span>
+                        <span className="text-xs text-text font-medium truncate">{formatEvaluatorName(criterion)}</span>
                         <span className={`text-xs font-mono font-medium ${passed === true ? "text-emerald-600 dark:text-emerald-400" : passed === false ? "text-red-500 dark:text-red-400" : "text-slate-500"}`}>
                           {err ? "err" : passed === true ? "✓" : passed === false ? "✗" : "—"}
                           {numericVal !== null && (
-                            <span className="ml-1 text-slate-400">
+                            <span className="ml-1 text-muted">
                               {numericVal}{threshold !== null ? `/${threshold}` : ""}
                             </span>
                           )}
                         </span>
                       </div>
                       {reason && (
-                        <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{reason}</p>
+                        <p className="mt-1 text-[11px] text-muted leading-relaxed line-clamp-2">{reason}</p>
                       )}
                       {err && (
                         <p className="mt-1 text-[11px] text-red-500 dark:text-red-400 font-mono line-clamp-2">{err}</p>
@@ -514,12 +514,12 @@ function EditScenarioModal({ scenario, onSave, onClose }: EditScenarioModalProps
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-navy-900 rounded-2xl shadow-glass-lg max-w-xl w-full border border-slate-200/50 dark:border-white/[0.08] animate-slide-up flex flex-col max-h-[85vh]"
+        className="bg-surface rounded-2xl shadow-card max-w-xl w-full border border-border-soft animate-slide-up flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/[0.06] flex-shrink-0">
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">Edit Scenario</h2>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-lg transition-all">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-soft flex-shrink-0">
+          <h2 className="text-base font-semibold text-text">Edit Scenario</h2>
+          <button onClick={onClose} className="p-2 text-muted hover:text-text hover:bg-hover rounded-lg transition-all">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -527,39 +527,39 @@ function EditScenarioModal({ scenario, onSave, onClose }: EditScenarioModalProps
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Name</label>
-            <input type="text" value={draft.name} onChange={(e) => update({ name: e.target.value })} className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all" />
+            <label className="block text-sm font-medium text-text mb-1.5">Name</label>
+            <input type="text" value={draft.name} onChange={(e) => update({ name: e.target.value })} className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Category</label>
-            <select value={draft.category} onChange={(e) => update({ category: e.target.value as EvalScenario["category"] })} className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all">
+            <label className="block text-sm font-medium text-text mb-1.5">Category</label>
+            <select value={draft.category} onChange={(e) => update({ category: e.target.value as EvalScenario["category"] })} className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all">
               {["standard", "edge_case", "error_handling", "boundary", "compliance"].map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Input Message</label>
-            <textarea value={draft.input_message} onChange={(e) => update({ input_message: e.target.value })} rows={3} className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all resize-none" />
+            <label className="block text-sm font-medium text-text mb-1.5">Input Message</label>
+            <textarea value={draft.input_message} onChange={(e) => update({ input_message: e.target.value })} rows={3} className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all resize-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Expected Behavior</label>
-            <textarea value={draft.expected_behavior} onChange={(e) => update({ expected_behavior: e.target.value })} rows={3} className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all resize-none" />
+            <label className="block text-sm font-medium text-text mb-1.5">Expected Behavior</label>
+            <textarea value={draft.expected_behavior} onChange={(e) => update({ expected_behavior: e.target.value })} rows={3} className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all resize-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              Expected Tool Calls <span className="text-slate-400 font-normal text-xs">(comma-separated)</span>
+            <label className="block text-sm font-medium text-text mb-1.5">
+              Expected Tool Calls <span className="text-muted font-normal text-xs">(comma-separated)</span>
             </label>
             <input
               type="text"
               value={draft.expected_tool_calls.join(", ")}
               onChange={(e) => update({ expected_tool_calls: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
               placeholder="search_documents, get_user_info"
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl text-sm text-slate-900 dark:text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              className="w-full px-3 py-2 bg-surface-2 border border-border-soft rounded-xl text-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Evaluators</label>
+            <label className="block text-sm font-medium text-text mb-2">Evaluators</label>
             <div className="flex flex-wrap gap-2">
               {ALL_EVALUATORS.map((ev) => (
                 <button
@@ -578,9 +578,9 @@ function EditScenarioModal({ scenario, onSave, onClose }: EditScenarioModalProps
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-white/[0.06] flex-shrink-0">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-500 bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-all font-medium">Cancel</button>
-          <button onClick={() => onSave(draft)} className="px-4 py-2 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium">Save Changes</button>
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-border-soft flex-shrink-0">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-muted bg-surface-2 border border-border-soft rounded-xl hover:bg-hover transition-all font-medium">Cancel</button>
+          <button onClick={() => onSave(draft)} className="px-4 py-2 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium">Save Changes</button>
         </div>
       </div>
     </div>
@@ -730,7 +730,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={() => setShowGenerateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
@@ -741,10 +741,10 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
         <button
           onClick={handleRunValidation}
           disabled={runningValidation || runningFoundry}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 text-sm text-text bg-surface border border-border-soft rounded-xl hover:bg-hover transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {runningValidation ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-slate-400/30 border-t-slate-500" />
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-border border-t-slate-500" />
           ) : (
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
@@ -756,11 +756,11 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
         <button
           onClick={handleRunFoundry}
           disabled={runningValidation || runningFoundry || scenarios.length === 0}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 text-sm text-text bg-surface border border-border-soft rounded-xl hover:bg-hover transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           title={scenarios.length === 0 ? "Add scenarios first" : undefined}
         >
           {runningFoundry ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-slate-400/30 border-t-slate-500" />
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-border border-t-slate-500" />
           ) : (
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
@@ -773,7 +773,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
           href={foundryUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 text-sm text-accent hover:text-accent transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -803,40 +803,40 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-200 border-t-primary-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-primary-600" />
         </div>
       )}
 
       {!loading && (
         <>
           {/* Scenarios section */}
-          <div className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.06]">
-              <h3 className="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="bg-surface border border-border-soft rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border-soft">
+              <h3 className="text-sm font-semibold text-text flex items-center gap-2">
+                <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
                 </svg>
                 Scenarios
               </h3>
-              <span className="text-xs font-mono text-slate-400 bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 rounded-full">
+              <span className="text-xs font-mono text-muted bg-surface-2 px-2 py-0.5 rounded-full">
                 {scenarios.length}
               </span>
             </div>
 
             {scenarios.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500/10 to-cyan-500/10 flex items-center justify-center mb-4">
-                  <svg className="w-7 h-7 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center mb-4">
+                  <svg className="w-7 h-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                   </svg>
                 </div>
-                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">No scenarios yet</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed mb-4">
+                <h4 className="text-sm font-semibold text-text mb-1">No scenarios yet</h4>
+                <p className="text-xs text-muted max-w-xs leading-relaxed mb-4">
                   Generate AI-powered eval scenarios to validate your agent&apos;s behavior against expected outcomes.
                 </p>
                 <button
                   onClick={() => setShowGenerateModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl hover:from-primary-700 hover:to-primary-600 transition-all shadow-sm font-medium"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-accent-fg bg-accent rounded-xl transition-all shadow-sm font-medium"
                 >
                   Generate Scenarios
                 </button>
@@ -844,21 +844,21 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
                 {scenarios.map((scenario) => (
-                  <div key={scenario.name} className="flex items-start gap-3 px-5 py-4 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                  <div key={scenario.name} className="flex items-start gap-3 px-5 py-4 hover:bg-slate-50/50 transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-slate-800 dark:text-white truncate">{scenario.name}</span>
+                        <span className="text-sm font-medium text-text truncate">{scenario.name}</span>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium flex-shrink-0 ${categoryColors[scenario.category] ?? categoryColors.standard}`}>
                           {scenario.category}
                         </span>
                       </div>
                       {scenario.description && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{scenario.description}</p>
+                        <p className="text-xs text-muted mt-0.5 line-clamp-1">{scenario.description}</p>
                       )}
                       {scenario.expected_tool_calls.length > 0 && (
                         <div className="flex items-center gap-1 mt-1 flex-wrap">
                           {scenario.expected_tool_calls.map((tc) => (
-                            <span key={tc} className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 rounded font-mono">
+                            <span key={tc} className="text-[10px] px-1.5 py-0.5 bg-surface-2 text-muted rounded font-mono">
                               {tc}
                             </span>
                           ))}
@@ -868,7 +868,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         onClick={() => setEditingScenario(scenario)}
-                        className="p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/10 rounded-lg transition-all"
+                        className="p-1.5 text-muted hover:text-accent hover:bg-accent-hover rounded-lg transition-all"
                         title="Edit"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -877,7 +877,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
                       </button>
                       <button
                         onClick={() => handleDeleteScenario(scenario.name)}
-                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                        className="p-1.5 text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
                         title="Delete"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -893,29 +893,29 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
 
           {/* Latest run */}
           {latestRun && rollup && (
-            <div className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-2xl overflow-hidden">
+            <div className="bg-surface border border-border-soft rounded-2xl overflow-hidden">
               {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/[0.06]">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border-soft">
                 <div className="flex items-center gap-3 min-w-0">
-                  <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Latest Run</h3>
+                  <h3 className="text-sm font-semibold text-text">Latest Run</h3>
                   <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusConfig[latestRun.status].color}`}>
                     {statusConfig[latestRun.status].label}
                     {ACTIVE_STATUSES.includes(latestRun.status) && (
                       <span className="ml-1 inline-block animate-spin">⟳</span>
                     )}
                   </span>
-                  <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 rounded-full uppercase font-medium">{latestRun.mode}</span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                    Persona: <span className="font-medium text-slate-700 dark:text-slate-300">{personaLabel}</span>
+                  <span className="text-[10px] text-muted bg-surface-2 px-2 py-0.5 rounded-full uppercase font-medium">{latestRun.mode}</span>
+                  <span className="text-[11px] text-muted truncate">
+                    Persona: <span className="font-medium text-text">{personaLabel}</span>
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400">{new Date(latestRun.created_at).toLocaleString()}</span>
+                  <span className="text-xs text-muted">{new Date(latestRun.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
               {latestRun.progress && (
-                <div className="px-5 py-2 text-xs text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-white/[0.04] bg-slate-50/50 dark:bg-white/[0.01]">
+                <div className="px-5 py-2 text-xs text-muted border-b border-border-soft bg-slate-50/50">
                   {latestRun.progress}
                 </div>
               )}
@@ -928,29 +928,29 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
 
               {/* KPI cards + overall score + per-evaluator bars */}
               {latestRun.results.length > 0 && (
-                <div className="px-5 py-4 space-y-4 border-b border-slate-100 dark:border-white/[0.06]">
+                <div className="px-5 py-4 space-y-4 border-b border-border-soft">
                   {/* KPI cards */}
                   <div className={`grid gap-3 ${rollup.erroredCount > 0 ? "grid-cols-4" : "grid-cols-3"}`}>
                     <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-3 text-center">
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">All Passed</p>
+                      <p className="text-[10px] text-muted mb-1 uppercase tracking-wider">All Passed</p>
                       <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{rollup.allPassedCount}</p>
-                      <p className="text-[10px] text-slate-400">{rollup.evaluators.length > 0 ? `${rollup.evaluators.length}/${rollup.evaluators.length} evaluators` : "completed"}</p>
+                      <p className="text-[10px] text-muted">{rollup.evaluators.length > 0 ? `${rollup.evaluators.length}/${rollup.evaluators.length} evaluators` : "completed"}</p>
                     </div>
                     <div className="rounded-xl bg-amber-500/5 border border-amber-500/20 p-3 text-center">
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Partial</p>
+                      <p className="text-[10px] text-muted mb-1 uppercase tracking-wider">Partial</p>
                       <p className="text-2xl font-bold text-amber-500 dark:text-amber-400 tabular-nums">{rollup.partialCount}</p>
-                      <p className="text-[10px] text-slate-400">minor issues</p>
+                      <p className="text-[10px] text-muted">minor issues</p>
                     </div>
                     <div className="rounded-xl bg-red-500/5 border border-red-500/20 p-3 text-center">
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Failed</p>
+                      <p className="text-[10px] text-muted mb-1 uppercase tracking-wider">Failed</p>
                       <p className="text-2xl font-bold text-red-600 dark:text-red-400 tabular-nums">{rollup.majorFailCount}</p>
-                      <p className="text-[10px] text-slate-400">majority fail</p>
+                      <p className="text-[10px] text-muted">majority fail</p>
                     </div>
                     {rollup.erroredCount > 0 && (
-                      <div className="rounded-xl bg-slate-500/5 border border-slate-200 dark:border-slate-500/20 p-3 text-center">
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Errored</p>
-                        <p className="text-2xl font-bold text-slate-700 dark:text-slate-300 tabular-nums">{rollup.erroredCount}</p>
-                        <p className="text-[10px] text-slate-400">runtime</p>
+                      <div className="rounded-xl bg-slate-500/5 border border-border-soft dark:border-slate-500/20 p-3 text-center">
+                        <p className="text-[10px] text-muted mb-1 uppercase tracking-wider">Errored</p>
+                        <p className="text-2xl font-bold text-text tabular-nums">{rollup.erroredCount}</p>
+                        <p className="text-[10px] text-muted">runtime</p>
                       </div>
                     )}
                   </div>
@@ -958,15 +958,15 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
                   {/* Overall score + stacked status bar */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">Overall quality score</span>
+                      <span className="text-muted">Overall quality score</span>
                       <span className={`font-bold tabular-nums ${scoreColor(rollup.overallScore)}`}>{rollup.overallScore}%</span>
                     </div>
-                    <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden flex">
+                    <div className="w-full h-2.5 rounded-full bg-surface-2 overflow-hidden flex">
                       {rollup.allPassedCount > 0 && (
                         <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${(rollup.allPassedCount / rollup.scenarios.length) * 100}%` }} />
                       )}
                       {rollup.partialCount > 0 && (
-                        <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${(rollup.partialCount / rollup.scenarios.length) * 100}%` }} />
+                        <div className="h-full bg-ask transition-all duration-500" style={{ width: `${(rollup.partialCount / rollup.scenarios.length) * 100}%` }} />
                       )}
                       {rollup.majorFailCount > 0 && (
                         <div className="h-full bg-red-500 transition-all duration-500" style={{ width: `${(rollup.majorFailCount / rollup.scenarios.length) * 100}%` }} />
@@ -977,21 +977,21 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
                   {/* Per-evaluator breakdown */}
                   {rollup.evaluators.length > 0 && (
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Per Evaluator</p>
+                      <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Per Evaluator</p>
                       <div className="space-y-1.5">
                         {rollup.evaluators.map((ev) => (
-                          <div key={ev.name} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.04]">
+                          <div key={ev.name} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface-2 border border-border-soft">
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                               <span className={`text-sm flex-shrink-0 ${scoreColor(ev.rate)}`}>
                                 {ev.rate >= 70 ? "✓" : ev.rate >= 40 ? "⚠" : "✗"}
                               </span>
-                              <span className="text-sm text-slate-700 dark:text-slate-300 truncate">{formatEvaluatorName(ev.name)}</span>
+                              <span className="text-sm text-text truncate">{formatEvaluatorName(ev.name)}</span>
                             </div>
                             <div className="flex items-center gap-3 flex-shrink-0">
-                              <div className="w-24 h-1.5 rounded-full bg-slate-200 dark:bg-white/[0.06] overflow-hidden">
+                              <div className="w-24 h-1.5 rounded-full bg-surface-2 overflow-hidden">
                                 <div className={`h-full rounded-full transition-all duration-500 ${scoreBarColor(ev.rate)}`} style={{ width: `${ev.rate}%` }} />
                               </div>
-                              <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400 w-20 text-right font-mono">
+                              <span className="text-xs tabular-nums text-muted w-20 text-right font-mono">
                                 {ev.passed}/{ev.total} ({ev.rate}%)
                               </span>
                             </div>
@@ -1006,7 +1006,7 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
               {/* Per-sample results */}
               {latestRun.results.length > 0 && (
                 <div className="px-5 py-4 space-y-2">
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                  <h4 className="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
                     Per Scenario ({latestRun.results.length} samples)
                   </h4>
                   {latestRun.results.map((result, idx) => (
@@ -1019,23 +1019,23 @@ export function EvalsAdminPanel({ useCase }: Props): JSX.Element {
 
           {/* Recent runs */}
           {runs.length > 1 && (
-            <div className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-2xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-100 dark:border-white/[0.06]">
-                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Recent Runs</h3>
+            <div className="bg-surface border border-border-soft rounded-2xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-border-soft">
+                <h3 className="text-sm font-semibold text-text">Recent Runs</h3>
               </div>
               <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
                 {runs.slice(1).map((run) => (
                   <button
                     key={run.run_id}
                     onClick={() => setLatestRun(run)}
-                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-slate-50/50 transition-colors text-left"
                   >
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusConfig[run.status].color}`}>
                       {statusConfig[run.status].label}
                     </span>
-                    <span className="text-[10px] text-slate-400 uppercase font-medium bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 rounded-full">{run.mode}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 flex-1 text-right">{new Date(run.created_at).toLocaleString()}</span>
-                    <svg className="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <span className="text-[10px] text-muted uppercase font-medium bg-surface-2 px-2 py-0.5 rounded-full">{run.mode}</span>
+                    <span className="text-xs text-muted flex-1 text-right">{new Date(run.created_at).toLocaleString()}</span>
+                    <svg className="w-4 h-4 text-text-strong" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
