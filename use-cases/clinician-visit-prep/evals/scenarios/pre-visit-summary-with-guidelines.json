@@ -1,0 +1,13 @@
+{
+  "name": "pre-visit-summary-with-guidelines",
+  "category": "happy-path-with-rag",
+  "description": "Pre-visit summary for Eleanor Hsu's BP follow-up. Agent must pull her full chart in parallel, surface the out-of-range BP and post-MI LDL, and cite the relevant clinical-guidelines-reference sections in the suggested-focus list.",
+  "input_message": "Pre-visit summary for Eleanor Hsu's BP follow-up — what should I focus on?",
+  "input_data": {
+    "expected_patient": "PAT-100001",
+    "expected_guideline_sections": ["§1", "§3"]
+  },
+  "expected_behavior": "Resolves Eleanor Hsu via epic_search_patients_by_name -> PAT-100001. Fans out epic_list_conditions + epic_list_medications + epic_list_allergies + epic_list_observations + epic_list_encounters_for_patient in parallel. Reads the clinical-guidelines-reference markdown file to cite §1 (BP targets) and §3 (post-MI LDL target). Surface order: identity -> today's reason -> allergies (⚠️ Penicillin moderate) -> active problems (HTN, T2DM, ASCVD) -> active meds grouped by indication -> recent labs including BP 148/92, LDL 82, A1C 7.4 -> suggested focus that quotes §1.2 (target <130/80 for T2DM) and §3.1 (post-MI <70). Does NOT invent any value not present in the tool output.",
+  "expected_tool_calls": ["pre-visit-summary", "epic", "clinical-guidelines-reference"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

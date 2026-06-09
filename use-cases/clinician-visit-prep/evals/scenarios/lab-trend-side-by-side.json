@@ -1,0 +1,13 @@
+{
+  "name": "lab-trend-side-by-side",
+  "category": "happy-path",
+  "description": "Two-lab side-by-side trend for George Achterberg (CKD-3 + T2DM). Agent should pull both A1C and eGFR series and render them in a single table with interpretation, plus a one-sentence reading that respects the renal context.",
+  "input_message": "Show me George Achterberg's last 3 A1Cs and eGFRs side by side with the trend",
+  "input_data": {
+    "expected_patient": "PAT-100006",
+    "expected_codes": ["A1C", "EGFR"]
+  },
+  "expected_behavior": "Resolves George Achterberg -> PAT-100006. Calls epic_list_observations twice (once per code) with limit ~5. Renders both series newest-first in side-by-side or paired tables, each value with its unit and interpretation. Reading paragraph notes the CKD-3 + T2DM context and the metformin / SGLT-2 considerations from clinical-guidelines-reference §2.3 / §4.2 if applicable. Quotes values verbatim — no rounding, no fabrication.",
+  "expected_tool_calls": ["lab-trend", "epic"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

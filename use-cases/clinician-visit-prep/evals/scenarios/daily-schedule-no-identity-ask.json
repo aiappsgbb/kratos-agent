@@ -1,0 +1,15 @@
+{
+  "name": "daily-schedule-no-identity-ask",
+  "category": "identity-anchor",
+  "description": "The headline sample question. Agent must resolve the user as Dr. Solomon (PRA-9001) and the date as 2 June 2026 without asking, then build a roster brief with per-patient context.",
+  "input_message": "Brief me on my patients for 2 June 2026",
+  "input_data": {
+    "expected_practitioner": "PRA-9001",
+    "expected_date": "2026-06-02",
+    "expected_patient_count": 3,
+    "must_not_ask_identity": true
+  },
+  "expected_behavior": "Calls epic_list_practitioner_schedule(PRA-9001, 2026-06-02, 2026-06-02) without first asking 'which clinician?' or 'what date?'. For each of the 3 booked encounters (Eleanor Hsu 10:00, Marcus Bell 10:45, George Achterberg 16:30), fans out to epic_get_patient + epic_list_conditions + epic_list_allergies in parallel. Renders a structured brief: time, patient name + DOB + MRN, today's reason, active problems, allergies (with red/amber severity flagged). Does NOT ask the user who they are.",
+  "expected_tool_calls": ["daily-schedule", "epic"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

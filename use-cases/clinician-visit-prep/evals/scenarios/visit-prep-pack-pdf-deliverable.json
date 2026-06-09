@@ -1,0 +1,15 @@
+{
+  "name": "visit-prep-pack-pdf-deliverable",
+  "category": "deliverable",
+  "description": "End-to-end deliverable. Agent gathers the full day's clinic for Dr. Solomon, builds per-patient context, and renders the visit-prep PDF to /tmp/visit-prep-2026-06-02.pdf for download.",
+  "input_message": "Build me a printable visit-prep pack for my 2 June clinic",
+  "input_data": {
+    "expected_practitioner": "PRA-9001",
+    "expected_date": "2026-06-02",
+    "expected_output_path": "/tmp/visit-prep-2026-06-02.pdf",
+    "expected_pages_min": 4
+  },
+  "expected_behavior": "Resolves the user as Dr. Solomon + the date as 2 Jun 2026 without asking. Pulls schedule -> 3 patients. For each: epic_get_patient, epic_list_conditions, epic_list_medications, epic_list_allergies, epic_list_observations in parallel. Synthesises per-patient focus notes (optionally citing clinical-guidelines-reference). Invokes the visit-prep-pack-pdf skill (code_interpreter executing scripts/render_visit_prep.py). Confirms the /tmp path in chat so file-sharing picks it up. PDF should be 1 cover + 3 patient pages, severe allergies in red, out-of-range labs flagged.",
+  "expected_tool_calls": ["daily-schedule", "epic", "visit-prep-pack-pdf", "file-sharing"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

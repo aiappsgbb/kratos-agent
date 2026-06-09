@@ -27,7 +27,19 @@ For the patient:
 
 The encounter `reason_text` usually hints at what to surface (e.g. "BP not at goal" → pull recent `BP` observations specifically via `epic_list_observations(patient_id, code: 'BP', limit: 5)`).
 
-### 4. Render
+### 4. Consult the guidelines reference for the "Suggested focus" section
+
+Before writing "Suggested focus", **always invoke the `clinical-guidelines-reference` skill** (read `references/chronic-conditions-quick-reference.md`). For any out-of-range value or chronic condition on the patient's problem list, cite the relevant section number and target in the focus bullet.
+
+Examples:
+- BP 148/92 with T2DM on the problem list → cite **§1.2 (NICE NG136)** for the <130/80 target.
+- LDL 82 post-MI → cite **§3.1 (ACC/AHA 2024)** for the <70 mg/dL target.
+- HbA1c 7.4 → cite **§2.1 (ADA 2026)** for the <7.0 target and **§2.3** for the SGLT-2 add-on indication if there's coexisting ASCVD or CKD.
+- eGFR <60 + Metformin → cite **§4.2 (KDIGO 2024)** for the dose-adjustment threshold.
+
+If no clinical guideline applies (e.g. pure wellness visit, paediatric well-child), skip this step.
+
+### 5. Render
 
 ```markdown
 # Pre-Visit Summary — Eleanor Hsu (PAT-100001, MRN-100001)
