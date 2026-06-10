@@ -155,7 +155,7 @@ class FoundryAgentProxy:
                                 payload.get("loaded_use_cases"),
                             )
                 return (ok, returned, resp.status, elapsed)
-        except (aiohttp.ClientError, asyncio.TimeoutError):
+        except (aiohttp.ClientError, TimeoutError):
             elapsed = loop.time() - t0
             logger.warning("Warm-pool ping failed after %.1fs", elapsed, exc_info=True)
             return (False, None, 0, elapsed)
