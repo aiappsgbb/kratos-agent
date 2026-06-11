@@ -19,13 +19,11 @@ environment_variables:
   # Model deployment (referenced in CopilotAgent._build_provider_config)
   - name: MODEL_DEPLOYMENT_NAME
     value: $${FOUNDRY_MODEL_DEPLOYMENT}
-  # AI Services base URL (fallback if platform doesn't inject FOUNDRY_ENDPOINT)
+  # AI Services project endpoint (full path with /api/projects/<proj>).
+  # Hosted-agent main.py derives the FOUNDRY_ENDPOINT base URL from this
+  # since FOUNDRY_* env var names are reserved by the platform.
   - name: AI_SERVICES_ENDPOINT
     value: $${AZURE_AI_PROJECT_ENDPOINT}
-  # Foundry endpoint — Kratos's CopilotAgent reads this to construct the
-  # Azure OpenAI provider base URL (settings.foundry_endpoint).
-  - name: FOUNDRY_ENDPOINT
-    value: $${FOUNDRY_ENDPOINT}
   # Azure service endpoints (injected by Bicep / azd env)
   - name: COSMOS_DB_ENDPOINT
     value: $${AZURE_COSMOS_DB_ENDPOINT}

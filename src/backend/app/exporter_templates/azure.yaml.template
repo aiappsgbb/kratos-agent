@@ -38,7 +38,10 @@ services:
                 BLOB_STORAGE_ENDPOINT: $${AZURE_BLOB_STORAGE_ENDPOINT}
                 COSMOS_DB_DATABASE: kratos-agent-${slug}
                 COSMOS_DB_ENDPOINT: $${AZURE_COSMOS_DB_ENDPOINT}
-                FOUNDRY_ENDPOINT: $${FOUNDRY_ENDPOINT}
+                # NOTE: FOUNDRY_* and AGENT_* env var names are reserved by the
+                # hosted-agent platform — cannot be set here. The hosted-agent
+                # main.py derives FOUNDRY_ENDPOINT from the platform-injected
+                # FOUNDRY_PROJECT_ENDPOINT (strips /api/projects/... suffix).
                 KEY_VAULT_URI: $${AZURE_KEY_VAULT_URI}
                 MODEL_DEPLOYMENT_NAME: $${FOUNDRY_MODEL_DEPLOYMENT}
 
