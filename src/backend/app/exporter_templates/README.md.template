@@ -2,93 +2,110 @@
 
 > ${description}
 
-This project is a **standalone Foundry Hosted Agent** exported from a
-[Kratos](https://github.com/kmavrodis/kratos-agent) use-case. It contains:
+This is a **standalone Foundry Hosted Agent** exported from a Kratos
+use-case. It's a self-contained clone of Kratos's hosted-agent runtime,
+trimmed down to a single persona (`${use_case}`).
 
-* `copilot-instructions.md` — the system prompt that drives the persona
-* `skills/` — Markdown-defined skills (one folder per skill, each with `SKILL.md`)
-* `mcp-config.json` — the MCP server map the agent connects to at runtime
-* `mocks/packages/` — bundled local stdio MCP mock servers (only those the
-  skills reference); empty when the use-case relies on remote MCP only
-* `main.py` — a ~300 LoC standalone runtime built on the
-  [GitHub Copilot SDK](https://pypi.org/project/github-copilot-sdk/) and
-  Foundry's `InvocationAgentServerHost`
-* `Dockerfile`, `pyproject.toml` — single-stage uv + Python 3.12 + Node 20
-* `agent.yaml`, `agent.manifest.yaml`, `azure.yaml` — Foundry / azd manifests
-* `infra/` — minimal Bicep (AI Project + ACR + App Insights)
+## What's in the ZIP
 
----
-
-## Quick start — local dev with `GITHUB_TOKEN`
-
-The fastest way to verify the agent boots is using GitHub-hosted models.
-
-```bash
-cp .env.template .env
-echo "GITHUB_TOKEN=$(gh auth token)" >> .env
-uv sync
-uv run python main.py
+```
+${slug}-agent/
+├── azure.yaml                # azd config — one hosted-agent service
+├── src/
+│   ├── hosted-agent/         # The Kratos hosted-agent runtime (verbatim)
+│   │   ├── main.py           # Copilot SDK + InvocationAgentServerHost
+│   │   ├── Dockerfile        # Builds the agent container image
+│   │   ├── agent.yaml        # Container-side agent descriptor
+│   │   ├── agent.manifest.yaml
+│   │   └── pyproject.toml
+│   └── backend/app/          # Kratos backend modules (CopilotAgent, SkillRegistry…)
+├── use-cases/${use_case}/    # ONLY the chosen persona
+├── mocks/                    # Bundled stdio MCP mock servers
+└── infra/                    # Bicep — AI Foundry + Cosmos + Search + Blob + KV + ACR
+    ├── main.bicep
+    ├── main.parameters.json
+    └── modules/
 ```
 
-The agent starts on `http://localhost:8088` — `POST /invocations` with
-`{"input": "Hello"}` to interact with it.
+Because the runtime is identical to Kratos's, the exported agent behaves
+**exactly** like the `${name}` persona did in Kratos — same `CopilotAgent`,
+same `SkillRegistry`, same event types, same APM lazy-loading, same
+Cosmos persistence.
 
-## Local dev with **BYOK** Azure AI Foundry
+## Prerequisites
 
-Update `.env`:
+- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) — installed and logged in
+- [Azure CLI (az)](https://learn.microsoft.com/cli/azure/install-azure-cli) — installed and logged in
+- An Azure subscription with quota for AI Foundry + Cosmos DB + AI Search
+- The `azd ai agents` extension:
+  ```bash
+  azd extension install azure.ai.agents
+  ```
 
-```bash
-FOUNDRY_PROJECT_ENDPOINT=https://<resource>.services.ai.azure.com/api/projects/<project>
-MODEL_DEPLOYMENT_NAME=gpt-4o-mini
-```
-
-Then `az login` and `uv run python main.py` — the runtime uses
-`DefaultAzureCredential` to mint Foundry tokens automatically.
-
-## Deploy to Azure as a Foundry Hosted Agent
+## Deploy
 
 ```bash
 azd auth login
-azd env new <env-name>
-azd env set AZURE_LOCATION eastus2
+azd init                            # picks env name + subscription
+azd env set AZURE_LOCATION eastus2  # or your preferred region
 azd up
 ```
 
-`azd up` provisions the AI Project + ACR + App Insights from `infra/`, builds
-the container via ACR remote build, and registers it as a hosted agent on the
-Foundry project. The agent surfaces in the Microsoft Foundry portal alongside
-any other agents in the project.
+`azd up`:
+1. **Provisions** the AI Foundry account/project, Cosmos DB, AI Search,
+   Blob Storage, Key Vault, App Insights, ACR + role assignments
+2. **Builds** the agent container via ACR remoteBuild
+3. **Registers** the hosted agent on the Foundry project via the
+   `azure.ai.agents` extension
+4. **Runs `hooks/postdeploy.sh`** to grant the data-plane RBAC roles
+   (`AcrPull`, `Cognitive Services OpenAI User`, `Cognitive Services User`)
+   to the hosted-agent's instance + blueprint managed identities. These
+   identities are created by Foundry **after** Bicep provisioning, so they
+   can't be granted via Bicep — the hook discovers them via
+   `azd ai agent show` and runs `az role assignment create`.
+5. **Prints** an Agent Playground URL
 
----
+> **Note:** If the first invocation reports `agent_version_failed` with
+> "Failed to pull container image", the AcrPull grant landed after Foundry
+> tried to pull the image. Re-run `azd deploy` to publish a new version —
+> Foundry will retry the pull with the grant in place.
 
-## How the runtime works
+After deploy completes:
+* Open the Playground URL and chat with the agent
+* Or hit the `/invocations` endpoint directly with `POST` + JSON body
 
-`main.py` reads everything from disk relative to `/app` (or `PROJECT_DIR`):
+## Local development
 
-| File                            | Purpose                                                      |
-|---------------------------------|--------------------------------------------------------------|
-| `copilot-instructions.md`       | System prompt — frontmatter is stripped at load time         |
-| `skills/<name>/SKILL.md`        | Per-skill Markdown contract; auto-discovered by the SDK      |
-| `mcp-config.json`               | MCP server map — passed directly to `mcp_servers` kwarg      |
-| `apm.yml`                       | (Optional) APM dependency manifest, copied only when present |
+The same runtime can be started outside Azure for fast iteration:
 
-Sessions are managed by the Foundry platform: when `FOUNDRY_AGENT_SESSION_ID`
-is set in the request context, the SDK resumes that session; otherwise a new
-one is created. No external state store is required.
+```bash
+cp .env.template .env             # fill in MODEL_DEPLOYMENT_NAME etc.
+cd src/hosted-agent
+uv sync --prerelease=allow
+uv run python main.py             # → http://localhost:8088/invocations
+```
+
+For BYOK Foundry, set `FOUNDRY_PROJECT_ENDPOINT` and `MODEL_DEPLOYMENT_NAME`
+in `.env` and `az login` — `DefaultAzureCredential` does the rest.
+
+## Project structure
+
+| Path                              | Purpose                                                              |
+|-----------------------------------|----------------------------------------------------------------------|
+| `src/hosted-agent/main.py`        | Single-tenant entry point (`InvocationAgentServerHost` on port 8088) |
+| `src/backend/app/services/`       | `CopilotAgent`, `SkillRegistry`, `CosmosService`, `ApmService`, …    |
+| `use-cases/${use_case}/`          | The persona: `SYSTEM_PROMPT.md`, `skills/`, `.mcp.json`, `apm.yml`    |
+| `mocks/packages/`                 | npm-installed stdio MCP mock servers                                  |
+| `infra/main.bicep`                | Trimmed Kratos infra — drops Container App backend, APIM, Static Web |
 
 ## Customizing the persona
 
-* **System prompt** — edit `copilot-instructions.md` (keep the YAML frontmatter
-  intact if you want it preserved by re-exports).
-* **Skills** — add or edit folders under `skills/`; each needs a `SKILL.md`
-  with frontmatter (`name`, `description`, `examples`).
-* **MCP servers** — edit `mcp-config.json`. Local stdio servers must be on
-  `$PATH` in the container; HTTP servers can be referenced by URL with
-  `${ENV_VAR}` expansion for tokens.
+Edit `use-cases/${use_case}/SYSTEM_PROMPT.md` (system prompt) or any
+`skills/<name>/SKILL.md` file, then `azd deploy` to push the change. The
+hosted agent's `SkillRegistry` reloads from disk on every cold start; the
+seeded blob storage is kept in sync via `seed_from_local()`.
 
-## Re-using your own Foundry resources
+---
 
-When the parameters `useExistingAiProject=true` and the
-`existing*` parameters are set, the deployment connects to your own AI
-Project, ACR, and App Insights without provisioning new ones. See
-`infra/main.parameters.json` for the full set of overrides.
+*Generated by [Kratos](https://github.com/kmavrodis/kratos-agent)'s
+per-use-case "Download as Foundry Agent" exporter.*

@@ -1,9 +1,17 @@
-"""Tests for the project exporter — ZIP packaging of Kratos use-cases."""
+"""Tests for the v2 project exporter — full-clone ZIP packaging.
+
+The v2 exporter mirrors a subset of the Kratos repo into the output tree:
+the hosted-agent runtime + backend modules + chosen use-case + mocks +
+trimmed infra. Tests build a synthetic Kratos-shaped layout under
+``tmp_path`` (copying real source dirs from the actual checkout where
+practical) and assert structural + content guarantees.
+"""
 
 from __future__ import annotations
 
 import io
 import json
+import shutil
 import zipfile
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -13,14 +21,38 @@ from fastapi.testclient import TestClient
 
 from app.services.project_exporter import ProjectExporter, _slugify
 
+# Resolve the real Kratos checkout from the test file's location.
+# ``src/backend/tests/test_project_exporter.py`` → parents[3] is the repo root.
+REAL_REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
 # ---------------------------------------------------------------------------
-# Unit-test fixtures
+# Fixtures
 # ---------------------------------------------------------------------------
 
 
 @pytest.fixture
-def use_case_tree(tmp_path: Path) -> Path:
-    """Build a minimal but realistic use-case tree under tmp_path/use-cases/foo."""
+def kratos_repo(tmp_path: Path) -> Path:
+    """Build a tmp_path that LOOKS LIKE a Kratos repo root.
+
+    Copies the real ``src/hosted-agent/``, ``src/backend/app/``, ``infra/``,
+    and ``mocks/`` from the actual checkout so the exporter exercises the
+    real file shapes. Then adds a synthetic ``use-cases/finance-close/``
+    so we don't depend on the real use-case content.
+    """
+    ignore = shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo", "node_modules", "dist", "build", ".venv")
+    shutil.copytree(REAL_REPO_ROOT / "src" / "hosted-agent", tmp_path / "src" / "hosted-agent", ignore=ignore)
+    shutil.copytree(
+        REAL_REPO_ROOT / "src" / "backend" / "app",
+        tmp_path / "src" / "backend" / "app",
+        ignore=ignore,
+    )
+    # Also copy src/backend/pyproject.toml so the exporter can bring it.
+    shutil.copy2(REAL_REPO_ROOT / "src" / "backend" / "pyproject.toml", tmp_path / "src" / "backend" / "pyproject.toml")
+    shutil.copytree(REAL_REPO_ROOT / "infra", tmp_path / "infra", ignore=ignore)
+    shutil.copytree(REAL_REPO_ROOT / "mocks", tmp_path / "mocks", ignore=ignore)
+
+    # Synthetic use-case at use-cases/finance-close/
     uc = tmp_path / "use-cases" / "finance-close"
     (uc / "skills" / "sap-s4").mkdir(parents=True)
     (uc / "skills" / "policy-ref" / "references").mkdir(parents=True)
@@ -34,12 +66,10 @@ def use_case_tree(tmp_path: Path) -> Path:
         "You orchestrate the close process.\n",
         encoding="utf-8",
     )
-
     (uc / "skills" / "sap-s4" / "SKILL.md").write_text(
         "---\nname: sap-s4\ndescription: Query the SAP S/4HANA ledger\nenabled: true\n---\n\n# SAP S/4\n",
         encoding="utf-8",
     )
-
     (uc / "skills" / "policy-ref" / "SKILL.md").write_text(
         "---\nname: policy-ref\ndescription: Internal close policy\nenabled: true\n---\n",
         encoding="utf-8",
@@ -61,36 +91,22 @@ def use_case_tree(tmp_path: Path) -> Path:
                     "args": [],
                     "tools": ["*"],
                 },
-                "external-kb": {
-                    "type": "http",
-                    "url": "https://kb.example/mcp",
-                    "tools": ["*"],
-                },
             }
         ),
         encoding="utf-8",
     )
 
-    # apm.yml with empty deps — must be omitted.
-    (uc / "apm.yml").write_text("dependencies:\n  apm: []\n  mcp: []\n", encoding="utf-8")
+    # Add a second use-case so we can verify ONLY the chosen one is exported.
+    other = tmp_path / "use-cases" / "marketing-launch"
+    other.mkdir(parents=True)
+    (other / "SYSTEM_PROMPT.md").write_text("---\nname: Other\n---\n", encoding="utf-8")
 
     return tmp_path
 
 
 @pytest.fixture
-def mocks_tree(tmp_path: Path) -> Path:
-    """Build a minimal mocks/packages tree with one matching package."""
-    mocks_root = tmp_path / "mocks"
-    pkg = mocks_root / "packages" / "sap-s4-mcp-server"
-    pkg.mkdir(parents=True)
-    (pkg / "package.json").write_text('{"name": "sap-s4-mcp-server", "version": "0.0.1"}', encoding="utf-8")
-    (pkg / "index.js").write_text("// stub\n", encoding="utf-8")
-    return mocks_root
-
-
-@pytest.fixture
-def exporter(use_case_tree: Path, mocks_tree: Path) -> ProjectExporter:
-    return ProjectExporter(use_cases_root=use_case_tree / "use-cases", mocks_root=mocks_tree)
+def exporter(kratos_repo: Path) -> ProjectExporter:
+    return ProjectExporter(repo_root=kratos_repo)
 
 
 # ---------------------------------------------------------------------------
@@ -104,75 +120,180 @@ def test_slugify_normalises():
     assert _slugify("") == "agent"
 
 
-def test_assemble_writes_core_files(exporter: ProjectExporter, tmp_path: Path):
+def test_assemble_copies_hosted_agent_verbatim(exporter: ProjectExporter, kratos_repo: Path, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
     exporter.assemble("finance-close", out)
 
-    assert (out / "copilot-instructions.md").is_file()
-    # System prompt is copied verbatim (frontmatter retained — main.py strips it at load time).
-    assert "Finance Close Controller" in (out / "copilot-instructions.md").read_text()
-    assert (out / "skills" / "sap-s4" / "SKILL.md").is_file()
-    assert (out / "skills" / "policy-ref" / "references" / "policy.md").is_file()
+    # main.py, pyproject.toml, Dockerfile are byte-identical to the source.
+    for name in ("main.py", "pyproject.toml", "Dockerfile"):
+        src = (kratos_repo / "src" / "hosted-agent" / name).read_bytes()
+        dst = (out / "src" / "hosted-agent" / name).read_bytes()
+        assert src == dst, f"{name} differs from src/hosted-agent/{name}"
 
 
-def test_assemble_renders_templates_with_frontmatter(exporter: ProjectExporter, tmp_path: Path):
+def test_assemble_renders_agent_yaml_with_persona(exporter: ProjectExporter, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
     exporter.assemble("finance-close", out)
 
-    pyproject = (out / "pyproject.toml").read_text()
-    assert 'name = "finance-close"' in pyproject
+    agent_yaml = (out / "src" / "hosted-agent" / "agent.yaml").read_text()
+    assert "name: finance-close" in agent_yaml
+    assert "Finance Close Controller" in agent_yaml
+    assert "kind: hosted" in agent_yaml
+    assert "protocols:" in agent_yaml
+    assert "environment_variables:" in agent_yaml
+    # Cosmos DB database is per-export to avoid collisions.
+    assert "kratos-agent-finance-close" in agent_yaml
+
+    manifest = (out / "src" / "hosted-agent" / "agent.manifest.yaml").read_text()
+    assert "name: finance-close" in manifest
+    assert "Finance Close Controller" in manifest
+
+
+def test_assemble_renders_azure_yaml_with_slug(exporter: ProjectExporter, tmp_path: Path):
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
 
     azure_yaml = (out / "azure.yaml").read_text()
-    assert "finance-close:" in azure_yaml
-
-    readme = (out / "README.md").read_text()
-    assert "Finance Close Controller" in readme
-    assert "AI co-pilot for the controller team" in readme
-
-    agent_yaml = (out / "agent.yaml").read_text()
-    assert "Finance Close Controller" in agent_yaml
+    assert "name: finance-close" in azure_yaml
+    assert "finance-close:" in azure_yaml  # service block
+    assert "project: ./src/hosted-agent" in azure_yaml
+    assert "language: docker" in azure_yaml
+    assert "context: ../.." in azure_yaml
+    assert "azure.ai.agents:" in azure_yaml  # required extension
 
 
-def test_assemble_translates_mcp_config(exporter: ProjectExporter, tmp_path: Path):
+def test_assemble_copies_backend_app_recursively(exporter: ProjectExporter, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
     exporter.assemble("finance-close", out)
 
-    cfg = json.loads((out / "mcp-config.json").read_text())
-    assert "sap-s4" in cfg
-    assert cfg["sap-s4"]["type"] == "local"
-    assert cfg["external-kb"]["type"] == "http"
+    # Key files exist (sanity check — real Kratos has 36+ .py files here).
+    assert (out / "src" / "backend" / "app" / "__init__.py").is_file()
+    assert (out / "src" / "backend" / "app" / "services" / "copilot_agent.py").is_file()
+    assert (out / "src" / "backend" / "app" / "services" / "skill_registry.py").is_file()
+    assert (out / "src" / "backend" / "app" / "services" / "cosmos_service.py").is_file()
+
+    # No __pycache__ or .pyc leaked.
+    backend_files = list((out / "src" / "backend").rglob("*"))
+    assert not any("__pycache__" in p.parts for p in backend_files)
+    assert not any(p.suffix == ".pyc" for p in backend_files)
+
+    # The exporter must NOT ship its own templates (would be infinite recursion).
+    assert not (out / "src" / "backend" / "app" / "exporter_templates").exists()
 
 
-def test_assemble_bundles_referenced_mock_only(exporter: ProjectExporter, tmp_path: Path):
+def test_assemble_includes_only_chosen_use_case(exporter: ProjectExporter, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
     exporter.assemble("finance-close", out)
 
-    bundled = out / "mocks" / "packages" / "sap-s4-mcp-server" / "package.json"
-    assert bundled.is_file()
+    use_cases = sorted(p.name for p in (out / "use-cases").iterdir() if p.is_dir())
+    assert use_cases == ["finance-close"]
 
-    # HTTP-type server is not bundled.
-    assert not (out / "mocks" / "packages" / "external-kb").exists()
+    # System prompt + skills land where main.py expects them.
+    assert (out / "use-cases" / "finance-close" / "SYSTEM_PROMPT.md").is_file()
+    assert (out / "use-cases" / "finance-close" / "skills" / "sap-s4" / "SKILL.md").is_file()
 
 
-def test_assemble_omits_empty_apm(exporter: ProjectExporter, tmp_path: Path):
+def test_assemble_bundles_full_mocks_workspace(exporter: ProjectExporter, kratos_repo: Path, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
     exporter.assemble("finance-close", out)
-    assert not (out / "apm.yml").exists()
+
+    assert (out / "mocks" / "package.json").is_file()
+    pkg_json = json.loads((out / "mocks" / "package.json").read_text())
+    assert "workspaces" in pkg_json
+
+    # All workspace packages from the real Kratos mocks/ are bundled.
+    src_pkgs = sorted(p.name for p in (kratos_repo / "mocks" / "packages").iterdir() if p.is_dir())
+    dst_pkgs = sorted(p.name for p in (out / "mocks" / "packages").iterdir() if p.is_dir())
+    assert dst_pkgs == src_pkgs
 
 
-def test_assemble_copies_infra(exporter: ProjectExporter, tmp_path: Path):
+def test_assemble_writes_trimmed_infra(exporter: ProjectExporter, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
     exporter.assemble("finance-close", out)
 
     assert (out / "infra" / "main.bicep").is_file()
     assert (out / "infra" / "main.parameters.json").is_file()
-    assert (out / "infra" / "core" / "ai" / "ai-project.bicep").is_file()
+    assert (out / "infra" / "abbreviations.json").is_file()
+
+    # The 10 expected modules are present.
+    expected_modules = {
+        "network.bicep",
+        "log-analytics.bicep",
+        "app-insights.bicep",
+        "key-vault.bicep",
+        "cosmos-db.bicep",
+        "ai-search.bicep",
+        "ai-services.bicep",
+        "blob-storage.bicep",
+        "container-registry.bicep",
+        "role-assignments.bicep",
+    }
+    actual_modules = {p.name for p in (out / "infra" / "modules").iterdir() if p.suffix == ".bicep"}
+    assert actual_modules == expected_modules
+
+    # Trimmed main.bicep does NOT reference the 5 dropped modules.
+    main_bicep = (out / "infra" / "main.bicep").read_text()
+    for dropped in (
+        "agent-service.bicep",
+        "container-apps-env.bicep",
+        "ai-gateway.bicep",
+        "static-web-app.bicep",
+        "bing-search.bicep",
+    ):
+        assert dropped not in main_bicep, f"main.bicep still references dropped module {dropped}"
+
+    # Trimmed role-assignments.bicep uses aiServicesPrincipalId, not agentServicePrincipalId.
+    role_bicep = (out / "infra" / "modules" / "role-assignments.bicep").read_text()
+    assert "param agentServicePrincipalId" not in role_bicep
+    assert "param aiServicesPrincipalId" in role_bicep
+
+
+def test_assemble_writes_root_files(exporter: ProjectExporter, tmp_path: Path):
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    assert (out / "azure.yaml").is_file()
+    assert (out / "README.md").is_file()
+    assert (out / ".env.template").is_file()
+    assert (out / ".gitignore").is_file()
+    assert (out / ".dockerignore").is_file()
+
+    readme = (out / "README.md").read_text()
+    assert "Finance Close Controller" in readme
+    assert "azd up" in readme
+
+
+def test_assemble_writes_postdeploy_hook_with_exec_bit(exporter: ProjectExporter, tmp_path: Path):
+    """The RBAC-fixup hook must be rendered, marked executable, and survive zipping."""
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    hook = out / "hooks" / "postdeploy.sh"
+    assert hook.is_file(), "hooks/postdeploy.sh must be rendered"
+    # Owner+group+other exec bits — Foundry / azd run via /bin/sh.
+    assert hook.stat().st_mode & 0o111, f"hook must be executable: mode={oct(hook.stat().st_mode)}"
+    content = hook.read_text()
+    assert content.startswith("#!/usr/bin/env bash"), "expected bash shebang"
+    assert "azd ai agent show" in content, "hook must call azd ai agent show"
+    assert "AcrPull" in content, "hook must grant AcrPull"
+    assert "Cognitive Services OpenAI User" in content
+    assert "Cognitive Services User" in content
+    # No leftover azd literal escape ($$ → $) — the hook is bash, not azure.yaml.
+    assert "$$" not in content, "hook should be plain bash (no $$ azure.yaml escapes)"
+
+    # azure.yaml must wire the hook so `azd deploy` runs it.
+    azyaml = (out / "azure.yaml").read_text()
+    assert "postdeploy" in azyaml
+    assert "./hooks/postdeploy.sh" in azyaml
 
 
 def test_assemble_unknown_use_case_raises(exporter: ProjectExporter, tmp_path: Path):
@@ -182,12 +303,23 @@ def test_assemble_unknown_use_case_raises(exporter: ProjectExporter, tmp_path: P
         exporter.assemble("does-not-exist", out)
 
 
+def test_assemble_missing_hosted_agent_raises(tmp_path: Path):
+    # tmp_path doesn't have src/hosted-agent — should fail clearly.
+    (tmp_path / "use-cases" / "x").mkdir(parents=True)
+    (tmp_path / "use-cases" / "x" / "SYSTEM_PROMPT.md").write_text("---\nname: X\n---\n")
+    exporter = ProjectExporter(repo_root=tmp_path)
+    out = tmp_path / "out"
+    out.mkdir()
+    with pytest.raises(FileNotFoundError, match="Hosted-agent dir not found"):
+        exporter.assemble("x", out)
+
+
 # ---------------------------------------------------------------------------
 # Unit tests — build_zip()
 # ---------------------------------------------------------------------------
 
 
-def test_build_zip_excludes_skip_dirs(exporter: ProjectExporter, tmp_path: Path):
+def test_build_zip_includes_all_expected_paths(exporter: ProjectExporter, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
     exporter.assemble("finance-close", out)
@@ -196,26 +328,51 @@ def test_build_zip_excludes_skip_dirs(exporter: ProjectExporter, tmp_path: Path)
     with zipfile.ZipFile(io.BytesIO(blob)) as zf:
         names = set(zf.namelist())
 
-    assert "copilot-instructions.md" in names
-    assert "skills/sap-s4/SKILL.md" in names
-    assert "mocks/packages/sap-s4-mcp-server/package.json" in names
-    assert "Dockerfile" in names
-    assert "main.py" in names
+    # Roots
+    assert "azure.yaml" in names
+    assert "README.md" in names
+    # Hosted agent
+    assert "src/hosted-agent/main.py" in names
+    assert "src/hosted-agent/Dockerfile" in names
+    assert "src/hosted-agent/agent.yaml" in names
+    # Backend app
+    assert "src/backend/app/services/copilot_agent.py" in names
+    # Use case + mocks + infra
+    assert "use-cases/finance-close/SYSTEM_PROMPT.md" in names
+    assert "mocks/package.json" in names
     assert "infra/main.bicep" in names
+    assert "infra/modules/role-assignments.bicep" in names
 
     # Junk dirs must be entirely absent.
     assert not any("__pycache__" in n for n in names)
     assert not any("evals/" in n for n in names)
+    assert not any("exporter_templates" in n for n in names)
 
 
-def test_assemble_handles_missing_mocks_root(use_case_tree: Path, tmp_path: Path):
-    # No mocks_root provided — assemble must still succeed; mocks/ is just empty.
-    exporter = ProjectExporter(use_cases_root=use_case_tree / "use-cases", mocks_root=tmp_path / "nope")
+def test_build_zip_skips_other_use_cases(exporter: ProjectExporter, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
     exporter.assemble("finance-close", out)
-    assert (out / "main.py").is_file()
-    assert not (out / "mocks").exists()
+    blob = ProjectExporter.build_zip(out)
+    with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+        names = zf.namelist()
+    assert not any("marketing-launch" in n for n in names)
+
+
+def test_build_zip_preserves_exec_bit_on_hooks(exporter: ProjectExporter, tmp_path: Path):
+    """Unix permission bits on ./hooks/postdeploy.sh must survive zipping.
+
+    Without this, users would have to `chmod +x hooks/postdeploy.sh` after
+    `unzip`, and azd's hook runner would fail with permission denied.
+    """
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+    blob = ProjectExporter.build_zip(out)
+    with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+        info = zf.getinfo("hooks/postdeploy.sh")
+    mode = info.external_attr >> 16
+    assert mode & 0o111, f"hook exec bit lost in zip: mode={oct(mode)}"
 
 
 # ---------------------------------------------------------------------------
@@ -224,9 +381,9 @@ def test_assemble_handles_missing_mocks_root(use_case_tree: Path, tmp_path: Path
 
 
 @pytest.fixture
-def export_client(use_case_tree: Path, mocks_tree: Path, monkeypatch: pytest.MonkeyPatch):
+def export_client(kratos_repo: Path, monkeypatch: pytest.MonkeyPatch):
     """Boot the FastAPI app with stubbed-out Azure deps and one registry."""
-    monkeypatch.chdir(use_case_tree)
+    monkeypatch.chdir(kratos_repo)
 
     from app.main import app
 
@@ -236,13 +393,8 @@ def export_client(use_case_tree: Path, mocks_tree: Path, monkeypatch: pytest.Mon
     app.state.registries = {"finance-close": registry_stub}
 
     blob_stub = MagicMock()
-    blob_stub.local_base_dir = use_case_tree / "use-cases"
+    blob_stub.local_base_dir = kratos_repo / "use-cases"
     app.state.blob_skill_service = blob_stub
-
-    # mocks_tree is fixture-built next to use_case_tree but ProjectExporter
-    # defaults to ``mocks/`` relative to cwd, which is now use_case_tree —
-    # which already contains it (same tmp_path). So no extra wiring needed.
-    assert (use_case_tree / "mocks").exists() or mocks_tree.exists()
 
     return TestClient(app, raise_server_exceptions=False)
 
@@ -255,10 +407,11 @@ def test_export_endpoint_streams_zip(export_client: TestClient):
 
     with zipfile.ZipFile(io.BytesIO(response.content)) as zf:
         names = set(zf.namelist())
-    assert "copilot-instructions.md" in names
-    assert "main.py" in names
-    assert "Dockerfile" in names
     assert "azure.yaml" in names
+    assert "src/hosted-agent/main.py" in names
+    assert "src/hosted-agent/Dockerfile" in names
+    assert "src/backend/app/services/copilot_agent.py" in names
+    assert "infra/main.bicep" in names
 
 
 def test_export_endpoint_unknown_use_case(export_client: TestClient):

@@ -1,161 +1,194 @@
+// Trimmed Kratos infrastructure for Foundry Hosted Agent export.
+//
+// This is a fork of Kratos's repo-root infra/main.bicep that drops the
+// modules a standalone hosted agent doesn't need:
+//   * container-apps-env  — no Container App backend
+//   * agent-service       — same
+//   * ai-gateway          — no APIM
+//   * static-web-app      — no frontend
+//   * bing-search         — optional capability, omitted
+//
+// The Foundry hosted-agent's system-assigned managed identity replaces the
+// Container App MI as the principal for all data-plane RBAC (Cosmos / KV /
+// AI Search / Blob / Foundry).
+
 targetScope = 'subscription'
 
 @minLength(1)
 @maxLength(64)
-@description('Name of the environment that can be used as part of naming resource convention')
+@description('Name of the environment (used for resource naming)')
 param environmentName string
-
-@minLength(1)
-@maxLength(90)
-@description('Name of the resource group to use or create')
-param resourceGroupName string = 'rg-${environmentName}'
 
 @minLength(1)
 @description('Primary location for all resources')
 param location string
 
-param aiDeploymentsLocation string
+@description('Principal ID of the deploying user for local-dev role assignments')
+param principalId string = ''
 
-@description('Id of the user or app to assign application roles')
-param principalId string
+// Optional overrides
+param containerRegistryName string = ''
+param cosmosDbAccountName string = ''
+param aiSearchName string = ''
+param aiServicesName string = ''
+param keyVaultName string = ''
+param appInsightsName string = ''
+param logAnalyticsName string = ''
+param vnetName string = ''
+param storageAccountName string = ''
 
-@description('Principal type of user or app')
-param principalType string
+// ─── Resource Naming ───
+var abbrs = loadJsonContent('./abbreviations.json')
+var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
+var tags = { 'azd-env-name': environmentName, project: 'kratos-agent-export' }
 
-@description('Optional. Name of an existing AI Services account within the resource group. If not provided, a new one will be created.')
-param aiFoundryResourceName string = ''
-
-@description('Optional. Name of the AI Foundry project. If not provided, a default name will be used.')
-param aiFoundryProjectName string = 'ai-project-${environmentName}'
-
-@description('List of model deployments')
-param aiProjectDeploymentsJson string = '[]'
-
-@description('List of connections')
-param aiProjectConnectionsJson string = '[]'
-
-@secure()
-@description('JSON map of connection name to credentials object. Example: {"my-conn":{"key":"secret"}}')
-param aiProjectConnectionCredentialsJson string = '{}'
-
-@description('List of resources to create and connect to the AI project')
-param aiProjectDependentResourcesJson string = '[]'
-
-var aiProjectDeployments = json(aiProjectDeploymentsJson)
-var aiProjectConnections = json(aiProjectConnectionsJson)
-var aiProjectConnectionCreds = json(aiProjectConnectionCredentialsJson)
-var aiProjectDependentResources = json(aiProjectDependentResourcesJson)
-
-@description('Enable hosted agent deployment')
-param enableHostedAgents bool
-
-@description('Enable the capability host for supporting BYO storage of agent conversations.')
-param enableCapabilityHost bool
-
-@description('Enable monitoring for the AI project')
-param enableMonitoring bool
-
-@description('When true, skip Foundry project/role/connection provisioning and reference the existing project read-only.')
-param useExistingAiProject bool = false
-
-@description('Optional. Existing container registry resource ID.')
-param existingContainerRegistryResourceId string = ''
-
-@description('Optional. Existing container registry endpoint (login server).')
-param existingContainerRegistryEndpoint string = ''
-
-@description('Optional. Name of an existing ACR connection on the Foundry project.')
-param existingAcrConnectionName string = ''
-
-@description('Optional. Existing Application Insights connection string.')
-param existingApplicationInsightsConnectionString string = ''
-
-@description('Optional. Existing Application Insights resource ID.')
-param existingApplicationInsightsResourceId string = ''
-
-@description('Optional. Name of an existing Application Insights connection on the Foundry project.')
-param existingAppInsightsConnectionName string = ''
-
-var tags = {
-  'azd-env-name': environmentName
-}
-
-resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: resourceGroupName
+// ─── Resource Group ───
+resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
+  name: 'rg-${environmentName}'
   location: location
   tags: tags
 }
 
-// Build dependent resources array — ensure ACR is included when hosted agents are enabled
-var hasAcr = contains(map(aiProjectDependentResources, r => r.resource), 'registry')
-var shouldCreateAcr = enableHostedAgents && !hasAcr && empty(existingContainerRegistryResourceId) && empty(existingAcrConnectionName)
-var dependentResources = shouldCreateAcr ? union(aiProjectDependentResources, [
-  {
-    resource: 'registry'
-    connectionName: 'acr-${uniqueString(subscription().id, resourceGroupName, location)}'
-  }
-]) : aiProjectDependentResources
-
-// ============================================================
-// AI Project (vendored from azd-ai-starter-basic)
-// ============================================================
-module aiProject 'core/ai/ai-project.bicep' = if (!useExistingAiProject) {
+// ─── Networking ───
+module network './modules/network.bicep' = {
+  name: 'network'
   scope: rg
-  name: 'ai-project'
   params: {
+    name: !empty(vnetName) ? vnetName : '${abbrs.networkVirtualNetworks}${resourceToken}'
+    location: location
     tags: tags
-    location: aiDeploymentsLocation
-    aiFoundryProjectName: aiFoundryProjectName
-    principalId: principalId
-    principalType: principalType
-    existingAiAccountName: aiFoundryResourceName
-    deployments: aiProjectDeployments
-    connections: aiProjectConnections
-    connectionCredentials: aiProjectConnectionCreds
-    additionalDependentResources: dependentResources
-    enableMonitoring: enableMonitoring
-    enableHostedAgents: enableHostedAgents
-    enableCapabilityHost: enableCapabilityHost
-    existingContainerRegistryResourceId: existingContainerRegistryResourceId
-    existingContainerRegistryEndpoint: existingContainerRegistryEndpoint
-    existingAcrConnectionName: existingAcrConnectionName
-    existingApplicationInsightsConnectionString: existingApplicationInsightsConnectionString
-    existingApplicationInsightsResourceId: existingApplicationInsightsResourceId
-    existingAppInsightsConnectionName: existingAppInsightsConnectionName
   }
 }
 
-module existingAiProject 'core/ai/existing-ai-project.bicep' = if (useExistingAiProject) {
+// ─── Log Analytics ───
+module logAnalytics './modules/log-analytics.bicep' = {
+  name: 'log-analytics'
   scope: rg
-  name: 'existing-ai-project'
   params: {
-    aiServicesAccountName: aiFoundryResourceName
-    aiFoundryProjectName: aiFoundryProjectName
-    existingAcrConnectionName: existingAcrConnectionName
-    existingContainerRegistryEndpoint: existingContainerRegistryEndpoint
-    existingApplicationInsightsConnectionString: existingApplicationInsightsConnectionString
-    existingApplicationInsightsResourceId: existingApplicationInsightsResourceId
+    name: !empty(logAnalyticsName) ? logAnalyticsName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
+    location: location
+    tags: tags
   }
 }
 
-// ============================================================
-// Outputs
-// ============================================================
+// ─── Application Insights ───
+module appInsights './modules/app-insights.bicep' = {
+  name: 'app-insights'
+  scope: rg
+  params: {
+    name: !empty(appInsightsName) ? appInsightsName : '${abbrs.insightsComponents}${resourceToken}'
+    location: location
+    tags: tags
+    logAnalyticsWorkspaceId: logAnalytics.outputs.id
+  }
+}
 
-// Resources
-output AZURE_RESOURCE_GROUP string = resourceGroupName
-output AZURE_AI_ACCOUNT_ID string = useExistingAiProject ? existingAiProject.outputs.accountId : aiProject.outputs.accountId
-output AZURE_AI_PROJECT_ID string = useExistingAiProject ? existingAiProject.outputs.projectId : aiProject.outputs.projectId
-output AZURE_AI_FOUNDRY_PROJECT_ID string = useExistingAiProject ? existingAiProject.outputs.projectId : aiProject.outputs.projectId
-output AZURE_AI_ACCOUNT_NAME string = useExistingAiProject ? existingAiProject.outputs.aiServicesAccountName : aiProject.outputs.aiServicesAccountName
-output AZURE_AI_PROJECT_NAME string = useExistingAiProject ? existingAiProject.outputs.projectName : aiProject.outputs.projectName
+// ─── Key Vault ───
+module keyVault './modules/key-vault.bicep' = {
+  name: 'key-vault'
+  scope: rg
+  params: {
+    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
+    location: location
+    tags: tags
+    principalId: principalId
+    subnetId: network.outputs.privateEndpointSubnetId
+    vnetId: network.outputs.id
+  }
+}
 
-// Endpoints
-output AZURE_AI_PROJECT_ENDPOINT string = useExistingAiProject ? existingAiProject.outputs.AZURE_AI_PROJECT_ENDPOINT : aiProject.outputs.AZURE_AI_PROJECT_ENDPOINT
-output AZURE_OPENAI_ENDPOINT string = useExistingAiProject ? existingAiProject.outputs.AZURE_OPENAI_ENDPOINT : aiProject.outputs.AZURE_OPENAI_ENDPOINT
-output APPLICATIONINSIGHTS_CONNECTION_STRING string = useExistingAiProject ? existingAiProject.outputs.APPLICATIONINSIGHTS_CONNECTION_STRING : aiProject.outputs.APPLICATIONINSIGHTS_CONNECTION_STRING
-output APPLICATIONINSIGHTS_RESOURCE_ID string = useExistingAiProject ? existingAiProject.outputs.APPLICATIONINSIGHTS_RESOURCE_ID : aiProject.outputs.APPLICATIONINSIGHTS_RESOURCE_ID
+// ─── Cosmos DB ───
+module cosmosDb './modules/cosmos-db.bicep' = {
+  name: 'cosmos-db'
+  scope: rg
+  params: {
+    name: !empty(cosmosDbAccountName) ? cosmosDbAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+    location: location
+    tags: tags
+    subnetId: network.outputs.privateEndpointSubnetId
+    vnetId: network.outputs.id
+    keyVaultName: keyVault.outputs.name
+  }
+}
 
-// ACR
-output AZURE_AI_PROJECT_ACR_CONNECTION_NAME string = useExistingAiProject ? existingAiProject.outputs.dependentResources.registry.connectionName : aiProject.outputs.dependentResources.registry.connectionName
-output AZURE_CONTAINER_REGISTRY_ENDPOINT string = useExistingAiProject ? existingAiProject.outputs.dependentResources.registry.loginServer : aiProject.outputs.dependentResources.registry.loginServer
+// ─── AI Search ───
+module aiSearch './modules/ai-search.bicep' = {
+  name: 'ai-search'
+  scope: rg
+  params: {
+    name: !empty(aiSearchName) ? aiSearchName : '${abbrs.searchSearchServices}${resourceToken}'
+    location: location
+    tags: tags
+    subnetId: network.outputs.privateEndpointSubnetId
+    vnetId: network.outputs.id
+  }
+}
+
+// ─── Microsoft Foundry ───
+module aiFoundry './modules/ai-services.bicep' = {
+  name: 'ai-foundry'
+  scope: rg
+  params: {
+    name: !empty(aiServicesName) ? aiServicesName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+// ─── Blob Storage (Skills) ───
+module blobStorage './modules/blob-storage.bicep' = {
+  name: 'blob-storage'
+  scope: rg
+  params: {
+    name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageAccounts}${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+// ─── Container Registry ───
+module containerRegistry './modules/container-registry.bicep' = {
+  name: 'container-registry'
+  scope: rg
+  params: {
+    name: !empty(containerRegistryName) ? containerRegistryName : '${abbrs.containerRegistryRegistries}${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+// ─── Role Assignments ───
+//
+// All data-plane access goes to the Foundry hosted-agent's system-assigned
+// MI. No Container App in this layout, so the agentServicePrincipalId
+// parameter is gone.
+module roleAssignments './modules/role-assignments.bicep' = {
+  name: 'role-assignments'
+  scope: rg
+  params: {
+    cosmosDbAccountName: cosmosDb.outputs.name
+    aiSearchName: aiSearch.outputs.name
+    aiServicesName: aiFoundry.outputs.name
+    aiServicesPrincipalId: aiFoundry.outputs.principalId
+    keyVaultName: keyVault.outputs.name
+    storageAccountName: blobStorage.outputs.name
+    appInsightsName: appInsights.outputs.name
+    containerRegistryName: containerRegistry.outputs.name
+    principalId: principalId
+  }
+}
+
+// ─── Outputs ───
+output AZURE_RESOURCE_GROUP string = rg.name
+output AZURE_CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
+output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.loginServer
+output AZURE_COSMOS_DB_ENDPOINT string = cosmosDb.outputs.endpoint
+output AZURE_AI_SEARCH_ENDPOINT string = aiSearch.outputs.endpoint
+output AZURE_KEY_VAULT_URI string = keyVault.outputs.uri
+output AZURE_APP_INSIGHTS_CONNECTION_STRING string = appInsights.outputs.connectionString
+output FOUNDRY_ENDPOINT string = aiFoundry.outputs.endpoint
+output FOUNDRY_MODEL_DEPLOYMENT string = aiFoundry.outputs.modelDeploymentName
+output AZURE_AI_PROJECT_ENDPOINT string = aiFoundry.outputs.projectEndpoint
+output AZURE_AI_PROJECT_ID string = aiFoundry.outputs.projectId
+output AZURE_BLOB_STORAGE_ENDPOINT string = blobStorage.outputs.endpoint
+output AZURE_BLOB_STORAGE_ACCOUNT_NAME string = blobStorage.outputs.name

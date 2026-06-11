@@ -46,9 +46,10 @@ async def export_use_case(
 
     The returned file contains everything required to run the persona as
     a standalone hosted agent in someone else's Azure subscription via
-    ``azd up``: copilot-instructions.md, skills/, mcp-config.json,
-    bundled MCP mock packages, a single-tenant main.py, Dockerfile,
-    pyproject.toml, agent.yaml, azure.yaml, and minimal infra/ Bicep.
+    ``azd up``: a structural clone of Kratos's ``src/hosted-agent/`` and
+    ``src/backend/app/``, only the chosen ``use-cases/<name>/``, the full
+    ``mocks/`` workspace, and a trimmed ``infra/`` Bicep subset that
+    drops the multi-tenant frontend + APIM modules.
     """
     if not _USE_CASE_NAME_RE.match(use_case):
         raise HTTPException(status_code=400, detail="Invalid use-case name")
@@ -58,15 +59,16 @@ async def export_use_case(
         raise HTTPException(status_code=404, detail=f"Use-case '{use_case}' not found")
 
     blob_service = getattr(request.app.state, "blob_skill_service", None)
-    # Locate the on-disk use-case directory. Prefer the blob service's
-    # local mirror; fall back to the conventional ``use-cases/<name>`` path
-    # so tests don't need to wire up Blob.
+    # Resolve the Kratos repo root — we need it to find src/hosted-agent/,
+    # src/backend/app/, mocks/, and infra/ at export time. Prefer the
+    # parent of blob_service.local_base_dir (which is ``<repo>/use-cases/``);
+    # fall back to cwd so tests don't need to wire up Blob.
     if blob_service is not None and getattr(blob_service, "local_base_dir", None):
-        use_cases_root = Path(blob_service.local_base_dir)
+        repo_root = Path(blob_service.local_base_dir).resolve().parent
     else:
-        use_cases_root = Path("use-cases")
+        repo_root = Path.cwd()
 
-    exporter = ProjectExporter(use_cases_root=use_cases_root)
+    exporter = ProjectExporter(repo_root=repo_root)
 
     try:
         with tempfile.TemporaryDirectory(prefix=f"kratos-export-{use_case}-") as td:
