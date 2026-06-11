@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Conversation, UseCase } from "@/types";
-import { exportUseCase } from "@/lib/api";
 import { ThemePicker } from "./ThemePicker";
 
 function timeAgo(dateStr: string): string {
@@ -52,8 +51,6 @@ export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, on
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
   const [personaFilter, setPersonaFilter] = useState<"curated" | "all">("curated");
-  const [exporting, setExporting] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
 
   const curatedUseCases = useCases.filter((uc) => uc.curated === true);
   const effectiveFilter =
@@ -89,27 +86,6 @@ export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, on
     if (deleteTarget) {
       onDelete(deleteTarget);
       setDeleteTarget(null);
-    }
-  };
-
-  const handleExportUseCase = async () => {
-    if (!selectedUseCase || exporting) return;
-    setExporting(true);
-    setExportError(null);
-    try {
-      const blob = await exportUseCase(selectedUseCase);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${selectedUseCase}-foundry-agent.zip`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setExportError(err instanceof Error ? err.message : "Export failed");
-    } finally {
-      setExporting(false);
     }
   };
 
@@ -230,35 +206,6 @@ export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, on
               </svg>
             </div>
           </div>
-
-          {selectedUseCase && (
-            <div className="mt-2">
-              <button
-                onClick={handleExportUseCase}
-                disabled={exporting}
-                title="Download a ZIP with everything needed to deploy this persona as a standalone Foundry Hosted Agent (azd up)"
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-text bg-surface hover:bg-hover border border-border-soft rounded-lg transition-all disabled:opacity-50 disabled:cursor-wait"
-                aria-label="Download persona as Foundry Hosted Agent"
-              >
-                {exporting ? (
-                  <svg className="w-3.5 h-3.5 animate-spin text-muted" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={3} className="opacity-25" />
-                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth={3} className="opacity-75" strokeLinecap="round" />
-                  </svg>
-                ) : (
-                  <svg className="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-                )}
-                {exporting ? "Packing…" : "Download as Foundry Agent"}
-              </button>
-              {exportError && (
-                <p className="mt-1.5 text-[11px] text-danger-500 leading-snug">
-                  {exportError}
-                </p>
-              )}
-            </div>
-          )}
         </div>
       )}
 
