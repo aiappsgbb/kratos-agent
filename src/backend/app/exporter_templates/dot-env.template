@@ -1,0 +1,13 @@
+# BYOK Foundry — required for Microsoft Foundry / Azure AI deployment.
+# Both spellings are accepted; FOUNDRY_PROJECT_ENDPOINT wins if both are set.
+FOUNDRY_PROJECT_ENDPOINT=https://<your-ai-foundry-resource>.services.ai.azure.com/api/projects/<your-project-name>
+MODEL_DEPLOYMENT_NAME=gpt-4o-mini
+
+# Local-development fallback — GitHub Copilot hosted models.
+# Get a token from https://github.com/settings/tokens with `read:user` scope.
+# Leave BLANK in production; BYOK above takes precedence whenever it is set.
+# GITHUB_TOKEN=
+
+# Application Insights — wire the connection string to enable tracing.
+# Leave BLANK to disable telemetry (the runtime no-ops cleanly).
+# APPLICATIONINSIGHTS_CONNECTION_STRING=

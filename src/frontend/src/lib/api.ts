@@ -187,6 +187,30 @@ export async function listUseCases(): Promise<UseCase[]> {
   return data.useCases;
 }
 
+/**
+ * Download a use-case as a self-contained Foundry Hosted Agent ZIP.
+ *
+ * Returns the raw bytes; the caller is responsible for triggering the
+ * browser download (e.g. via createObjectURL + anchor click).
+ */
+export async function exportUseCase(name: string): Promise<Blob> {
+  const response = await fetch(
+    `${getApiUrl()}/api/use-cases/${encodeURIComponent(name)}/export`,
+    { headers: { Accept: "application/zip" } },
+  );
+  if (!response.ok) {
+    let detail = `${response.status}`;
+    try {
+      const body = await response.json();
+      if (body?.detail) detail = String(body.detail);
+    } catch {
+      // Body wasn't JSON — keep the status code as the error.
+    }
+    throw new Error(`Failed to export use-case: ${detail}`);
+  }
+  return response.blob();
+}
+
 // ─── Skills Admin API ───
 
 import type { Skill, SkillCreate, SkillUpdate } from "@/types";

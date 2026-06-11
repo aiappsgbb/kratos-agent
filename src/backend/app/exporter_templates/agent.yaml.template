@@ -1,0 +1,8 @@
+name: ${name}
+description: |
+  ${description}
+
+# These declarations are advisory metadata for the Foundry Agent service.
+# The runtime instructions and tool/MCP wiring are loaded by main.py from
+# copilot-instructions.md, skills/, and mcp-config.json next to this file.
+instructions: copilot-instructions.md

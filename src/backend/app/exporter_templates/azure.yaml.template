@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+# azd configuration for ${name} — a Kratos-exported Foundry Hosted Agent.
+name: ${slug}
+metadata:
+  template: kratos-agent@1.0.0
+services:
+  ${slug}:
+    project: .
+    language: python
+    # host: azure.ai.agent makes azd push the container image to the AI Project
+    # via ACR remoteBuild, then deploy it as a Foundry Hosted Agent.
+    host: azure.ai.agent
+    remoteBuild: true
+    config:
+      agentManifest: agent.manifest.yaml

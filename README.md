@@ -309,6 +309,33 @@ Each use case has:
 
 Switch use cases per conversation via the frontend dropdown or `useCase` field in the API request.
 
+### Export a use case as a standalone Foundry Hosted Agent
+
+Each persona can be downloaded as a self-contained ZIP that ships everything
+needed to deploy the *same* agent into a different Azure subscription as a
+[Microsoft Foundry Hosted Agent](https://learn.microsoft.com/azure/ai-foundry/agents/):
+
+* `copilot-instructions.md` — the persona's system prompt
+* `skills/` — every SKILL.md and supporting script/asset
+* `mcp-config.json` — the persona's MCP server map
+* `mocks/packages/` — referenced local stdio mock servers, ready for `npm install -g`
+* `main.py` — a ~300-LoC single-tenant runtime (Copilot SDK + Foundry `InvocationAgentServerHost`)
+* `Dockerfile`, `pyproject.toml`, `agent.yaml`, `azure.yaml`, `infra/` (Bicep)
+
+Trigger from the UI ("Download as Foundry Agent" under the persona picker)
+or directly via the API:
+
+```bash
+curl -OJ http://localhost:8000/api/use-cases/finance-close/export
+# → finance-close-foundry-agent.zip
+
+unzip finance-close-foundry-agent.zip && cd finance-close-agent
+azd auth login && azd env new my-finance-close && azd up
+```
+
+The exported agent surfaces in the target Foundry project alongside any
+other hosted agents — no Kratos backend required at runtime.
+
 ---
 
 ## Skills & MCP Protocol
@@ -673,6 +700,7 @@ kratos-agent/
 | `GET` | `/health` | Health check |
 | `GET` | `/api/settings` | Service configuration status |
 | `GET` | `/api/use-cases` | List available use cases |
+| `GET` | `/api/use-cases/{use_case}/export` | Download use-case as Foundry Hosted Agent ZIP |
 
 ---
 

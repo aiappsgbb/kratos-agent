@@ -1,0 +1,94 @@
+# ${name}
+
+> ${description}
+
+This project is a **standalone Foundry Hosted Agent** exported from a
+[Kratos](https://github.com/kmavrodis/kratos-agent) use-case. It contains:
+
+* `copilot-instructions.md` — the system prompt that drives the persona
+* `skills/` — Markdown-defined skills (one folder per skill, each with `SKILL.md`)
+* `mcp-config.json` — the MCP server map the agent connects to at runtime
+* `mocks/packages/` — bundled local stdio MCP mock servers (only those the
+  skills reference); empty when the use-case relies on remote MCP only
+* `main.py` — a ~300 LoC standalone runtime built on the
+  [GitHub Copilot SDK](https://pypi.org/project/github-copilot-sdk/) and
+  Foundry's `InvocationAgentServerHost`
+* `Dockerfile`, `pyproject.toml` — single-stage uv + Python 3.12 + Node 20
+* `agent.yaml`, `agent.manifest.yaml`, `azure.yaml` — Foundry / azd manifests
+* `infra/` — minimal Bicep (AI Project + ACR + App Insights)
+
+---
+
+## Quick start — local dev with `GITHUB_TOKEN`
+
+The fastest way to verify the agent boots is using GitHub-hosted models.
+
+```bash
+cp .env.template .env
+echo "GITHUB_TOKEN=$(gh auth token)" >> .env
+uv sync
+uv run python main.py
+```
+
+The agent starts on `http://localhost:8088` — `POST /invocations` with
+`{"input": "Hello"}` to interact with it.
+
+## Local dev with **BYOK** Azure AI Foundry
+
+Update `.env`:
+
+```bash
+FOUNDRY_PROJECT_ENDPOINT=https://<resource>.services.ai.azure.com/api/projects/<project>
+MODEL_DEPLOYMENT_NAME=gpt-4o-mini
+```
+
+Then `az login` and `uv run python main.py` — the runtime uses
+`DefaultAzureCredential` to mint Foundry tokens automatically.
+
+## Deploy to Azure as a Foundry Hosted Agent
+
+```bash
+azd auth login
+azd env new <env-name>
+azd env set AZURE_LOCATION eastus2
+azd up
+```
+
+`azd up` provisions the AI Project + ACR + App Insights from `infra/`, builds
+the container via ACR remote build, and registers it as a hosted agent on the
+Foundry project. The agent surfaces in the Microsoft Foundry portal alongside
+any other agents in the project.
+
+---
+
+## How the runtime works
+
+`main.py` reads everything from disk relative to `/app` (or `PROJECT_DIR`):
+
+| File                            | Purpose                                                      |
+|---------------------------------|--------------------------------------------------------------|
+| `copilot-instructions.md`       | System prompt — frontmatter is stripped at load time         |
+| `skills/<name>/SKILL.md`        | Per-skill Markdown contract; auto-discovered by the SDK      |
+| `mcp-config.json`               | MCP server map — passed directly to `mcp_servers` kwarg      |
+| `apm.yml`                       | (Optional) APM dependency manifest, copied only when present |
+
+Sessions are managed by the Foundry platform: when `FOUNDRY_AGENT_SESSION_ID`
+is set in the request context, the SDK resumes that session; otherwise a new
+one is created. No external state store is required.
+
+## Customizing the persona
+
+* **System prompt** — edit `copilot-instructions.md` (keep the YAML frontmatter
+  intact if you want it preserved by re-exports).
+* **Skills** — add or edit folders under `skills/`; each needs a `SKILL.md`
+  with frontmatter (`name`, `description`, `examples`).
+* **MCP servers** — edit `mcp-config.json`. Local stdio servers must be on
+  `$PATH` in the container; HTTP servers can be referenced by URL with
+  `${ENV_VAR}` expansion for tokens.
+
+## Re-using your own Foundry resources
+
+When the parameters `useExistingAiProject=true` and the
+`existing*` parameters are set, the deployment connects to your own AI
+Project, ACR, and App Insights without provisioning new ones. See
+`infra/main.parameters.json` for the full set of overrides.

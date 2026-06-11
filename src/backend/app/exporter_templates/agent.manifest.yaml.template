@@ -1,0 +1,7 @@
+name: ${name}
+description: |
+  ${description}
+
+# Manifest consumed by the Foundry Agent service to project the hosted agent
+# into Microsoft 365 Copilot and other agentic surfaces.
+display_name: ${name}
