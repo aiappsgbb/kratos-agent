@@ -1,0 +1,40 @@
+# ${name} — local development environment variables.
+#
+# Required for `cd src/hosted-agent && uv run python main.py` outside Azure.
+# For `azd up`, all of these are provisioned + wired automatically — you
+# don't need a .env file at all.
+
+# Foundry model deployment (e.g. "gpt-4o-mini" — must exist in the project)
+MODEL_DEPLOYMENT_NAME=gpt-4o-mini
+
+# BYOK Foundry endpoint (only set for local dev — auto-injected on Azure)
+# FOUNDRY_PROJECT_ENDPOINT=https://<your-ai-foundry-resource>.services.ai.azure.com/api/projects/<your-project-name>
+# AI_SERVICES_ENDPOINT=https://<your-ai-foundry-resource>.services.ai.azure.com
+
+# Cosmos DB (Optional locally — runtime silently no-ops if unset)
+# COSMOS_DB_ENDPOINT=https://<cosmos-account>.documents.azure.com:443/
+# COSMOS_DB_DATABASE=kratos-agent-${slug}
+
+# Azure AI Search (Optional locally)
+# AZURE_AI_SEARCH_ENDPOINT=https://<search-service>.search.windows.net
+
+# Key Vault (Optional locally)
+# KEY_VAULT_URI=https://<kv-name>.vault.azure.net/
+
+# Blob Storage — where the SkillRegistry mirrors use-case content.
+# When unset, the runtime falls back to local disk under APM_USE_CASES_ROOT.
+# BLOB_STORAGE_ENDPOINT=https://<account>.blob.core.windows.net
+# BLOB_SKILLS_CONTAINER=skills
+
+# Local fallback path for the use-case manifest (defaults to ./use-cases)
+APM_USE_CASES_ROOT=./use-cases
+
+# Cosmos DB database (Optional locally — defaults to "kratos-agent")
+COSMOS_DB_DATABASE=kratos-agent-${slug}
+
+# Environment tag
+ENVIRONMENT=development
+
+# Application Insights — wire the connection string to enable tracing.
+# Leave BLANK to disable telemetry (the runtime no-ops cleanly).
+# APPLICATIONINSIGHTS_CONNECTION_STRING=

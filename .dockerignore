@@ -24,9 +24,10 @@
 # Frontend (not needed by backend/hosted-agent images; deployed as Static Web App)
 src/frontend/
 
-# Docs site, infra, scripts, mocks node output not needed at build context root
+# Docs site, scripts not needed at build context root.
+# NOTE: infra/ and mocks/ are NOT excluded — the backend's project-exporter
+# service reads them at request time to assemble Foundry Hosted Agent ZIPs.
 docs/
-infra/
 scripts/
 
 # Test artifacts

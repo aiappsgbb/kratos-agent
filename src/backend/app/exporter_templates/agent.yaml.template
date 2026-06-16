@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/AgentSchema/refs/heads/main/schemas/v1.0/ContainerAgent.yaml
+#
+# Foundry Hosted Agent manifest for ${name} — exported from Kratos.
+#
+# This is the container-side agent descriptor read by the `azd ai agent`
+# extension when it registers the hosted agent against the Foundry project.
+
+name: ${slug}
+description: >
+  ${description}
+kind: hosted
+protocols:
+  - protocol: invocations
+    version: 1.0.0
+resources:
+  cpu: "1"
+  memory: 2Gi
+environment_variables:
+  # Model deployment (referenced in CopilotAgent._build_provider_config)
+  - name: MODEL_DEPLOYMENT_NAME
+    value: $${FOUNDRY_MODEL_DEPLOYMENT}
+  # AI Services project endpoint (full path with /api/projects/<proj>).
+  # Hosted-agent main.py derives the FOUNDRY_ENDPOINT base URL from this
+  # since FOUNDRY_* env var names are reserved by the platform.
+  - name: AI_SERVICES_ENDPOINT
+    value: $${AZURE_AI_PROJECT_ENDPOINT}
+  # Azure service endpoints (injected by Bicep / azd env)
+  - name: COSMOS_DB_ENDPOINT
+    value: $${AZURE_COSMOS_DB_ENDPOINT}
+  - name: AZURE_AI_SEARCH_ENDPOINT
+    value: $${AZURE_AI_SEARCH_ENDPOINT}
+  - name: KEY_VAULT_URI
+    value: $${AZURE_KEY_VAULT_URI}
+  - name: BLOB_STORAGE_ENDPOINT
+    value: $${AZURE_BLOB_STORAGE_ENDPOINT}
+  - name: BLOB_SKILLS_CONTAINER
+    value: skills
+  # Local fallback path for use-case manifests (Dockerfile copies to /app/use-cases)
+  - name: APM_USE_CASES_ROOT
+    value: /app/use-cases
+  # Cosmos DB database name — scoped per export so multiple exported agents
+  # in the same Cosmos account don't collide.
+  - name: COSMOS_DB_DATABASE
+    value: kratos-agent-${slug}
+  # Environment tag
+  - name: ENVIRONMENT
+    value: production
+  # Force a new agent version per deploy (Foundry deduplicates create_version
+  # when env vars are identical — see foundry-hosted-agents skill).
+  - name: _BUILD_TS
+    value: $${KRATOS_BUILD_TS}

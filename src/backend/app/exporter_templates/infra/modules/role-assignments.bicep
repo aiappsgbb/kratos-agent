@@ -1,5 +1,9 @@
-@description('Principal ID of the agent service managed identity')
-param agentServicePrincipalId string
+// Role Assignments — trimmed for Kratos Hosted-Agent export.
+//
+// This is a fork of Kratos's repo-root infra/modules/role-assignments.bicep
+// with the `agentServicePrincipalId` parameter dropped. In the exported
+// project there is NO Container App backend — the Foundry hosted-agent's
+// system-assigned MI is the single principal for all data-plane access.
 
 @description('Cosmos DB account name')
 param cosmosDbAccountName string
@@ -37,7 +41,6 @@ var keyVaultSecretsUser = '4633458b-17de-408a-b874-0445c86b69e6'
 var searchIndexDataReader = '1407120a-92aa-4202-b7e9-c0e197c71c8f'
 var searchIndexDataContributor = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
 var cognitiveServicesOpenAIUser = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-var azureAIDeveloper = '64702f94-c441-49e6-a78b-ef80e0188fee'
 var cognitiveServicesUser = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 var storageBlobDataContributor = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 var monitoringReader = '43d0d8ad-25c7-4714-9337-8ba259a9fe05'
@@ -72,88 +75,74 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' e
   name: containerRegistryName
 }
 
-// ─── Agent Service → Cosmos DB ───
+// ─── Foundry Hosted Agent → Cosmos DB ───
 resource agentCosmosRole 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-02-15-preview' = {
   parent: cosmosDb
-  name: guid(cosmosDb.id, agentServicePrincipalId, cosmosDbDataContributor)
+  name: guid(cosmosDb.id, aiServicesPrincipalId, cosmosDbDataContributor)
   properties: {
     roleDefinitionId: '${cosmosDb.id}/sqlRoleDefinitions/${cosmosDbDataContributor}'
-    principalId: agentServicePrincipalId
+    principalId: aiServicesPrincipalId
     scope: cosmosDb.id
   }
 }
 
-// ─── Agent Service → Key Vault ───
+// ─── Foundry Hosted Agent → Key Vault ───
 resource agentKeyVaultRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(keyVault.id, agentServicePrincipalId, keyVaultSecretsUser)
+  name: guid(keyVault.id, aiServicesPrincipalId, keyVaultSecretsUser)
   scope: keyVault
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', keyVaultSecretsUser)
-    principalId: agentServicePrincipalId
+    principalId: aiServicesPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
 
-// ─── Agent Service → AI Search (Reader) ───
+// ─── Foundry Hosted Agent → AI Search (Reader) ───
 resource agentSearchRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiSearch.id, agentServicePrincipalId, searchIndexDataReader)
+  name: guid(aiSearch.id, aiServicesPrincipalId, searchIndexDataReader)
   scope: aiSearch
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchIndexDataReader)
-    principalId: agentServicePrincipalId
+    principalId: aiServicesPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
 
-// ─── Agent Service → AI Search (Contributor — for ingestion) ───
+// ─── Foundry Hosted Agent → AI Search (Contributor — for ingestion) ───
 resource agentSearchContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiSearch.id, agentServicePrincipalId, searchIndexDataContributor)
+  name: guid(aiSearch.id, aiServicesPrincipalId, searchIndexDataContributor)
   scope: aiSearch
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchIndexDataContributor)
-    principalId: agentServicePrincipalId
+    principalId: aiServicesPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
 
-// NOTE: AcrPull is assigned via a User-Assigned Managed Identity in agent-service.bicep
-// to avoid the chicken-and-egg problem with the Container App's registry config.
-
-// ─── Agent Service → Microsoft Foundry ───
+// ─── Foundry Hosted Agent → Microsoft Foundry (OpenAI User) ───
 resource agentAiServicesRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiServices.id, agentServicePrincipalId, cognitiveServicesOpenAIUser)
+  name: guid(aiServices.id, aiServicesPrincipalId, cognitiveServicesOpenAIUser)
   scope: aiServices
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAIUser)
-    principalId: agentServicePrincipalId
+    principalId: aiServicesPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
 
-// ─── Agent Service → Foundry Agent Service (agents/write) ───
+// ─── Foundry Hosted Agent → Foundry Agent Service (Cognitive Services User) ───
 resource agentCogServicesUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiServices.id, agentServicePrincipalId, cognitiveServicesUser)
+  name: guid(aiServices.id, aiServicesPrincipalId, cognitiveServicesUser)
   scope: aiServices
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesUser)
-    principalId: agentServicePrincipalId
+    principalId: aiServicesPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
 
-// ─── Agent Service → Blob Storage (Skills) ───
+// ─── Foundry Hosted Agent → Blob Storage (Skills) ───
 resource agentStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccount.id, agentServicePrincipalId, storageBlobDataContributor)
-  scope: storageAccount
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributor)
-    principalId: agentServicePrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-// ─── AI Services (Hosted Agent) → Blob Storage ───
-resource aiServicesStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(storageAccount.id, aiServicesPrincipalId, storageBlobDataContributor)
   scope: storageAccount
   properties: {
@@ -163,18 +152,18 @@ resource aiServicesStorageRole 'Microsoft.Authorization/roleAssignments@2022-04-
   }
 }
 
-// ─── Agent Service → Application Insights (Monitoring Reader for Traces panel KQL) ───
+// ─── Foundry Hosted Agent → Application Insights (Monitoring Reader) ───
 resource agentAppInsightsRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(appInsightsName)) {
-  name: guid(appInsights.id, agentServicePrincipalId, monitoringReader)
+  name: guid(appInsights.id, aiServicesPrincipalId, monitoringReader)
   scope: appInsights
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', monitoringReader)
-    principalId: agentServicePrincipalId
+    principalId: aiServicesPrincipalId
     principalType: 'ServicePrincipal'
   }
 }
 
-// ─── AI Services (Foundry hosted-agent MI) → ACR (AcrPull, so Foundry can pull the hosted-agent image) ───
+// ─── Foundry Hosted Agent → ACR (AcrPull, so Foundry can pull the hosted-agent image) ───
 resource aiServicesAcrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(containerRegistryName)) {
   name: guid(containerRegistry.id, aiServicesPrincipalId, acrPull)
   scope: containerRegistry
@@ -188,8 +177,8 @@ resource aiServicesAcrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-
 // ─── AI Services PROJECT MI → ACR (AcrPull) ───
 // The Foundry PROJECT MI is what actually pulls the hosted-agent container
 // image at first invoke (per foundry-hosted-agents skill). Account MI alone
-// is insufficient and produces ImageError. Belt-and-braces with the account MI
-// grant above.
+// is insufficient and produces ImageError. Belt-and-braces with the account
+// MI grant above.
 resource aiServicesProjectAcrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(containerRegistryName) && !empty(aiServicesProjectPrincipalId)) {
   name: guid(containerRegistry.id, aiServicesProjectPrincipalId, acrPull)
   scope: containerRegistry

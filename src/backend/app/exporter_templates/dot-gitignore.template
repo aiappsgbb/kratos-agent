@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.env
+.env.local
+
+# Tooling caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Editors
+.idea/
+.vscode/
+.DS_Store
+
+# azd state
+.azure/
+
+# Node (only present if MCP mocks are bundled)
+node_modules/

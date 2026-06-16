@@ -73,4 +73,9 @@ output endpoint string = aiFoundry.properties.endpoint
 output modelDeploymentName string = modelDeployment.name
 output projectName string = project.name
 output projectEndpoint string = '${aiFoundry.properties.endpoint}api/projects/${project.name}'
+output projectId string = project.id
 output principalId string = aiFoundry.identity.principalId
+// The project MI is what pulls the hosted-agent container image from ACR
+// (per foundry-hosted-agents skill). Account MI ≠ project MI — both are
+// system-assigned, both need different roles.
+output projectPrincipalId string = project.identity.principalId

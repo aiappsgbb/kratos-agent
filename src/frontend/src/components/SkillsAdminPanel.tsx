@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { listSkills, createSkill, updateSkill, deleteSkill, getSystemPrompt, updateSystemPrompt, resetSystemPrompt, listSkillFiles, upsertSkillFile, deleteSkillFile, getMCPConfig, updateMCPConfig, analyzeConsistency, applyAnalysisFix } from "@/lib/api";
+import { listSkills, createSkill, updateSkill, deleteSkill, getSystemPrompt, updateSystemPrompt, resetSystemPrompt, listSkillFiles, upsertSkillFile, deleteSkillFile, getMCPConfig, updateMCPConfig, analyzeConsistency, applyAnalysisFix, exportUseCase } from "@/lib/api";
 import type { AnalysisResult, AnalysisIssue, ApplyFixResult, MCPConfig, Skill, SkillFile, UseCase } from "@/types";
 import { useTheme } from "./ThemeProvider";
 import { ApmAdminPanel } from "./ApmAdminPanel";
@@ -9,7 +9,7 @@ import { EvalsAdminPanel } from "./EvalsAdminPanel";
 import { TracesAdminPanel } from "./TracesAdminPanel";
 import { SourceBadge } from "./SourceBadge";
 
-type Tab = "skills" | "prompt" | "mcp" | "consistency" | "apm" | "evals" | "traces";
+type Tab = "skills" | "prompt" | "mcp" | "consistency" | "apm" | "evals" | "traces" | "deploy";
 
 interface Props {
   onClose: () => void;
@@ -67,6 +67,11 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadPath, setUploadPath] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Deploy / export state
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
 
   // Consistency analysis state
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -392,6 +397,40 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
     }
   };
 
+  const currentUseCaseMeta = useCases.find((uc) => uc.name === useCase);
+  const currentDisplayName = currentUseCaseMeta?.displayName ?? useCase;
+
+  const handleExport = async () => {
+    if (!useCase || exporting) return;
+    setExporting(true);
+    setExportError(null);
+    try {
+      const blob = await exportUseCase(useCase);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${useCase}-foundry-agent.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const copyCmd = async (text: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedCmd(id);
+      setTimeout(() => setCopiedCmd((cur) => (cur === id ? null : cur)), 1500);
+    } catch {
+      // Clipboard unavailable (insecure context) — silently no-op.
+    }
+  };
+
   const navItems: { id: Tab; label: string; icon: string }[] = [
     { id: "skills", label: "Skills", icon: "puzzle" },
     { id: "prompt", label: "System Prompt", icon: "document" },
@@ -400,6 +439,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
     { id: "consistency", label: "Consistency", icon: "shield" },
     { id: "evals", label: "Evals", icon: "chart" },
     { id: "traces", label: "Traces", icon: "activity" },
+    { id: "deploy", label: "Deploy", icon: "rocket" },
   ];
 
   const renderNavIcon = (icon: string) => {
@@ -411,6 +451,7 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
       case "package": return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>;
       case "chart": return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>;
       case "activity": return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h2.25l2.25-6 3 12 3-9 2.25 3h3.75" /></svg>;
+      case "rocket": return <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /></svg>;
       default: return null;
     }
   };
@@ -580,10 +621,10 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
             </button>
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-semibold text-text">
-                {tab === "skills" ? (showCreate ? "Create Skill" : "Skills") : tab === "prompt" ? "System Prompt" : tab === "consistency" ? "Consistency Analysis" : tab === "apm" ? "APM Packages" : tab === "evals" ? "Evaluations" : tab === "traces" ? "Traces" : (editingMcp ? `Edit: ${editingMcp.name}` : showMcpCreate ? "Add MCP Server" : "MCP Servers")}
+                {tab === "skills" ? (showCreate ? "Create Skill" : "Skills") : tab === "prompt" ? "System Prompt" : tab === "consistency" ? "Consistency Analysis" : tab === "apm" ? "APM Packages" : tab === "evals" ? "Evaluations" : tab === "traces" ? "Traces" : tab === "deploy" ? "Deploy as Foundry Agent" : (editingMcp ? `Edit: ${editingMcp.name}` : showMcpCreate ? "Add MCP Server" : "MCP Servers")}
               </h2>
               <p className="text-xs text-muted mt-0.5">
-                {tab === "skills" ? `${skills.filter(s => s.enabled).length} of ${skills.length} active` : tab === "prompt" ? "Configure the system prompt for all conversations" : tab === "consistency" ? "Detect contradictions, overlaps, and gaps in your agent configuration" : tab === "apm" ? "Manage Agent Package Manager dependencies for this use-case" : tab === "evals" ? "Validate agent behavior with automated eval scenarios" : tab === "traces" ? "App Insights waterfall view for recent operations" : `${Object.keys(mcpServers).length} server${Object.keys(mcpServers).length !== 1 ? "s" : ""} configured`}
+                {tab === "skills" ? `${skills.filter(s => s.enabled).length} of ${skills.length} active` : tab === "prompt" ? "Configure the system prompt for all conversations" : tab === "consistency" ? "Detect contradictions, overlaps, and gaps in your agent configuration" : tab === "apm" ? "Manage Agent Package Manager dependencies for this use-case" : tab === "evals" ? "Validate agent behavior with automated eval scenarios" : tab === "traces" ? "App Insights waterfall view for recent operations" : tab === "deploy" ? "Package this persona as a standalone Microsoft Foundry Hosted Agent" : `${Object.keys(mcpServers).length} server${Object.keys(mcpServers).length !== 1 ? "s" : ""} configured`}
               </p>
             </div>
             {/* Action buttons */}
@@ -878,6 +919,156 @@ export function SkillsAdminPanel({ onClose, useCase = "generic", useCases = [], 
           ) : tab === "traces" ? (
             /* ── Traces tab ── */
             <TracesAdminPanel useCase={useCase} />
+          ) : tab === "deploy" ? (
+            /* ── Deploy tab ── */
+            <div className="max-w-3xl space-y-6">
+              {/* Hero / explainer */}
+              <div className="rounded-2xl border border-border-soft bg-surface p-5 sm:p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-accent-soft text-accent flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-semibold text-text-strong">
+                      Ship <span className="text-accent">{currentDisplayName}</span> as a Foundry Hosted Agent
+                    </h3>
+                    <p className="mt-1 text-sm text-muted leading-relaxed">
+                      Download a self-contained <code className="font-mono text-[12px] bg-hover px-1.5 py-0.5 rounded">azd</code> project that
+                      deploys this persona — skills, prompt, MCP config, and infra — as a standalone
+                      Microsoft Foundry Hosted Agent in any Azure subscription. Kratos is not required at runtime.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-col sm:flex-row gap-3 sm:items-center">
+                  <button
+                    onClick={handleExport}
+                    disabled={exporting || !useCase}
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-accent-fg bg-accent hover:bg-accent-hover rounded-xl transition-all shadow-card disabled:opacity-50 disabled:cursor-wait"
+                  >
+                    {exporting ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={3} className="opacity-25" />
+                          <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth={3} className="opacity-75" strokeLinecap="round" />
+                        </svg>
+                        Packing&hellip;
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                        Download {useCase}-foundry-agent.zip
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[11px] text-muted">
+                    Typical bundle: ~150 files, ~300 KB. Generated on demand from the live persona configuration.
+                  </p>
+                </div>
+
+                {exportError && (
+                  <div className="mt-3 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs border border-red-100 dark:border-red-500/20">
+                    {exportError}
+                  </div>
+                )}
+              </div>
+
+              {/* What's inside */}
+              <section>
+                <h4 className="text-sm font-semibold text-text-strong mb-3">What&apos;s inside the ZIP</h4>
+                <ul className="space-y-2 text-sm text-text">
+                  {[
+                    { path: "infra/", desc: "Bicep for Foundry account, project, ACR, monitoring, and RBAC." },
+                    { path: "src/hosted-agent/", desc: "MAF orchestrator container — pinned to agent-framework-core ~=1.7.0." },
+                    { path: "src/backend/app/", desc: "Persona runtime: skills, system prompt, MCP config, SkillsProvider wiring." },
+                    { path: "use-cases/" + useCase + "/", desc: "This persona's curated skills + assets (frozen at download time)." },
+                    { path: "azure.yaml + agent.yaml", desc: "azd service map + ContainerAgent schema for the azure.ai.agents extension." },
+                    { path: "README.md", desc: "Step-by-step deploy + invoke walkthrough." },
+                  ].map((row) => (
+                    <li key={row.path} className="flex items-start gap-3">
+                      <code className="font-mono text-[12px] bg-hover text-text-strong px-2 py-0.5 rounded shrink-0">{row.path}</code>
+                      <span className="text-muted">{row.desc}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              {/* Prerequisites */}
+              <section>
+                <h4 className="text-sm font-semibold text-text-strong mb-3">Prerequisites</h4>
+                <ul className="space-y-1.5 text-sm text-muted list-disc pl-5">
+                  <li>Azure subscription with Microsoft Foundry preview features enabled.</li>
+                  <li>
+                    <code className="font-mono text-[12px] bg-hover text-text px-1.5 py-0.5 rounded">azd</code> CLI ≥ 1.20
+                    with the <code className="font-mono text-[12px] bg-hover text-text px-1.5 py-0.5 rounded">azure.ai.agents</code> extension.
+                  </li>
+                  <li>
+                    <strong className="text-text">Foundry Project Manager</strong> role on the target Foundry project
+                    (so the postdeploy hook can auto-assign <em>Foundry User</em> to the agent identity).
+                  </li>
+                  <li>
+                    A supported region: <code className="font-mono text-[12px] bg-hover text-text px-1.5 py-0.5 rounded">northcentralus</code>,
+                    {" "}<code className="font-mono text-[12px] bg-hover text-text px-1.5 py-0.5 rounded">eastus</code>,
+                    {" "}<code className="font-mono text-[12px] bg-hover text-text px-1.5 py-0.5 rounded">swedencentral</code>,
+                    or <code className="font-mono text-[12px] bg-hover text-text px-1.5 py-0.5 rounded">westus</code>.
+                  </li>
+                </ul>
+              </section>
+
+              {/* Deploy steps */}
+              <section>
+                <h4 className="text-sm font-semibold text-text-strong mb-3">Deploy</h4>
+                <ol className="space-y-3">
+                  {[
+                    { id: "unzip", label: "Unzip + enter the project", cmd: `unzip ${useCase}-foundry-agent.zip && cd ${useCase}-foundry-agent` },
+                    { id: "auth", label: "Authenticate with Azure", cmd: "azd auth login" },
+                    { id: "up", label: "Provision infra + deploy the agent", cmd: `azd up -e ${useCase}-prod` },
+                    { id: "invoke", label: "Smoke test the deployed agent", cmd: 'azd ai agent invoke "Hello!"' },
+                  ].map((step, idx) => (
+                    <li key={step.id} className="rounded-xl border border-border-soft bg-surface overflow-hidden">
+                      <div className="flex items-center gap-3 px-4 py-2 border-b border-border-soft bg-surface-2">
+                        <span className="w-5 h-5 rounded-full bg-accent text-accent-fg text-[11px] font-semibold flex items-center justify-center flex-shrink-0">
+                          {idx + 1}
+                        </span>
+                        <span className="text-xs font-medium text-text flex-1">{step.label}</span>
+                        <button
+                          onClick={() => copyCmd(step.cmd, step.id)}
+                          className="text-[11px] text-muted hover:text-text px-2 py-1 rounded hover:bg-hover transition-all"
+                          aria-label={`Copy ${step.label}`}
+                        >
+                          {copiedCmd === step.id ? "Copied!" : "Copy"}
+                        </button>
+                      </div>
+                      <pre className="px-4 py-2.5 text-xs font-mono text-text-strong overflow-x-auto">
+                        <span className="text-muted select-none">$ </span>{step.cmd}
+                      </pre>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-3 text-[11px] text-muted leading-relaxed">
+                  First <code className="font-mono bg-hover px-1 py-0.5 rounded">azd up</code> takes
+                  ~12–18 min (Foundry account + project + ACR + agent build). Subsequent
+                  {" "}<code className="font-mono bg-hover px-1 py-0.5 rounded">azd deploy</code> is &lt; 2 min.
+                </p>
+              </section>
+
+              {/* Footer / troubleshooting */}
+              <section className="rounded-xl border border-border-soft bg-surface-2 px-4 py-3">
+                <p className="text-[12px] text-muted leading-relaxed">
+                  <strong className="text-text">Stuck?</strong> The bundle&apos;s
+                  {" "}<code className="font-mono bg-hover text-text px-1 py-0.5 rounded">README.md</code> covers the
+                  three most common gotchas: 401 on first invoke (RBAC propagation, wait 5–15 min),
+                  <em> session_not_ready</em> 424 (container crash — check
+                  {" "}<code className="font-mono bg-hover text-text px-1 py-0.5 rounded">azd ai agent monitor --session-id</code>),
+                  and region <em>experience not available</em> (try
+                  {" "}<code className="font-mono bg-hover text-text px-1 py-0.5 rounded">swedencentral</code>).
+                </p>
+              </section>
+            </div>
           ) : tab === "consistency" ? (
             /* ── Consistency Analysis tab ── */
             <div className="max-w-4xl space-y-6">

@@ -1,0 +1,18 @@
+# Build artefacts that should never ship inside the agent image.
+.git
+.venv
+__pycache__
+*.pyc
+*.pyo
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.idea
+.vscode
+.DS_Store
+node_modules
+.azure
+infra
+README.md
+.env
+.env.local

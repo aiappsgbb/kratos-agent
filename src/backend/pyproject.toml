@@ -44,9 +44,15 @@ dev = [
 [tool.setuptools.packages.find]
 include = ["app*"]
 
+[tool.setuptools.package-data]
+# Exporter templates ship inside the wheel so importlib.resources resolves
+# them at runtime — both in editable installs and in the built Docker image.
+"app" = ["exporter_templates/**/*"]
+
 [tool.ruff]
 target-version = "py311"
 line-length = 120
+extend-exclude = ["app/exporter_templates"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "S", "B", "A", "C4", "SIM"]

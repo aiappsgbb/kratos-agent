@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# Post-deploy hook for ${name} (Kratos-exported Foundry Hosted Agent).
+#
+# Foundry creates two managed identities for each hosted agent — the
+# *instance* identity (used by the running container) and the *blueprint*
+# identity (used by the agent control plane). These identities are created
+# **after** Bicep provisioning, so bicep-based RBAC can't grant them roles
+# directly. This hook runs after `azd deploy` registers the agent, queries
+# the identities from the Foundry control plane, and grants the data-plane
+# roles the Kratos runtime needs.
+#
+# Roles are pinned by GUID (not display name) because Azure rotates the
+# display names — e.g. "Azure AI User" was renamed "Foundry User" in May
+# 2026 while the GUID stayed identical. The GUID call-site survives
+# further rotations.
+#
+# The hook is idempotent — re-running it is safe.
+
+set -euo pipefail
+
+echo ""
+echo "╔══════════════════════════════════════════════════════════╗"
+echo "║       Granting RBAC to hosted-agent identities          ║"
+echo "╚══════════════════════════════════════════════════════════╝"
+
+# Role definition GUIDs (pin by GUID, not name — survives rename).
+# Source: foundry-hosted-agents SKILL.md § Identity & RBAC
+ACR_PULL_ROLE='7f951dda-4ed3-4680-a7ca-43fe172d538d'                      # AcrPull
+COGNITIVE_OPENAI_USER_ROLE='5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'         # Cognitive Services OpenAI User
+COGNITIVE_USER_ROLE='a97b65f3-24c7-4388-baec-2e87135dc908'                # Cognitive Services User
+FOUNDRY_USER_ROLE='53ca6127-db72-4b80-b1b0-d745d6d5456d'                  # Foundry User (formerly Azure AI User)
+
+# Discover the identities from `azd ai agent show` (JSON output).
+AGENT_JSON="$$(azd ai agent show 2>/dev/null | sed -n '/^{/,/^}/p' || true)"
+if [ -z "$$AGENT_JSON" ]; then
+    echo "⚠️  Couldn't read agent state from 'azd ai agent show'. Skipping RBAC."
+    exit 0
+fi
+
+INSTANCE_PID="$$(echo "$$AGENT_JSON" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get("instance_identity",{}).get("principal_id",""))' 2>/dev/null || true)"
+BLUEPRINT_PID="$$(echo "$$AGENT_JSON" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get("blueprint",{}).get("principal_id",""))' 2>/dev/null || true)"
+
+if [ -z "$$INSTANCE_PID" ]; then
+    echo "⚠️  Couldn't extract instance_identity.principal_id. Skipping RBAC."
+    exit 0
+fi
+
+echo "Instance identity:  $$INSTANCE_PID"
+echo "Blueprint identity: $${BLUEPRINT_PID:-(none)}"
+echo ""
+
+# Resolve scopes from the azd environment.
+SUB="$${AZURE_SUBSCRIPTION_ID}"
+RG="$${AZURE_RESOURCE_GROUP}"
+ACR_NAME="$${AZURE_CONTAINER_REGISTRY_NAME}"
+AI_PROJECT_ID="$${AZURE_AI_PROJECT_ID}"
+AI_ACCOUNT_NAME="$${AZURE_AI_ACCOUNT_NAME:-}"
+
+# Derive parent Foundry account ID from the project ID if not already known.
+AI_ACCOUNT_ID="$$(echo "$$AI_PROJECT_ID" | sed 's|/projects/[^/]*$$||')"
+if [ -z "$$AI_ACCOUNT_NAME" ]; then
+    AI_ACCOUNT_NAME="$${AI_ACCOUNT_ID##*/}"
+fi
+ACR_ID="/subscriptions/$$SUB/resourceGroups/$$RG/providers/Microsoft.ContainerRegistry/registries/$$ACR_NAME"
+
+grant() {
+    local pid="$$1"
+    local role="$$2"
+    local scope="$$3"
+    local label="$$4"
+    if [ -z "$$pid" ] || [ -z "$$scope" ]; then return 0; fi
+    az role assignment create \
+        --assignee-object-id "$$pid" \
+        --assignee-principal-type ServicePrincipal \
+        --role "$$role" \
+        --scope "$$scope" \
+        --output none 2>/dev/null \
+        && echo "  ✅ $${pid:0:8}… → $$label @ $${scope##*/}" \
+        || echo "  ⊙  $${pid:0:8}… → $$label @ $${scope##*/} (exists / skip)"
+}
+
+# ── 1. Grant AcrPull to the Foundry PROJECT MI (the actual image-puller). ──
+# Per foundry-hosted-agents skill: the project system MI is what pulls the
+# hosted-agent container image, NOT the account MI. Bicep already grants
+# both AcrPull at provision time, but we re-grant here as belt-and-braces
+# in case the project MI was recreated between provision and deploy.
+PROJECT_MI="$$(az resource show \
+    --ids "$$AI_PROJECT_ID" \
+    --api-version 2025-04-01-preview \
+    --query identity.principalId -o tsv 2>/dev/null || true)"
+if [ -n "$$PROJECT_MI" ]; then
+    echo "Foundry project MI: $$PROJECT_MI"
+    grant "$$PROJECT_MI" "$$ACR_PULL_ROLE" "$$ACR_ID" "AcrPull"
+fi
+
+# ── 2. Grant data-plane roles to BOTH instance + blueprint identities. ──
+# Kratos calls AOAI directly via CopilotClient → needs Cognitive Services
+# OpenAI User on the account. We also grant Foundry User on both scopes
+# in case the runtime needs project-scoped data-plane access (e.g. for
+# session storage, tool discovery via the Foundry control plane).
+for PID in "$$INSTANCE_PID" "$$BLUEPRINT_PID"; do
+    [ -z "$$PID" ] && continue
+
+    # Container image pull (Foundry pulls the hosted-agent image from ACR).
+    grant "$$PID" "$$ACR_PULL_ROLE" "$$ACR_ID" "AcrPull"
+
+    # Direct AOAI invocations (Kratos's CopilotClient path).
+    grant "$$PID" "$$COGNITIVE_OPENAI_USER_ROLE" "$$AI_ACCOUNT_ID" "Cognitive Services OpenAI User"
+    grant "$$PID" "$$COGNITIVE_OPENAI_USER_ROLE" "$$AI_PROJECT_ID" "Cognitive Services OpenAI User"
+
+    # Cognitive Services basic data-plane (token issuance, model listing).
+    grant "$$PID" "$$COGNITIVE_USER_ROLE" "$$AI_ACCOUNT_ID" "Cognitive Services User"
+    grant "$$PID" "$$COGNITIVE_USER_ROLE" "$$AI_PROJECT_ID" "Cognitive Services User"
+
+    # Foundry-mediated data-plane (required by post-rename data plane,
+    # surfaces as 401 if missing — see foundry-hosted-agents SKILL.md
+    # § MAF 1.4.0 breaking changes).
+    grant "$$PID" "$$FOUNDRY_USER_ROLE" "$$AI_ACCOUNT_ID" "Foundry User"
+    grant "$$PID" "$$FOUNDRY_USER_ROLE" "$$AI_PROJECT_ID" "Foundry User"
+done
+
+echo ""
+echo "RBAC complete."
+echo ""
+echo "Note: RBAC propagation takes 5-15 minutes for newly-created"
+echo "service principals. If 'azd ai agent invoke' returns 401/403,"
+echo "wait ~10 minutes, then retry. If still failing after 15 minutes,"
+echo "run 'azd deploy' again to publish a new agent version."
