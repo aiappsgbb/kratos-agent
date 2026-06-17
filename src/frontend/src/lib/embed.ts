@@ -8,6 +8,8 @@
  *
  *   ?embed=1            — chromeless layout
  *   &theme=dark         — sync light/dark mode (or a named Kratos theme)
+ *   &mode=dark          — sync light/dark mode independently of a named theme
+ *                         (lets the host pass &theme=agentic-loop&mode=dark)
  *   &persona=<slug>     — open this persona (post-import landing target)
  *   &prompt=<text>      — auto-start a conversation with this first message
  *   &import=1           — read a relayed manifest from sessionStorage and POST
@@ -25,6 +27,7 @@ export const IMPORT_RELAY_KEY = "kratos.import";
 export interface EmbedParams {
   embed: boolean;
   theme: string | null;
+  mode: string | null;
   persona: string | null;
   prompt: string | null;
   doImport: boolean;
@@ -37,12 +40,13 @@ function truthy(value: string | null): boolean {
 /** Parse embed-relevant args from the current URL. SSR-safe (returns defaults). */
 export function readEmbedParams(): EmbedParams {
   if (typeof window === "undefined") {
-    return { embed: false, theme: null, persona: null, prompt: null, doImport: false };
+    return { embed: false, theme: null, mode: null, persona: null, prompt: null, doImport: false };
   }
   const p = new URLSearchParams(window.location.search);
   return {
     embed: truthy(p.get("embed")),
     theme: p.get("theme"),
+    mode: p.get("mode"),
     persona: p.get("persona"),
     prompt: p.get("prompt"),
     doImport: truthy(p.get("import")),

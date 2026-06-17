@@ -38,6 +38,60 @@
   color-scheme: light;
 }
 
+/* Agentic Loop — branded palette so Kratos matches the agentic-loop-site host
+   when embedded under /kratos (aurora purple + cyan on near-black). Light and
+   dark variants mirror the host's :root[data-theme] tokens. */
+[data-theme="agentic-loop"] {
+  --bg:           #f6f7fb;
+  --surface:      #ffffff;
+  --surface-2:    #f0f2f8;
+  --border:       #dfe3ee;
+  --border-soft:  #e7ebf3;
+  --hover:        #eceff6;
+  --text:         #0e1422;
+  --text-strong:  #000000;
+  --muted:        #4a546a;
+  --muted-strong: #2f3748;
+  --accent:       #6b46ff;
+  --accent-hover: #5a37e6;
+  --accent-fg:    #ffffff;
+  --accent-soft:  rgba(107, 70, 255, 0.10);
+  --ask-accent:   #0ea5e9;
+  --ask-accent-fg:#ffffff;
+  --ask-border:   rgba(14, 165, 233, 0.30);
+  --ask-bg:       rgba(14, 165, 233, 0.08);
+  --code-fg:      #ec4899;
+  --shadow-card:  0 1px 2px rgba(15,23,42,0.06), 0 2px 8px rgba(15,23,42,0.05);
+  --font-display: 'Inter';
+  --font-mono:    'JetBrains Mono';
+  color-scheme: light;
+}
+[data-theme="agentic-loop"].dark {
+  --bg:           #07080c;
+  --surface:      #0c0f16;
+  --surface-2:    #121622;
+  --border:       #222838;
+  --border-soft:  #161b28;
+  --hover:        #161b28;
+  --text:         #e8ecf4;
+  --text-strong:  #ffffff;
+  --muted:        #9aa4b8;
+  --muted-strong: #b6bfd0;
+  --accent:       #7c5cff;
+  --accent-hover: #9579ff;
+  --accent-fg:    #ffffff;
+  --accent-soft:  rgba(124, 92, 255, 0.16);
+  --ask-accent:   #34d2ff;
+  --ask-accent-fg:#07080c;
+  --ask-border:   rgba(52, 210, 255, 0.32);
+  --ask-bg:       rgba(52, 210, 255, 0.10);
+  --code-fg:      #ff5ca8;
+  --shadow-card:  0 1px 2px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.4);
+  --font-display: 'Inter';
+  --font-mono:    'JetBrains Mono';
+  color-scheme: dark;
+}
+
 [data-theme="tokyo-night"] {
   --bg:           #e1e2e7;
   --surface:      #eaebef;

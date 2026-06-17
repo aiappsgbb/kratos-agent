@@ -34,7 +34,7 @@ export default function Home() {
 
   // Embed mode (chromeless hosting under another origin — design spec §C)
   const [embed, setEmbed] = useState<EmbedParams>({
-    embed: false, theme: null, persona: null, prompt: null, doImport: false,
+    embed: false, theme: null, mode: null, persona: null, prompt: null, doImport: false,
   });
   const [importStatus, setImportStatus] = useState<ImportStatus>("idle");
   const [importError, setImportError] = useState<string | null>(null);
@@ -203,13 +203,18 @@ export default function Home() {
     if (!params.embed) return;
     bootstrappedRef.current = true;
 
-    // Sync theme: accept a light/dark mode or a named Kratos theme.
+    // Sync theme: accept a light/dark mode or a named Kratos theme, plus an
+    // optional explicit &mode= so the host can pass a named theme AND a mode
+    // together (e.g. &theme=agentic-loop&mode=dark for a branded dark match).
     if (params.theme) {
       if (params.theme === "light" || params.theme === "dark") {
         setMode(params.theme as Mode);
       } else if (THEME_NAMES.has(params.theme as ThemeName)) {
         setTheme(params.theme as ThemeName);
       }
+    }
+    if (params.mode === "light" || params.mode === "dark") {
+      setMode(params.mode as Mode);
     }
 
     if (params.doImport) {

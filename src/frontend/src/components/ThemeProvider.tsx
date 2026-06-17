@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 export type Mode = "light" | "dark";
 
 export type ThemeName =
+  | "agentic-loop"
   | "tokyo-night"
   | "catppuccin"
   | "rose-pine"
@@ -14,6 +15,7 @@ export type ThemeName =
   | "nord";
 
 export const THEMES: { id: ThemeName; label: string; tagline: string; swatches: [string, string, string] }[] = [
+  { id: "agentic-loop",     label: "Agentic Loop",     tagline: "Aurora purple on near-black", swatches: ["#07080c", "#7c5cff", "#34d2ff"] },
   { id: "newsprint",        label: "Newsprint",        tagline: "Cream paper + ink + red",    swatches: ["#f7f3e9", "#1a1a1a", "#a02929"] },
   { id: "tokyo-night",      label: "Tokyo Night",      tagline: "Midnight + mauve",           swatches: ["#1a1b26", "#bb9af7", "#e0af68"] },
   { id: "catppuccin",       label: "Catppuccin",       tagline: "Pastel-on-dark",             swatches: ["#1e1e2e", "#cba6f7", "#fab387"] },
