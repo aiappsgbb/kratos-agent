@@ -1,7 +1,7 @@
 # Design Spec — Kratos Persona Import API + Embedded Hosting in agentic-loop-site
 
 - **Date:** 2026-06-17
-- **Status:** Design (approved direction, pre-implementation)
+- **Status:** Design — locked direction (manifest-first + §10.1 Variant B), pre-implementation
 - **Primary repo:** `kmavrodis/kratos-agent` (this worktree) — implemented here
 - **Secondary repo:** `aiappsgbb/agentic-loop-site` — separate PR / separate session
 - **Related skill (contract compatibility only):** `aiappsgbb/threadlight-skills → threadlight-design`
@@ -44,6 +44,7 @@ The persona **manifest the site builds must be compatible with `threadlight-desi
 | D6 | **Import endpoint is authenticated** (`require_authenticated_user`), consistent with all existing Kratos admin/export routes. | Security parity. |
 | D7 | **Import-first, then redirect.** Sequence: site builds manifest → `POST /api/use-cases/import` (manifest-in) creates the persona → **only on success** the UX deep-links into the embedded Kratos at the new persona (`?embed=1&persona=<name>`). | User directive: "Kratos imports it first (new API) then UX redirects." |
 | D8 | Import contract input is **the threadlight-`manifest.json`-compatible manifest** (structured, primary path). Optional NL `prompt` expansion in Kratos is a **secondary convenience**, off the main flow. | User NOTE about threadlight compatibility; D2 moves generation to the site. |
+| D9 | **The authenticated import call is issued from inside Kratos** (after its own EasyAuth), not cross-app from the site. The site relays the manifest via same-origin `sessionStorage['kratos.import']` → `/kratos/?embed=1&import=1` → Kratos imports on entry → settles on `?persona=<name>`. (§10.1 "Variant B".) | User-confirmed. Survives the two-EasyAuth-app split without a pre-existing Kratos session or an un-followable cross-app `fetch` redirect. |
 
 ---
 
@@ -112,36 +113,41 @@ flowchart TB
 
   U["Authenticated user"] --> FD
   R1 --> SITE["agentic-loop-site SWA · EasyAuth app #1<br/>'Describe your agent' box<br/><b>builds threadlight manifest</b>"]
-  SITE -->|"1 · POST manifest (authenticated)"| R4
+  SITE -->|"1 · relay manifest → sessionStorage['kratos.import']<br/>navigate /kratos/?embed=1&import=1"| R2
+  R2 --> KFE["Kratos frontend · EasyAuth app #2<br/>embed mode (import-on-entry)"]
+  KFE -->|"2 · EasyAuth login (silent if IdP session)"| R3
+  KFE -->|"3 · POST manifest (same-origin, Kratos cookie)"| R4
   R4 --> KBE["Kratos <b>import API</b><br/>POST /api/use-cases/import (manifest-in)"]
   KBE --> STORE["use-cases/&lt;name&gt;/<br/>SYSTEM_PROMPT.md + .mcp.json + apm.yml"]
   KBE --> REG["app.state.registries[name]"]
-  KBE -->|"201 {name}"| SITE
-  SITE -->|"2 · redirect /kratos/?embed=1&persona=&lt;name&gt;"| R2
-  R2 --> KFE["Kratos frontend · EasyAuth app #2<br/>embed mode → opens the new persona"]
+  KBE -->|"201 {name}"| KFE
+  KFE -->|"4 · settle on ?embed=1&persona=&lt;name&gt;"| KFE
 ```
 
-**End-to-end flow (import-first, then redirect — per D2/D7):**
+**End-to-end flow (Variant B — import-on-entry, then settle; per D2/D7/D9):**
 
 1. User is on `site.com` (authenticated to site EasyAuth app #1), types a description into the
    **generate box**.
 2. **The site builds the threadlight-compatible manifest** from the description (its
    advisor / its own LLM / deterministic builder — Kratos is not involved in generation).
-3. The site **POSTs the manifest** to `site.com/kratos/api/use-cases/import` (the new Kratos
-   import API). *(Auth-context note: this endpoint is gated by Kratos EasyAuth app #2 — see
-   §10.1 for exactly which page issues this authenticated call; that's the one open
-   decision below.)*
-4. Kratos import API: validate manifest → map to the three persona files → persist
+3. The site **relays the manifest** into same-origin `sessionStorage['kratos.import']`
+   (§7.1) and navigates (top-level) to `site.com/kratos/?embed=1&theme=<t>&import=1`.
+4. Front Door routes `/kratos/*` → Kratos SWA; **Kratos EasyAuth (app #2)** authenticates —
+   silent if the browser already has an Entra IdP session, otherwise an interactive prompt.
+   The manifest **survives this redirect** because storage is per-origin (the single
+   `site.com` origin), not per-path.
+5. Embed mode (chromeless) sees `import=1`, **reads-and-clears** the manifest from
+   `sessionStorage`, and **POSTs it same-origin** to `/kratos/api/use-cases/import` —
+   authenticated by the Kratos EasyAuth cookie (no cross-app `fetch`, no CORS).
+6. Kratos import API: validate manifest → map to the three persona files → persist
    (blob/local) → register `app.state.registries[name]` → return `201 {name, displayName}`.
    Slug is **auto-deduped** (`name-2`, `name-3`, …) so a name clash never dead-ends (explicit
    collisions can opt into `409`/`overwrite`).
-5. **Only on success**, the UX **redirects** into the embedded Kratos at the new persona:
-   `site.com/kratos/?embed=1&theme=<t>&persona=<name>`.
-6. Front Door routes `/kratos/*` → Kratos SWA; EasyAuth (app #2) is satisfied (already
-   established in step 3 / silent via IdP session). Embed mode (chromeless) **preselects the
-   persona**, surfaces its `sampleQuestions`, and opens the chat — the user is now talking to
-   their agent, visually "inside" the site. Import errors are surfaced **on the site** (step 4
-   response) *before* any redirect, so the embedded view only ever opens on success.
+7. **On success**, embed mode **settles on the new persona** — `history.replaceState` to
+   `?embed=1&theme=<t>&persona=<name>` (so a refresh won't re-import), preselects it,
+   surfaces its `sampleQuestions`, and opens the chat — the user is now talking to their
+   agent, visually "inside" the site. On import/registration error, embed mode shows an
+   inline "couldn't import — try again" affordance instead of the chat.
 
 ---
 
@@ -271,9 +277,9 @@ URL arguments (read in `page.tsx` via `useSearchParams`):
 |---|---|
 | `embed=1` | **Chromeless** layout: hide the standalone sidebar/header chrome so the site's own chrome wraps Kratos; tighten paddings to blend in. |
 | `theme=light\|dark` | Apply theme to match the host site (Tailwind `dark` class / data-attr). |
-| `persona=<name>` | **Primary handoff (D7).** Preselect `selectedUseCase`, surface its `sampleQuestions`, open the chat. This is the post-import landing target — import already happened on the site, so embed just *opens* the persona. (Skip gracefully if not found yet — show landing.) |
+| `persona=<name>` | **Post-import landing target (D7/D9).** Preselect `selectedUseCase`, surface its `sampleQuestions`, open the chat. Embed settles here via `history.replaceState` after a successful import. (Skip gracefully if not found yet — show landing.) |
 | `prompt=<text>` | Prefill `landingInput` (optional, e.g. seed the first question). |
-| `import=1` | **Only used by auth-variant B (§10.1).** Read the manifest handoff (§7.1), **read-and-clear** it, **POST it to `/kratos/api/use-cases/import`** from inside Kratos (after its own EasyAuth), then settle on the created persona. Absent in variant A. |
+| `import=1` | **The chosen handoff (§10.1 Variant B / D9).** Read the manifest handoff (§7.1), **read-and-clear** it, **POST it to `/kratos/api/use-cases/import`** from inside Kratos (after its own EasyAuth), then settle on `?persona=<name>`. |
 
 - Add a small `useEmbed()` hook + an `embed`-aware wrapper around the existing layout; no
   changes to standalone behavior when params are absent.
@@ -282,17 +288,9 @@ URL arguments (read in `page.tsx` via `useSearchParams`):
   that would be heavy and brittle; chromeless + theme sync is the pragmatic "included"
   feel the user asked for.)
 
-### 7.1 The handoff (depends on the §10.1 auth decision)
+### 7.1 The handoff (Variant B — locked, §10.1 / D9)
 
-**Variant A (default/recommended) — the site imports, then redirects with `persona`.**
-The site posts the manifest to the import API itself and, on `201`, navigates to
-`/kratos/?embed=1&theme=<t>&persona=<name>`. Embed mode does **no importing** — it only
-*opens* the named persona. Nothing is relayed through storage; the persona name is a short,
-safe value to carry in the URL. This is the cleanest expression of D7 ("import first, then
-redirect").
-
-**Variant B (fallback) — Kratos imports on entry via a same-origin manifest relay.**
-Used only if the site cannot make an authenticated cross-app import call (§10.1):
+Kratos imports on entry via a same-origin manifest relay:
 
 - Under Front Door, `/` and `/kratos/*` are **one browser origin** (`site.com`), so
   `sessionStorage` is **shared** (web storage is keyed by origin, not path). The site writes
@@ -303,14 +301,16 @@ Used only if the site cannot make an authenticated cross-app import call (§10.1
 - Kratos embed mode **reads the payload once and removes it** (`removeItem`) before calling
   import, so a refresh cannot re-import; on `201` it settles on `?persona=<name>` (replacing
   history so the manifest never re-runs).
+- The import call is **same-origin** (`/kratos/api/...`), carried by Kratos's own EasyAuth
+  cookie — no cross-app `fetch`, no CORS, no un-followable `401` redirect.
 - The manifest itself is **never** placed in the URL (size limits, history/edge-log leakage).
 - This relay lives in the **site PR**; the Kratos PR only **consumes** `sessionStorage`
   `['kratos.import']` + the `import` param. Standalone Kratos ignores both.
 
-Both variants converge on the same end state: an embedded, chromeless Kratos opened at the
-newly-created persona. On import/registration error, the user is kept **on the site** with a
-retry affordance (variant A surfaces the error before any redirect; variant B shows an inline
-"couldn't import — try again" panel in embed mode instead of the chat).
+On import/registration error, embed mode shows an inline "couldn't import — try again" panel
+instead of the chat. *(Optional future fast path: when a Kratos session already exists, the
+site could `POST` import directly and arrive with just `?persona=<name>` — "Variant A" in
+§10.1, not built in this PR.)*
 
 ---
 
@@ -323,12 +323,9 @@ Captured here for completeness; **implemented in a separate session/worktree**, 
   - a **"Describe your agent" generate box** that **builds the threadlight-compatible
     manifest** in the site (reusing the `GreenfieldBuilder` / `advisor.ts` "Make it real"
     pattern, repurposed to persona intent), and
-  - the **import-then-redirect** handoff per the §10.1 auth decision:
-    - **Variant A:** site `POST`s the manifest to `/kratos/api/use-cases/import`, then on
-      `201` navigates to `/kratos/?embed=1&theme=<t>&persona=<name>`.
-    - **Variant B:** site writes the manifest to `sessionStorage['kratos.import']` (§7.1)
-      and navigates to `/kratos/?embed=1&import=1` (Kratos imports on entry after its own
-      EasyAuth).
+  - the **import-then-settle** handoff (§10.1 Variant B / D9): the site writes the manifest
+    to `sessionStorage['kratos.import']` (§7.1) and navigates to `/kratos/?embed=1&theme=<t>&import=1`;
+    Kratos imports on entry (after its own EasyAuth) and settles on `?persona=<name>`.
 - Add the **Front Door** profile + routes that path-mount Kratos under `/kratos/*`
   (per §6.3–6.4), including `/kratos/.auth/*` and `/kratos/api/*`.
 - No Kratos files are copied — the mount serves the live Kratos SWA.
@@ -372,23 +369,27 @@ manifest** so personas round-trip between ecosystems:
 - The Import API trusts the Kratos SWA EasyAuth principal (existing
   `require_authenticated_user`); no new auth surface is introduced.
 
-### 10.1 OPEN DECISION — which page issues the authenticated import call?
+### 10.1 DECISION (locked) — Kratos imports on entry after its own login (Variant B)
 
 Because the import endpoint is gated by **Kratos** EasyAuth (app #2) but the generate box
-lives on the **site** (app #1), the cross-app `POST` needs a Kratos auth context. Two ways:
+lives on the **site** (app #1), the authenticated import call is issued **from inside
+Kratos**, not cross-app from the site:
 
-| | **Variant A — site calls import directly** | **Variant B — Kratos entry page imports after its own login** |
+| | **Variant A — site calls import directly** | **✅ Variant B (CHOSEN) — Kratos entry page imports after its own login** |
 |---|---|---|
 | Who POSTs the manifest | The site page (`fetch('/kratos/api/use-cases/import')`) | The embedded Kratos page, on entry |
 | Auth needed | A **Kratos (app #2) session must already exist** in the browser; if not, the cross-app `fetch` hits a `401`→login redirect a `fetch` can't follow | Kratos does its **own** EasyAuth round-trip first (silent if IdP session exists), *then* imports — always has a valid context |
 | Handoff | None — persona name carried in the redirect URL (`?persona=<name>`) | Manifest relayed via same-origin `sessionStorage['kratos.import']` (§7.1), `?import=1` |
-| Pros | Simplest; truest "import-first, then redirect"; no storage relay | Robust to a missing Kratos session; no cross-app `fetch`/CORS/401-follow problem |
-| Cons | Fragile if the user has no Kratos session yet (needs a priming top-level visit to `/kratos/.auth` first) | Import happens *inside* Kratos on entry, so the "redirect only after success" ordering is realized as "enter → import → settle on persona" |
+| Pros | Simplest; no storage relay | Robust to a missing Kratos session; no cross-app `fetch`/CORS/401-follow problem |
+| Cons | Fragile if the user has no Kratos session yet (needs a priming top-level visit to `/kratos/.auth` first) | Import happens *inside* Kratos on entry, so "redirect only after success" is realized as "enter → import → settle on persona" |
 
-**Recommendation: Variant B** — it survives the two-app EasyAuth split with no reliance on a
+**Chosen: Variant B.** It survives the two-app EasyAuth split with no reliance on a
 pre-existing Kratos session and no un-followable `fetch` redirect, at the cost of moving the
-import call one hop into Kratos. (Variant A can be offered as a fast path when a Kratos
-session is already present.) **This is the one decision to confirm before implementation.**
+import call one hop into Kratos. Variant A **may** be offered later as an optional fast path
+when a Kratos session is already present, but it is **not required** for this PR. The
+realized end-to-end sequence is therefore: site builds manifest → relay via
+`sessionStorage['kratos.import']` → enter `/kratos/?embed=1&import=1` → Kratos EasyAuth →
+import-on-entry → settle on `?persona=<name>`.
 
 ---
 
@@ -398,8 +399,8 @@ session is already present.) **This is the one decision to confirm before implem
 |---|---|
 | Front Door `/kratos/.auth/*` rewrite correctness (EasyAuth redirect URIs must resolve under the mount) | Validate during site-PR infra work; the Entra app #2 redirect URIs must include the Front Door origin under `/kratos/.auth/login/aad/callback`. |
 | Next.js `basePath` + `trailingSlash` + static export edge cases for `_next/*` and `config.json` placement | Verify `out/` layout after `next build`; add a smoke check. |
-| Second login could drop the handoff if it relied on EasyAuth query preservation | **Mitigated** in variant B by the same-origin `sessionStorage['kratos.import']` relay (§7.1) — the manifest is independent of the redirect URL, read-and-cleared after use. Variant A carries only a short `persona=<name>` in the URL. |
-| CORS / cross-app `fetch` for the import call (two EasyAuth apps) | Resolved by the §10.1 decision: variant B keeps the import call **inside Kratos** (same-origin, own EasyAuth); variant A relies on a pre-existing Kratos session. **Confirm before build.** |
+| Second login could drop the handoff if it relied on EasyAuth query preservation | **Mitigated** by the same-origin `sessionStorage['kratos.import']` relay (§7.1) — the manifest is independent of the redirect URL, read-and-cleared after use. Only a short `persona=<name>` ever appears in the URL (post-import). |
+| CORS / cross-app `fetch` for the import call (two EasyAuth apps) | **Resolved by D9 / §10.1 Variant B**: the import call runs **inside Kratos** (same-origin, Kratos's own EasyAuth cookie) — no cross-app `fetch`, no CORS, no un-followable `401`. |
 | `GreenfieldBuilder`/`advisor.ts` is app-scaffolding-shaped, not persona-shaped | Site PR repurposes the box to build a **persona manifest**; the manifest shape (§9) is the site's output contract. |
 | Cost/complexity of Front Door | Accepted (D3); the lower-effort iframe alt was rejected as "clumsy". |
 
@@ -411,19 +412,19 @@ session is already present.) **This is the one decision to confirm before implem
 - `src/backend/app/routers/import_persona.py` — **new** router (`POST /api/use-cases/import`).
 - `src/backend/app/main.py` — mount the new router.
 - `src/backend/app/services/blob_skill_service.py` — **new** `create_use_case(...)` (atomic write + registry registration helper).
-- `src/backend/app/models/…` — Pydantic models for the import contract.
+- `src/backend/app/models/…` — Pydantic models for the import **manifest** (exactly-one-of manifest/prompt).
 - `src/frontend/next.config.js` — `NEXT_PUBLIC_BASE_PATH` → `basePath`/`assetPrefix`.
 - `src/frontend/src/lib/config.ts` — basePath-aware `/config.json` fetch.
 - `src/frontend/staticwebapp.config.json` — basePath-aware `401` redirect.
-- `src/frontend/src/app/page.tsx` (+ small `useEmbed`/`useSearchParams` hook + chromeless wrapper) — embed/theme/persona/prompt URL args (+ `import=1` for §10.1 variant B).
+- `src/frontend/src/app/page.tsx` (+ small `useEmbed`/`useSearchParams` hook + chromeless wrapper) — embed/theme/persona/prompt URL args + `import=1` import-on-entry (§10.1 Variant B).
 - `azure.yaml` — confirm `config.json` injection path under basePath.
 - Tests for the import mapping + endpoint.
 - This spec; session `plan.md`.
 
 **agentic-loop-site PR (separate session):**
-- Replace mock Kratos with a generate box that **builds the manifest**, imports it, then
-  opens the embedded persona (`?embed=1&persona=<name>` for variant A, or
-  `?embed=1&import=1` + `sessionStorage['kratos.import']` for variant B).
+- Replace mock Kratos with a generate box that **builds the manifest**, relays it via
+  `sessionStorage['kratos.import']`, and enters `/kratos/?embed=1&import=1` so Kratos imports
+  on entry and settles on `?persona=<name>` (§10.1 Variant B / D9).
 - Front Door profile + routes (`/kratos/*`, `/kratos/.auth/*`, `/kratos/api/*`, default → site).
 
 ---
