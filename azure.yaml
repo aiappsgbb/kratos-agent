@@ -46,7 +46,18 @@ services:
                 kind: sh
                 shell: sh
                 run: |
-                    if [ -n "${AGENT_SERVICE_URL}" ]; then
+                    # config.json tells the static frontend where the backend API is.
+                    # When hosted behind Front Door under a sub-path (NEXT_PUBLIC_BASE_PATH,
+                    # e.g. /kratos), the embedded UI calls the backend SAME-ORIGIN at
+                    # <basePath>/api/* — Front Door routes /kratos/api/* to the Container
+                    # App (stripping the /kratos prefix). This avoids CORS entirely.
+                    # In standalone (root) deployments there is no sub-path, so we point
+                    # config.json at the backend's own URL (AGENT_SERVICE_URL).
+                    BP="$(printf '%s' "${NEXT_PUBLIC_BASE_PATH:-}" | sed 's#/*$##')"
+                    if [ -n "$BP" ]; then
+                      echo "{\"apiUrl\":\"${BP}\"}" > out/config.json
+                      echo "Injected same-origin config.json with apiUrl=${BP} (behind Front Door)"
+                    elif [ -n "${AGENT_SERVICE_URL}" ]; then
                       echo "{\"apiUrl\":\"${AGENT_SERVICE_URL}\"}" > out/config.json
                       echo "Injected config.json with apiUrl=${AGENT_SERVICE_URL}"
                     fi
@@ -54,7 +65,6 @@ services:
                     # SWA EasyAuth 401 redirect + /api/* gating stay inside the mount
                     # path (e.g. /kratos) when hosted behind Front Door. Empty base
                     # path → straight copy (standalone root deployment).
-                    BP="$(printf '%s' "${NEXT_PUBLIC_BASE_PATH:-}" | sed 's#/*$##')"
                     if [ -f staticwebapp.config.json ]; then
                       if [ -n "$BP" ]; then
                         sed "s#/.auth/login/aad#${BP}/.auth/login/aad#g; s#\"/api/\*\"#\"${BP}/api/*\"#g" \
