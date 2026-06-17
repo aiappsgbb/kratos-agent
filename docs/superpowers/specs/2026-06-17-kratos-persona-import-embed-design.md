@@ -121,17 +121,27 @@ flowchart TB
 **End-to-end flow (generate a persona):**
 
 1. User is on `site.com` (already authenticated to site EasyAuth app #1).
-2. User types a description into the **generate box** and submits.
-3. Site navigates to the embedded Kratos:
-   `site.com/kratos/?embed=1&theme=<t>&generate=<url-encoded NL>`.
-4. Front Door routes `/kratos/*` → Kratos SWA. Kratos EasyAuth (app #2) authenticates —
+2. User types a description into the **generate box** and submits. The site **stashes the
+   NL prompt in `sessionStorage['kratos.generate']`** (see §7.1) and navigates (top-level)
+   to `site.com/kratos/?embed=1&theme=<t>&generate=1`.
+3. Front Door routes `/kratos/*` → Kratos SWA. Kratos EasyAuth (app #2) authenticates —
    **silent** if the Entra IdP session already exists in the browser, otherwise a prompt.
-5. Embedded Kratos (chromeless) reads `?generate=`, calls
-   `POST /kratos/api/use-cases/import` (authenticated, same Kratos origin context).
-6. Import API: LLM expands NL → threadlight-compatible **contract** → maps to the three
-   Kratos files → persists (blob/local) → registers `app.state.registries[name]`.
-7. Kratos selects the new persona and opens the chat — the user is now talking to their
-   generated agent, visually "inside" the site.
+   The handoff payload **survives this redirect** because `sessionStorage` is shared across
+   the single `site.com` origin (storage is per-origin, not per-path — both backend SWAs are
+   invisible to the browser).
+4. Embedded Kratos (chromeless) sees `?generate=1`, **reads-and-clears** the handoff payload
+   from `sessionStorage` (so a refresh won't regenerate), then calls
+   `POST /kratos/api/use-cases/import` with the NL — authenticated by the EasyAuth cookie,
+   **same-origin** (no CORS), API base resolved by `config.ts`'s same-origin proxy fallback.
+5. Import API: LLM expands NL → threadlight-compatible **contract** → maps to the three
+   Kratos files → persists (blob/local) → registers `app.state.registries[name]` →
+   `201 {name, displayName}`. On the NL path the slug is **auto-deduped** (`-2`, `-3`, …) so
+   generation never dead-ends on a name clash; an explicit `contract.name` clash returns
+   `409` (unless `overwrite`).
+6. Kratos sets `selectedUseCase = name`, surfaces the persona's `sampleQuestions`, and opens
+   the chat — the user is now talking to their generated agent, visually "inside" the site.
+   On `422`/`409`/network error, embed mode shows an inline "couldn't generate — try again /
+   edit" affordance instead of the chat.
 
 ---
 
@@ -141,8 +151,11 @@ flowchart TB
 - `POST /api/use-cases/import` — new router `src/backend/app/routers/import_persona.py`,
   mounted in `main.py` under the `/api/use-cases` prefix (alongside `use_cases` / `export`).
 - **Auth-gated** with the same `require_authenticated_user` dependency used by `export.py`.
-- Returns `201` with `{ name, displayName, files: {...}, created: true }`; `409` if the
-  use-case already exists (unless `?overwrite=true`); `422` on invalid contract.
+- Returns `201` with `{ name, displayName, files: {...}, created: true }`. Name-collision
+  policy: on the **NL path** (no explicit `contract.name`) the derived slug is
+  **auto-deduped** (`name-2`, `name-3`, …) so generation never dead-ends; with an **explicit
+  `contract.name`** a clash returns `409` unless `?overwrite=true`. `422` on invalid
+  contract or malformed LLM output.
 
 ### 5.2 Request contract (hybrid; threadlight-compatible)
 Accepts **either** a structured contract, **or** a raw `prompt`, **or** both (the contract
@@ -249,7 +262,7 @@ URL arguments (read in `page.tsx` via `useSearchParams`):
 | `theme=light\|dark` | Apply theme to match the host site (Tailwind `dark` class / data-attr). |
 | `persona=<name>` | Preselect `selectedUseCase` (skip if not found). |
 | `prompt=<text>` | Prefill `landingInput`. |
-| `generate=<NL>` | After auth, **auto-invoke** `POST /kratos/api/use-cases/import` with the NL, then select + open the created persona. |
+| `generate=1` (or `generate=<short NL>`) | After auth, read the NL handoff (§7.1), **read-and-clear** it, **auto-invoke** `POST /kratos/api/use-cases/import`, then select + open the created persona. |
 
 - Add a small `useEmbed()` hook + an `embed`-aware wrapper around the existing layout; no
   changes to standalone behavior when params are absent.
@@ -257,6 +270,27 @@ URL arguments (read in `page.tsx` via `useSearchParams`):
   surrounding frame/nav. (We are **not** restyling Kratos to the site's design system —
   that would be heavy and brittle; chromeless + theme sync is the pragmatic "included"
   feel the user asked for.)
+
+### 7.1 The `generate=` handoff (same-origin sessionStorage relay)
+
+The NL prompt is **not** stuffed into the query string (URL length limits, prompt leaking
+into browser history/edge logs, fragility across the EasyAuth redirect). Instead:
+
+- Under Front Door, `/` and `/kratos/*` are **one browser origin** (`site.com`), so
+  `sessionStorage` is **shared** (web storage is keyed by origin, not path; the two backend
+  SWAs are invisible to the browser). The site writes
+  `sessionStorage.setItem('kratos.generate', JSON.stringify({ nl, theme?, persona?, prompt?, nonce }))`
+  and navigates to `/kratos/?embed=1&generate=1`.
+- The payload **survives the second EasyAuth round-trip** (same origin), so the design no
+  longer depends on EasyAuth preserving the `post_login_redirect_uri` query string.
+- Kratos embed mode **reads the payload once and removes it** (`removeItem`) before invoking
+  import, so a page refresh cannot re-trigger generation.
+- **Fallback for short prompts / no-relay contexts:** `generate=<url-encoded NL>` is still
+  accepted; if `generate` is a non-`1` value, treat it as the literal NL. If `generate=1`
+  but the relay payload is missing (e.g. opened directly), embed mode shows the normal
+  landing input instead of erroring.
+- This relay lives in the **site PR**; the Kratos PR only **consumes** `sessionStorage`
+  `['kratos.generate']` + the `generate` param. Standalone Kratos ignores both.
 
 ---
 
@@ -268,7 +302,8 @@ Captured here for completeness; **implemented in a separate session/worktree**, 
   `src/components/KratosChatMock.tsx`, `src/data/kratos.ts` `mockKratosReply`) with:
   - a **"Describe your agent" generate box** (can reuse the `GreenfieldBuilder` /
     `advisor.ts` "Make it real" pattern, repurposed to persona intent), and
-  - an **embedded mount** that navigates to `/kratos/?embed=1&theme=<t>&generate=<NL>`.
+  - an **embedded mount** that writes the NL to `sessionStorage['kratos.generate']` (§7.1)
+    and navigates to `/kratos/?embed=1&theme=<t>&generate=1`.
 - Add the **Front Door** profile + routes that path-mount Kratos under `/kratos/*`
   (per §6.3–6.4), including `/kratos/.auth/*` and `/kratos/api/*`.
 - No Kratos files are copied — the mount serves the live Kratos SWA.
@@ -318,7 +353,7 @@ contract** so personas round-trip between ecosystems:
 |---|---|
 | Front Door `/kratos/.auth/*` rewrite correctness (EasyAuth redirect URIs must resolve under the mount) | Validate during site-PR infra work; the Entra app #2 redirect URIs must include the Front Door origin under `/kratos/.auth/login/aad/callback`. |
 | Next.js `basePath` + `trailingSlash` + static export edge cases for `_next/*` and `config.json` placement | Verify `out/` layout after `next build`; add a smoke check. |
-| Second login UX (interactive prompt if no IdP session) | Accepted per D5; document in site UX. |
+| Second login could drop the `generate` payload if it relied on EasyAuth query preservation | **Mitigated** by the same-origin `sessionStorage` relay (§7.1) — the payload is independent of the redirect URL; read-and-cleared after use. |
 | CORS: under the mount, frontend calls `/kratos/api/*` **same-origin** (no CORS); direct cross-origin calls avoided by D7. | Keep Kratos `_cors_origins` unchanged for standalone use. |
 | `GreenfieldBuilder`/`advisor.ts` is app-scaffolding-shaped, not persona-shaped | Site PR repurposes the box to persona intent; deterministic contract optional, NL is primary. |
 | Cost/complexity of Front Door | Accepted (D3); the lower-effort iframe alt was rejected as "clumsy". |
