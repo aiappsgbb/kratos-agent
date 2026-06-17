@@ -34,7 +34,7 @@ export default function Home() {
 
   // Embed mode (chromeless hosting under another origin — design spec §C)
   const [embed, setEmbed] = useState<EmbedParams>({
-    embed: false, theme: null, mode: null, persona: null, prompt: null, doImport: false,
+    embed: false, theme: null, mode: null, persona: null, prompt: null, doImport: false, back: null,
   });
   const [importStatus, setImportStatus] = useState<ImportStatus>("idle");
   const [importError, setImportError] = useState<string | null>(null);
@@ -244,15 +244,15 @@ export default function Home() {
       </a>
 
       {/* Mobile sidebar overlay */}
-      {!embed.embed && sidebarOpen && (
+      {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
           onClick={closeSidebar}
         />
       )}
 
-      {/* Sidebar — hidden in embed mode (chromeless hosting) */}
-      {!embed.embed && (
+      {/* Sidebar — full original UX, also shown in embed mode (with a
+          "Back to Agentic Loop" button at the top when embedded). */}
       <div className={`
         fixed inset-y-0 left-0 z-50 w-[300px] transform transition-transform duration-300 ease-out
         lg:relative lg:translate-x-0 lg:z-auto
@@ -271,9 +271,9 @@ export default function Home() {
           selectedUseCase={selectedUseCase}
           onSelectUseCase={setSelectedUseCase}
           onCloseMobile={closeSidebar}
+          embedBackHref={embed.embed ? (embed.back || "/reference/kratos") : null}
         />
       </div>
-      )}
 
       {/* Settings modal */}
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
@@ -293,8 +293,7 @@ export default function Home() {
           />
         ) : (
           <div className="flex-1 flex flex-col">
-            {/* Mobile top bar — hidden in embed mode (no sidebar to open) */}
-            {!embed.embed && (
+            {/* Mobile top bar */}
             <div className="lg:hidden flex items-center px-4 py-3 border-b border-border-soft bg-surface backdrop-blur">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -306,7 +305,6 @@ export default function Home() {
               </button>
               <span className="ml-2 text-sm font-semibold text-text">Kratos Agent</span>
             </div>
-            )}
 
             {/* Landing page */}
             <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">

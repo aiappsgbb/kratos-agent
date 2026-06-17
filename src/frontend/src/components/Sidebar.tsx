@@ -45,9 +45,12 @@ interface Props {
   selectedUseCase: string;
   onSelectUseCase: (name: string) => void;
   onCloseMobile?: () => void;
+  /** When embedded under a host (agentic-loop-site), the same-origin path to
+   *  return to. Null when not embedded — hides the "Back to Agentic Loop" button. */
+  embedBackHref?: string | null;
 }
 
-export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, onOpenSettings, onOpenSkills, onOpenAgenticLoop, useCases, selectedUseCase, onSelectUseCase, onCloseMobile }: Props) {
+export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, onOpenSettings, onOpenSkills, onOpenAgenticLoop, useCases, selectedUseCase, onSelectUseCase, onCloseMobile, embedBackHref }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
   const [personaFilter, setPersonaFilter] = useState<"curated" | "all">("curated");
@@ -91,6 +94,17 @@ export function Sidebar({ conversations, activeId, onNew, onSelect, onDelete, on
 
   return (
     <aside className="w-[300px] bg-surface-2 flex flex-col h-full border-r border-border" aria-label="Conversation sidebar">
+      {embedBackHref && (
+        <a
+          href={embedBackHref}
+          className="flex items-center gap-2 px-5 py-2.5 text-xs font-medium text-muted hover:text-text bg-surface border-b border-border-soft hover:bg-hover transition-all"
+        >
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Back to Agentic Loop
+        </a>
+      )}
       {deleteTarget && createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur animate-fade-in">
           <div className="bg-surface border border-border rounded-2xl p-6 max-w-sm mx-4 shadow-card animate-scale-in">

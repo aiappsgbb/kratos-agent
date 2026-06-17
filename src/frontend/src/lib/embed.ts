@@ -14,6 +14,8 @@
  *   &prompt=<text>      — auto-start a conversation with this first message
  *   &import=1           — read a relayed manifest from sessionStorage and POST
  *                         it to the import API, then settle on ?persona=<slug>
+ *   &back=<path>        — where the in-sidebar "Back to Agentic Loop" button
+ *                         returns to (same-origin path; default /reference/kratos)
  *
  * The manifest is relayed **same-origin** via `sessionStorage` (Variant B in the
  * design spec): the host writes `sessionStorage['kratos.import']` then navigates
@@ -31,6 +33,7 @@ export interface EmbedParams {
   persona: string | null;
   prompt: string | null;
   doImport: boolean;
+  back: string | null;
 }
 
 function truthy(value: string | null): boolean {
@@ -40,7 +43,7 @@ function truthy(value: string | null): boolean {
 /** Parse embed-relevant args from the current URL. SSR-safe (returns defaults). */
 export function readEmbedParams(): EmbedParams {
   if (typeof window === "undefined") {
-    return { embed: false, theme: null, mode: null, persona: null, prompt: null, doImport: false };
+    return { embed: false, theme: null, mode: null, persona: null, prompt: null, doImport: false, back: null };
   }
   const p = new URLSearchParams(window.location.search);
   return {
@@ -50,6 +53,7 @@ export function readEmbedParams(): EmbedParams {
     persona: p.get("persona"),
     prompt: p.get("prompt"),
     doImport: truthy(p.get("import")),
+    back: p.get("back"),
   };
 }
 
