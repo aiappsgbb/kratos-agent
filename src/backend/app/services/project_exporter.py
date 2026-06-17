@@ -102,8 +102,13 @@ _HOSTED_AGENT_TEMPLATE_FILES: tuple[tuple[str, str], ...] = (
 )
 
 # Templates rendered into ``hooks/`` at the project root. These are azd
-# lifecycle hooks (currently just ``postdeploy.sh``) and need exec bit set.
-_HOOKS_TEMPLATE_FILES: tuple[tuple[str, str], ...] = (("hooks/postdeploy.sh.template", "postdeploy.sh"),)
+# lifecycle hooks (``postdeploy``) and need the exec bit set on the POSIX
+# variant. A PowerShell sibling ships alongside so ``azd up`` also works on
+# Windows (azd picks the OS-specific variant declared in ``azure.yaml``).
+_HOOKS_TEMPLATE_FILES: tuple[tuple[str, str], ...] = (
+    ("hooks/postdeploy.sh.template", "postdeploy.sh"),
+    ("hooks/postdeploy.ps1.template", "postdeploy.ps1"),
+)
 
 # Subset of templates that need ``${placeholder}`` substitution.
 _PARAMETERIZED: frozenset[str] = frozenset(
@@ -114,6 +119,7 @@ _PARAMETERIZED: frozenset[str] = frozenset(
         "agent.yaml.template",
         "agent.manifest.yaml.template",
         "hooks/postdeploy.sh.template",
+        "hooks/postdeploy.ps1.template",
     }
 )
 

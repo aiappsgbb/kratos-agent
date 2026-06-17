@@ -57,12 +57,13 @@ azd up
 2. **Builds** the agent container via ACR remoteBuild
 3. **Registers** the hosted agent on the Foundry project via the
    `azure.ai.agents` extension
-4. **Runs `hooks/postdeploy.sh`** to grant the data-plane RBAC roles
-   (`AcrPull`, `Cognitive Services OpenAI User`, `Cognitive Services User`)
-   to the hosted-agent's instance + blueprint managed identities. These
-   identities are created by Foundry **after** Bicep provisioning, so they
-   can't be granted via Bicep — the hook discovers them via
-   `azd ai agent show` and runs `az role assignment create`.
+4. **Runs the post-deploy RBAC hook** (`hooks/postdeploy.sh` on Linux/macOS,
+   `hooks/postdeploy.ps1` on Windows — azd picks the right one) to grant the
+   data-plane roles (`AcrPull`, `Cognitive Services OpenAI User`,
+   `Cognitive Services User`, `Foundry User`) to the hosted-agent's instance +
+   blueprint managed identities. These identities are created by Foundry
+   **after** Bicep provisioning, so they can't be granted via Bicep — the hook
+   discovers them via `azd ai agent show` and runs `az role assignment create`.
 5. **Prints** an Agent Playground URL
 
 > **Note:** If the first invocation reports `agent_version_failed` with

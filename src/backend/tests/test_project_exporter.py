@@ -17,6 +17,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+import yaml
 from fastapi.testclient import TestClient
 
 from app.services.project_exporter import ProjectExporter, _slugify
@@ -296,6 +297,57 @@ def test_assemble_writes_postdeploy_hook_with_exec_bit(exporter: ProjectExporter
     assert "./hooks/postdeploy.sh" in azyaml
 
 
+def test_assemble_azure_yaml_hooks_are_cross_platform(exporter: ProjectExporter, tmp_path: Path):
+    """Every azd hook must ship POSIX *and* Windows variants.
+
+    Regression test for the Windows ``azd up`` failure: the exported hooks
+    used to be ``shell: sh`` only, so on Windows (no bash/sh) azd could not
+    run them. Each hook now declares a ``posix:`` (sh) and ``windows:``
+    (pwsh) configuration.
+    """
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    doc = yaml.safe_load((out / "azure.yaml").read_text())
+    hooks = doc["hooks"]
+    for event in ("predeploy", "preprovision", "postprovision", "postdeploy"):
+        assert event in hooks, f"missing hook: {event}"
+        assert "posix" in hooks[event], f"{event} missing posix variant"
+        assert "windows" in hooks[event], f"{event} missing windows variant"
+        assert hooks[event]["posix"]["shell"] == "sh"
+        assert hooks[event]["windows"]["shell"] == "pwsh"
+
+    # postdeploy points at the matching script per OS.
+    assert hooks["postdeploy"]["posix"]["run"] == "./hooks/postdeploy.sh"
+    assert hooks["postdeploy"]["windows"]["run"] == "./hooks/postdeploy.ps1"
+    # Non-schema ``name:`` key must be gone (azure.yaml schema forbids it).
+    assert "name:" not in (out / "azure.yaml").read_text().split("hooks:", 1)[1]
+
+
+def test_assemble_writes_windows_postdeploy_hook(exporter: ProjectExporter, tmp_path: Path):
+    """A PowerShell RBAC hook must ship so ``azd up`` works on Windows."""
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    hook = out / "hooks" / "postdeploy.ps1"
+    assert hook.is_file(), "hooks/postdeploy.ps1 must be rendered for Windows"
+    content = hook.read_text()
+
+    # Same RBAC behaviour as the bash hook: discover identities + grant roles.
+    assert "azd ai agent show" in content
+    assert "az role assignment create" in content
+    # Role GUIDs are pinned identically to the bash hook.
+    assert "7f951dda-4ed3-4680-a7ca-43fe172d538d" in content  # AcrPull
+    assert "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd" in content  # Cognitive Services OpenAI User
+    assert "53ca6127-db72-4b80-b1b0-d745d6d5456d" in content  # Foundry User
+
+    # Persona name substituted; no leftover azure.yaml ``$$`` escapes.
+    assert "Finance Close Controller" in content
+    assert "$$" not in content, "ps1 should be plain PowerShell (no $$ azure.yaml escapes)"
+
+
 def test_assemble_unknown_use_case_raises(exporter: ProjectExporter, tmp_path: Path):
     out = tmp_path / "out"
     out.mkdir()
@@ -347,6 +399,18 @@ def test_build_zip_includes_all_expected_paths(exporter: ProjectExporter, tmp_pa
     assert not any("__pycache__" in n for n in names)
     assert not any("evals/" in n for n in names)
     assert not any("exporter_templates" in n for n in names)
+
+
+def test_build_zip_includes_windows_hook(exporter: ProjectExporter, tmp_path: Path):
+    """Both the POSIX and Windows postdeploy hooks must land in the zip."""
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+    blob = ProjectExporter.build_zip(out)
+    with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+        names = set(zf.namelist())
+    assert "hooks/postdeploy.sh" in names
+    assert "hooks/postdeploy.ps1" in names
 
 
 def test_build_zip_skips_other_use_cases(exporter: ProjectExporter, tmp_path: Path):

@@ -47,38 +47,62 @@ services:
 
 hooks:
     predeploy:
-        name: predeploy
-        kind: sh
-        shell: sh
-        run: |
-            BUILD_TS="$$(date +%s)"
-            azd env set KRATOS_BUILD_TS "$$BUILD_TS"
-            echo "KRATOS_BUILD_TS=$$BUILD_TS (forces new hosted-agent version)"
+        posix:
+            shell: sh
+            run: |
+                BUILD_TS="$$(date +%s)"
+                azd env set KRATOS_BUILD_TS "$$BUILD_TS"
+                echo "KRATOS_BUILD_TS=$$BUILD_TS (forces new hosted-agent version)"
+        windows:
+            shell: pwsh
+            run: |
+                $$BuildTs = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+                azd env set KRATOS_BUILD_TS "$$BuildTs"
+                Write-Host "KRATOS_BUILD_TS=$$BuildTs (forces new hosted-agent version)"
     preprovision:
-        name: preprovision
-        kind: sh
-        shell: sh
-        run: echo "Provisioning Azure resources for ${name}..."
+        posix:
+            shell: sh
+            run: echo "Provisioning Azure resources for ${name}..."
+        windows:
+            shell: pwsh
+            run: Write-Host "Provisioning Azure resources for ${name}..."
     postprovision:
-        name: postprovision
-        kind: sh
-        shell: sh
-        run: |
-            # azure.ai.agents extension requires AZURE_TENANT_ID in env to
-            # auto-assign Foundry User to the agent identity. Set it from
-            # the current Azure CLI session if it isn't already set.
-            if [ -z "$${AZURE_TENANT_ID:-}" ]; then
-                TID="$$(az account show --query tenantId -o tsv 2>/dev/null || true)"
-                if [ -n "$$TID" ]; then
-                    azd env set AZURE_TENANT_ID "$$TID"
-                    echo "Set AZURE_TENANT_ID=$$TID"
+        posix:
+            shell: sh
+            run: |
+                # azure.ai.agents extension requires AZURE_TENANT_ID in env to
+                # auto-assign Foundry User to the agent identity. Set it from
+                # the current Azure CLI session if it isn't already set.
+                if [ -z "$${AZURE_TENANT_ID:-}" ]; then
+                    TID="$$(az account show --query tenantId -o tsv 2>/dev/null || true)"
+                    if [ -n "$$TID" ]; then
+                        azd env set AZURE_TENANT_ID "$$TID"
+                        echo "Set AZURE_TENANT_ID=$$TID"
+                    fi
                 fi
-            fi
-            echo "Post-provisioning complete."
-            echo "Run 'azd deploy' to publish the hosted agent."
+                echo "Post-provisioning complete."
+                echo "Run 'azd deploy' to publish the hosted agent."
+        windows:
+            shell: pwsh
+            run: |
+                # azure.ai.agents extension requires AZURE_TENANT_ID in env to
+                # auto-assign Foundry User to the agent identity. Set it from
+                # the current Azure CLI session if it isn't already set.
+                if (-not $$env:AZURE_TENANT_ID) {
+                    $$Tid = (az account show --query tenantId -o tsv 2>$$null)
+                    if ($$Tid) {
+                        azd env set AZURE_TENANT_ID "$$Tid"
+                        Write-Host "Set AZURE_TENANT_ID=$$Tid"
+                    }
+                }
+                Write-Host "Post-provisioning complete."
+                Write-Host "Run 'azd deploy' to publish the hosted agent."
     postdeploy:
-        name: postdeploy
-        kind: sh
-        shell: sh
-        run: ./hooks/postdeploy.sh
-        interactive: true
+        posix:
+            shell: sh
+            run: ./hooks/postdeploy.sh
+            interactive: true
+        windows:
+            shell: pwsh
+            run: ./hooks/postdeploy.ps1
+            interactive: true
