@@ -96,6 +96,31 @@ def test_apm_and_mcp_mapping(client, tmp_path):
     assert mcp["microsoft-learn"]["type"] == "http"
 
 
+def test_url_less_mcp_server_skipped_in_mcp_json(client, tmp_path):
+    # A registry reference with no url cannot be a runnable Copilot MCP entry, so
+    # it must be skipped in .mcp.json (kept only in apm.yml) — never written as a
+    # non-startable {"type": "http"} entry. This is exactly what the host site
+    # emits for its `mcp-tools` / `m365-graph` requirements.
+    manifest = _manifest(
+        mcpServers=[
+            {"name": "tools", "transport": "http", "registry": True},
+            {"name": "microsoft-learn", "transport": "http", "url": "https://learn.microsoft.com/api/mcp"},
+        ]
+    )
+    resp = client.post("/api/use-cases/import", json={"manifest": manifest})
+    assert resp.status_code == 201, resp.text
+    uc_dir = tmp_path / "use-cases" / "claims-triage-bot"
+
+    mcp = json.loads((uc_dir / ".mcp.json").read_text())
+    assert "tools" not in mcp  # url-less → skipped, no broken entry
+    assert mcp["microsoft-learn"]["url"] == "https://learn.microsoft.com/api/mcp"
+
+    # The dependency is still recorded in apm.yml for later resolution.
+    apm = yaml.safe_load((uc_dir / "apm.yml").read_text())
+    mcp_dep_names = {d["name"] for d in apm["dependencies"]["mcp"]}
+    assert {"tools", "microsoft-learn"} <= mcp_dep_names
+
+
 def test_import_dedupes_slug(client):
     first = client.post("/api/use-cases/import", json={"manifest": _manifest()})
     second = client.post("/api/use-cases/import", json={"manifest": _manifest()})

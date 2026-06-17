@@ -113,13 +113,27 @@ def _build_system_prompt(manifest: PersonaManifest, slug: str) -> str:
 
 
 def _build_mcp_json(servers: list[ImportMcpServer]) -> str:
-    """Render .mcp.json (Copilot MCP config) from the manifest MCP servers."""
+    """Render .mcp.json (Copilot MCP config) from the manifest MCP servers.
+
+    ``.mcp.json`` is loaded verbatim into the Copilot SDK session config, so every
+    entry must be runnable. A remote (http/sse) server needs a ``url``; a registry
+    reference without one cannot be expressed here deterministically (it would need
+    ``apm install`` to resolve a command/url). Such entries are therefore skipped —
+    they remain recorded in ``apm.yml`` ``dependencies.mcp`` for later resolution —
+    so the imported persona never carries a non-startable MCP server.
+    """
     config: dict[str, dict] = {}
     for server in servers:
-        entry: dict = {"type": server.transport}
-        if server.url:
-            entry["url"] = server.url
-        config[server.name] = entry
+        if not server.url:
+            logger.info(
+                "Skipping MCP server '%s' in .mcp.json: no url (registry=%s, transport=%s); "
+                "kept in apm.yml dependencies.mcp for later resolution",
+                server.name,
+                server.registry,
+                server.transport,
+            )
+            continue
+        config[server.name] = {"type": server.transport, "url": server.url}
     return json.dumps(config, indent=2) + "\n"
 
 
