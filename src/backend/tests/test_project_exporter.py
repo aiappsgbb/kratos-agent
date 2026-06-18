@@ -535,3 +535,126 @@ def test_export_endpoint_rejects_bad_name(export_client: TestClient):
     # FastAPI/Starlette returns 404 for path-traversal attempts in URL path
     # segments; either way the export router never sees an unsafe name.
     assert response.status_code in (400, 404)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests — runtime correctness fixes (RBAC, telemetry, region docs)
+# ---------------------------------------------------------------------------
+
+
+def test_assemble_azure_yaml_wires_app_insights(exporter: ProjectExporter, tmp_path: Path):
+    """The container env must carry the App Insights connection string.
+
+    Without ``APPLICATIONINSIGHTS_CONNECTION_STRING`` the agentserver framework
+    falls back to a *console* OTLP exporter and dumps a wall of metric JSON to
+    stdout every 60s, drowning the Agent Playground logs. ``setup_telemetry``
+    only wires Azure Monitor when this var is set, and ``main.bicep`` already
+    outputs it as ``AZURE_APP_INSIGHTS_CONNECTION_STRING``.
+    """
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    doc = yaml.safe_load((out / "azure.yaml").read_text())
+    env = doc["services"]["finance-close"]["config"]["env"]
+    assert env.get("APPLICATIONINSIGHTS_CONNECTION_STRING") == "${AZURE_APP_INSIGHTS_CONNECTION_STRING}"
+
+
+def test_postdeploy_grants_dataplane_roles_to_instance_identity(exporter: ProjectExporter, tmp_path: Path):
+    """The hook must grant Cosmos + Blob + KV + Search data-plane roles.
+
+    The running container authenticates via ``DefaultAzureCredential`` as the
+    Foundry *instance* identity. Bicep (role-assignments.bicep) grants the
+    data-plane roles only to the Foundry **account** MI — NOT the instance
+    identity — so without these hook grants the agent gets 403s reading Cosmos
+    history / syncing skills from Blob. The hook discovers the instance +
+    blueprint identities post-deploy and grants them the missing roles.
+    """
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    sh = (out / "hooks" / "postdeploy.sh").read_text()
+    ps = (out / "hooks" / "postdeploy.ps1").read_text()
+
+    cosmos_data_contributor = "00000000-0000-0000-0000-000000000002"
+    storage_blob_contributor = "ba92f5b4-2d11-453d-a403-e96b0029c9fe"
+    kv_secrets_user = "4633458b-17de-408a-b874-0445c86b69e6"
+    search_index_contributor = "8ebe5a00-799e-43f5-93ac-243d3dce84a7"
+
+    for content in (sh, ps):
+        # Cosmos uses the data-plane SQL role API, not `az role assignment create`.
+        assert "cosmosdb sql role assignment create" in content
+        assert cosmos_data_contributor in content
+        assert storage_blob_contributor in content
+        assert kv_secrets_user in content
+        assert search_index_contributor in content
+
+
+def test_postdeploy_surfaces_real_grant_failures(exporter: ProjectExporter, tmp_path: Path):
+    """A failed grant must NOT be silently mislabelled as '(exists / skip)'.
+
+    The old hook ran ``az ... 2>/dev/null || echo skip``, hiding genuine
+    failures (auth, bad scope, MissingSubscription) behind the same message as
+    a harmless already-exists. The fix captures the command output and only
+    treats an *already-exists* error as skippable; anything else is reported as
+    a real failure.
+    """
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    sh = (out / "hooks" / "postdeploy.sh").read_text()
+    ps = (out / "hooks" / "postdeploy.ps1").read_text()
+
+    for content in (sh, ps):
+        # Special-cases the already-exists error code rather than swallowing all.
+        assert "RoleAssignmentExists" in content
+        # Surfaces a distinct failure marker for real errors.
+        assert "FAILED" in content
+
+
+def test_postdeploy_ps1_does_not_throw_on_nonzero_az_exit(exporter: ProjectExporter, tmp_path: Path):
+    """The ps1 hook must inspect ``$LASTEXITCODE`` itself, not throw.
+
+    The hook sets ``$ErrorActionPreference = 'Stop'``. In PowerShell 7.4+,
+    ``$PSNativeCommandUseErrorActionPreference`` defaults to ``$true``, so a
+    native command (``az``) returning a non-zero exit code raises a
+    *terminating* error under ``Stop`` — which would abort the hook before our
+    ``if ($LASTEXITCODE -eq 0)`` check runs. Because an already-exists / Conflict
+    grant returns non-zero (the case fix #3 handles by design), the hook must
+    disable that behaviour so re-runs stay idempotent.
+    """
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    ps = (out / "hooks" / "postdeploy.ps1").read_text()
+    assert "$PSNativeCommandUseErrorActionPreference = $false" in ps
+
+
+def test_readme_warns_about_hosted_agent_regions(exporter: ProjectExporter, tmp_path: Path):
+    """README must warn that hosted agents aren't available in every region.
+
+    Several regions (e.g. Central US) provision the infra fine but the hosted
+    agent deploy fails — a trap worth calling out, with a pointer to a known
+    supported region.
+    """
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+
+    readme = (out / "README.md").read_text().lower()
+    assert "region" in readme
+    assert "central us" in readme
+
+
+def test_build_zip_includes_invoke_parser_module(exporter: ProjectExporter, tmp_path: Path):
+    """The new invoke-parsing helper must ship with the backend app."""
+    out = tmp_path / "out"
+    out.mkdir()
+    exporter.assemble("finance-close", out)
+    blob = ProjectExporter.build_zip(out)
+    with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+        names = set(zf.namelist())
+    assert "src/backend/app/hosted_agent_invoke.py" in names

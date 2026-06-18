@@ -32,6 +32,9 @@ services:
                     memory: 2Gi
             env:
                 APM_USE_CASES_ROOT: /app/use-cases
+                # Without this, the agentserver framework falls back to a console
+                # OTLP exporter and floods stdout with metric JSON every 60s.
+                APPLICATIONINSIGHTS_CONNECTION_STRING: $${AZURE_APP_INSIGHTS_CONNECTION_STRING}
                 AI_SERVICES_ENDPOINT: $${AZURE_AI_PROJECT_ENDPOINT}
                 AZURE_AI_SEARCH_ENDPOINT: $${AZURE_AI_SEARCH_ENDPOINT}
                 BLOB_SKILLS_CONTAINER: skills

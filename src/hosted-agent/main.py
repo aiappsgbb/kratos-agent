@@ -46,6 +46,7 @@ if "FOUNDRY_ENDPOINT" not in os.environ:
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 from app.config import Settings, get_settings
+from app.hosted_agent_invoke import parse_invoke_payload
 from app.models import (
     ContentEvent,
     DoneEvent,
@@ -410,17 +411,22 @@ async def handle_invoke(request: Request) -> Response:
     if _copilot_agent is None:
         await _startup()
 
+    # Read the request body exactly once and normalise it. The hosted agent is
+    # invoked through several paths that frame the body differently:
+    #   * ``azd ai agent invoke "msg"`` posts the message as text/plain (NOT JSON)
+    #   * the Kratos backend proxy posts a JSON object
+    #   * the platform keep-alive posts ``{"warmup": true}`` or an empty body
+    # parse_invoke_payload coerces all of these into a dict (empty body → warmup),
+    # so a plain-text CLI invoke no longer 400s on json.loads.
+    data = parse_invoke_payload(await request.body())
+
     # Keep-warm fast-path: the backend pings the hosted agent periodically with
     # ``{"warmup": true}`` to stop the Foundry platform from scaling the container
     # to zero (which causes multi-second cold starts and gateway 408 timeouts on
     # the next real request). Running _startup() above already re-provisions and
     # initialises every service, so we return immediately without invoking the
     # model or persisting anything — this resets the platform idle timer cheaply.
-    try:
-        _warmup_data = await request.json()
-    except (json.JSONDecodeError, ValueError):
-        _warmup_data = None
-    if isinstance(_warmup_data, dict) and _warmup_data.get("warmup") is True:
+    if data.get("warmup") is True:
         return JSONResponse(
             status_code=200,
             content={
@@ -433,10 +439,6 @@ async def handle_invoke(request: Request) -> Response:
         )
 
     try:
-        data = _warmup_data if isinstance(_warmup_data, dict) else await request.json()
-        if not isinstance(data, dict):
-            raise ValueError("body is not a JSON object")
-
         message = data.get("message") or data.get("input")
         if not isinstance(message, str) or not message.strip():
             raise ValueError('missing or empty "message" (or "input") field')

@@ -47,9 +47,17 @@ Cosmos persistence.
 ```bash
 azd auth login
 azd init                            # picks env name + subscription
-azd env set AZURE_LOCATION eastus2  # or your preferred region
+azd env set AZURE_LOCATION eastus2  # or your preferred region — see note below
 azd up
 ```
+
+> **Region note:** Foundry **hosted agents** are not available in every Azure
+> region. Some regions (notably **Central US**) provision all the infra
+> successfully but then fail the hosted-agent deploy step. Pick a region that
+> supports hosted agents — e.g. `eastus2`, `swedencentral`, `westus3`, or
+> `uksouth` — and check the latest
+> [Foundry Agent Service region list](https://learn.microsoft.com/azure/ai-foundry/agents/concepts/model-region-support)
+> if you hit a deploy failure.
 
 `azd up`:
 1. **Provisions** the AI Foundry account/project, Cosmos DB, AI Search,
@@ -60,10 +68,14 @@ azd up
 4. **Runs the post-deploy RBAC hook** (`hooks/postdeploy.sh` on Linux/macOS,
    `hooks/postdeploy.ps1` on Windows — azd picks the right one) to grant the
    data-plane roles (`AcrPull`, `Cognitive Services OpenAI User`,
-   `Cognitive Services User`, `Foundry User`) to the hosted-agent's instance +
-   blueprint managed identities. These identities are created by Foundry
-   **after** Bicep provisioning, so they can't be granted via Bicep — the hook
-   discovers them via `azd ai agent show` and runs `az role assignment create`.
+   `Cognitive Services User`, `Foundry User`, plus `Cosmos DB Data Contributor`,
+   `Storage Blob Data Contributor`, `Key Vault Secrets User`, and
+   `Search Index Data Contributor`) to the hosted-agent's instance + blueprint
+   managed identities. The container runs **as the instance identity**, which
+   Bicep can't grant (those identities are created by Foundry **after** Bicep
+   provisioning), so the hook discovers them via `azd ai agent show` and runs
+   `az role assignment create` (and `az cosmosdb sql role assignment create`
+   for the Cosmos data-plane role).
 5. **Prints** an Agent Playground URL
 
 > **Note:** If the first invocation reports `agent_version_failed` with

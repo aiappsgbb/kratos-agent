@@ -35,9 +35,7 @@ def _manifest(**overrides) -> dict:
             {"name": "fraud-check", "description": "Score fraud risk", "package": "acme/skills/skills/fraud-check"},
             {"name": "no-package-skill", "description": "metadata only"},
         ],
-        "mcpServers": [
-            {"name": "microsoft-learn", "transport": "http", "url": "https://learn.microsoft.com/api/mcp"}
-        ],
+        "mcpServers": [{"name": "microsoft-learn", "transport": "http", "url": "https://learn.microsoft.com/api/mcp"}],
         "traits": ["analysis", "validation"],
         "workflow_model": "agent",
     }

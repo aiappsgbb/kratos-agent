@@ -29,6 +29,10 @@ ACR_PULL_ROLE='7f951dda-4ed3-4680-a7ca-43fe172d538d'                      # AcrP
 COGNITIVE_OPENAI_USER_ROLE='5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'         # Cognitive Services OpenAI User
 COGNITIVE_USER_ROLE='a97b65f3-24c7-4388-baec-2e87135dc908'                # Cognitive Services User
 FOUNDRY_USER_ROLE='53ca6127-db72-4b80-b1b0-d745d6d5456d'                  # Foundry User (formerly Azure AI User)
+STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE='ba92f5b4-2d11-453d-a403-e96b0029c9fe' # Storage Blob Data Contributor
+KEY_VAULT_SECRETS_USER_ROLE='4633458b-17de-408a-b874-0445c86b69e6'        # Key Vault Secrets User
+SEARCH_INDEX_DATA_CONTRIBUTOR_ROLE='8ebe5a00-799e-43f5-93ac-243d3dce84a7' # Search Index Data Contributor
+COSMOS_DATA_CONTRIBUTOR_ROLE='00000000-0000-0000-0000-000000000002'       # Cosmos DB Built-in Data Contributor (data-plane)
 
 # Discover the identities from `azd ai agent show` (JSON output).
 AGENT_JSON="$$(azd ai agent show 2>/dev/null | sed -n '/^{/,/^}/p' || true)"
@@ -63,20 +67,64 @@ if [ -z "$$AI_ACCOUNT_NAME" ]; then
 fi
 ACR_ID="/subscriptions/$$SUB/resourceGroups/$$RG/providers/Microsoft.ContainerRegistry/registries/$$ACR_NAME"
 
+# Data-plane scopes. Bicep grants Cosmos/Blob/KV/Search data-plane roles only
+# to the Foundry *account* MI — but the running container authenticates (via
+# DefaultAzureCredential) as the *instance* identity, so those grants don't
+# cover it. Resolve each resource's scope from the azd env outputs (account
+# names are derived from their endpoints where azd only exposes the endpoint).
+STORAGE_NAME="$${AZURE_BLOB_STORAGE_ACCOUNT_NAME:-}"
+COSMOS_NAME="$$(echo "$${AZURE_COSMOS_DB_ENDPOINT:-}" | sed -E 's#^https?://([^.]+)\..*#\1#')"
+KV_NAME="$$(echo "$${AZURE_KEY_VAULT_URI:-}" | sed -E 's#^https?://([^.]+)\..*#\1#')"
+SEARCH_NAME="$$(echo "$${AZURE_AI_SEARCH_ENDPOINT:-}" | sed -E 's#^https?://([^.]+)\..*#\1#')"
+STORAGE_ID="/subscriptions/$$SUB/resourceGroups/$$RG/providers/Microsoft.Storage/storageAccounts/$$STORAGE_NAME"
+KV_ID="/subscriptions/$$SUB/resourceGroups/$$RG/providers/Microsoft.KeyVault/vaults/$$KV_NAME"
+SEARCH_ID="/subscriptions/$$SUB/resourceGroups/$$RG/providers/Microsoft.Search/searchServices/$$SEARCH_NAME"
+
+# Grant a control-plane RBAC role, surfacing *real* failures. Capturing the
+# command output lets us tell a harmless already-exists apart from a genuine
+# error (auth, bad scope, MissingSubscription) instead of hiding both behind
+# the same "skip" message (which used to mask broken deploys entirely).
 grant() {
     local pid="$$1"
     local role="$$2"
     local scope="$$3"
     local label="$$4"
     if [ -z "$$pid" ] || [ -z "$$scope" ]; then return 0; fi
-    az role assignment create \
+    local out
+    if out="$$(az role assignment create \
         --assignee-object-id "$$pid" \
         --assignee-principal-type ServicePrincipal \
         --role "$$role" \
         --scope "$$scope" \
-        --output none 2>/dev/null \
-        && echo "  ✅ $${pid:0:8}… → $$label @ $${scope##*/}" \
-        || echo "  ⊙  $${pid:0:8}… → $$label @ $${scope##*/} (exists / skip)"
+        --output none 2>&1)"; then
+        echo "  ✅ $${pid:0:8}… → $$label @ $${scope##*/}"
+    elif echo "$$out" | grep -qiE 'RoleAssignmentExists|already exists|Conflict'; then
+        echo "  ⊙  $${pid:0:8}… → $$label @ $${scope##*/} (already granted)"
+    else
+        echo "  ❌ FAILED $${pid:0:8}… → $$label @ $${scope##*/}: $$out"
+    fi
+}
+
+# Grant the Cosmos DB *data-plane* role. Cosmos uses its own SQL role API
+# (not `az role assignment create`); role-definition 00000000-…-002 is the
+# Built-in Data Contributor, scoped to the whole account ("/").
+grant_cosmos() {
+    local pid="$$1"
+    if [ -z "$$pid" ] || [ -z "$$COSMOS_NAME" ]; then return 0; fi
+    local out
+    if out="$$(az cosmosdb sql role assignment create \
+        --account-name "$$COSMOS_NAME" \
+        --resource-group "$$RG" \
+        --role-definition-id "$$COSMOS_DATA_CONTRIBUTOR_ROLE" \
+        --principal-id "$$pid" \
+        --scope "/" \
+        --output none 2>&1)"; then
+        echo "  ✅ $${pid:0:8}… → Cosmos DB Data Contributor"
+    elif echo "$$out" | grep -qiE 'RoleAssignmentExists|already exists|Conflict'; then
+        echo "  ⊙  $${pid:0:8}… → Cosmos DB Data Contributor (already granted)"
+    else
+        echo "  ❌ FAILED $${pid:0:8}… → Cosmos DB Data Contributor: $$out"
+    fi
 }
 
 # ── 1. Grant AcrPull to the Foundry PROJECT MI (the actual image-puller). ──
@@ -117,6 +165,14 @@ for PID in "$$INSTANCE_PID" "$$BLUEPRINT_PID"; do
     # § MAF 1.4.0 breaking changes).
     grant "$$PID" "$$FOUNDRY_USER_ROLE" "$$AI_ACCOUNT_ID" "Foundry User"
     grant "$$PID" "$$FOUNDRY_USER_ROLE" "$$AI_PROJECT_ID" "Foundry User"
+
+    # App data-plane: the container reads/writes Cosmos (conversation history),
+    # syncs skills from Blob storage, queries Search indexes, and fetches Key
+    # Vault secrets — all as the instance identity, which Bicep does NOT grant.
+    grant_cosmos "$$PID"
+    grant "$$PID" "$$STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE" "$$STORAGE_ID" "Storage Blob Data Contributor"
+    grant "$$PID" "$$KEY_VAULT_SECRETS_USER_ROLE" "$$KV_ID" "Key Vault Secrets User"
+    grant "$$PID" "$$SEARCH_INDEX_DATA_CONTRIBUTOR_ROLE" "$$SEARCH_ID" "Search Index Data Contributor"
 done
 
 echo ""
