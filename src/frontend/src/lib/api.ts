@@ -211,6 +211,50 @@ export async function exportUseCase(name: string): Promise<Blob> {
   return response.blob();
 }
 
+/** Result of a persona import (mirrors backend `PersonaImportResponse`). */
+export interface PersonaImportResult {
+  name: string;
+  displayName: string;
+  description: string;
+  skillCount: number;
+  created: boolean;
+  files: string[];
+}
+
+/**
+ * Import a persona from a threadlight-design-compatible manifest.
+ *
+ * The manifest is built by the host (e.g. agentic-loop-site) and relayed
+ * same-origin via sessionStorage; here it is POSTed to the auth-gated Kratos
+ * import endpoint. Returns the created persona's slug + metadata.
+ */
+export async function importPersona(
+  manifest: unknown,
+  opts: { name?: string; overwrite?: boolean; dedupe?: boolean } = {},
+): Promise<PersonaImportResult> {
+  const payload: Record<string, unknown> = { manifest };
+  if (opts.name) payload.name = opts.name;
+  if (opts.overwrite !== undefined) payload.overwrite = opts.overwrite;
+  if (opts.dedupe !== undefined) payload.dedupe = opts.dedupe;
+
+  const response = await fetch(`${getApiUrl()}/api/use-cases/import`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    let detail = `${response.status}`;
+    try {
+      const body = await response.json();
+      if (body?.detail) detail = String(body.detail);
+    } catch {
+      // Body wasn't JSON — keep the status code as the error.
+    }
+    throw new Error(`Failed to import persona: ${detail}`);
+  }
+  return (await response.json()) as PersonaImportResult;
+}
+
 // ─── Skills Admin API ───
 
 import type { Skill, SkillCreate, SkillUpdate } from "@/types";

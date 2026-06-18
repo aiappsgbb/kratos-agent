@@ -263,6 +263,62 @@ class BlobSkillService:
         blob_path = f"{_USE_CASES_PREFIX}{use_case}/{filename}"
         await self.upload_file(blob_path, content)
 
+    async def use_case_exists(self, use_case: str) -> bool:
+        """Return True if a use-case already exists in blob or on local disk."""
+        if self._container_client and use_case in await self.list_use_cases():
+            return True
+        local = self.local_dir(use_case)
+        return local.is_dir() and (local / "SYSTEM_PROMPT.md").exists()
+
+    async def create_use_case(
+        self,
+        use_case: str,
+        *,
+        system_prompt_md: str,
+        mcp_json: str,
+        apm_yml: str,
+        overwrite: bool = False,
+    ) -> list[str]:
+        """Create a new use-case from its three core persona files.
+
+        Writes ``SYSTEM_PROMPT.md``, ``.mcp.json`` and ``apm.yml`` to blob
+        storage (when configured) and always mirrors them to the local
+        filesystem so a freshly constructed :class:`SkillRegistry` can read
+        them immediately — both via the blob→local sync path and the
+        local-fallback path.
+
+        Args:
+            use_case: The (already validated) use-case slug.
+            system_prompt_md: Full SYSTEM_PROMPT.md content incl. frontmatter.
+            mcp_json: Serialized ``.mcp.json`` (Copilot MCP config shape).
+            apm_yml: Serialized ``apm.yml`` APM manifest.
+            overwrite: When False and the use-case exists, raise FileExistsError.
+
+        Returns:
+            The list of relative file paths that were written.
+        """
+        if not overwrite and await self.use_case_exists(use_case):
+            raise FileExistsError(use_case)
+
+        files: dict[str, bytes] = {
+            "SYSTEM_PROMPT.md": system_prompt_md.encode("utf-8"),
+            ".mcp.json": mcp_json.encode("utf-8"),
+            "apm.yml": apm_yml.encode("utf-8"),
+        }
+
+        local_dir = self.local_dir(use_case)
+        local_dir.mkdir(parents=True, exist_ok=True)
+        for name, content in files.items():
+            (local_dir / name).write_bytes(content)
+
+        if self._container_client:
+            await self.upload_file(f"{_USE_CASES_PREFIX}{use_case}/SYSTEM_PROMPT.md", files["SYSTEM_PROMPT.md"])
+            await self.upload_mcp_config(use_case, files[".mcp.json"])
+            await self.upload_apm_manifest(use_case, "apm.yml", files["apm.yml"])
+
+        logger.info("Created use-case '%s' (%d files, blob=%s)", use_case, len(files), self.is_available)
+        return [f"{_USE_CASES_PREFIX}{use_case}/{name}" for name in files]
+
     # ─── Internal helpers ─────────────────────────────────────────────────
 
     async def download_blob(self, blob_path: str) -> bytes | None:

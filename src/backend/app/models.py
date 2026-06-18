@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # ─── Enums ───
 
@@ -297,6 +297,83 @@ class UseCaseList(BaseModel):
     """List of available use-cases."""
 
     useCases: list[UseCaseInfo]
+
+
+# ─── Persona Import (threadlight-design-compatible manifest) ─────────────────
+
+
+class ImportSkill(BaseModel):
+    """A skill reference in the import manifest.
+
+    Maps to ``apm.yml`` ``dependencies.apm[]`` when ``package`` is given.
+    ``implements`` carries threadlight ``BR-XXX`` traceability (metadata only).
+    """
+
+    name: str
+    description: str = ""
+    package: str | None = None
+    implements: list[str] = Field(default_factory=list)
+
+
+class ImportMcpServer(BaseModel):
+    """An MCP server reference → ``.mcp.json`` + ``apm.yml`` ``dependencies.mcp[]``."""
+
+    name: str
+    transport: str = "http"
+    url: str | None = None
+    registry: bool = False
+
+
+class PersonaManifest(BaseModel):
+    """threadlight-design-compatible persona manifest consumed by the import API.
+
+    Field names mirror threadlight's ``specs/manifest.json`` / ``AGENTS.md`` so
+    personas round-trip between ecosystems (see design spec §9).
+    """
+
+    name: str
+    description: str = ""
+    instructions: str = ""
+    displayName: str | None = None
+    sampleQuestions: list[str] = Field(default_factory=list)
+    skills: list[ImportSkill] = Field(default_factory=list)
+    mcpServers: list[ImportMcpServer] = Field(default_factory=list)
+    traits: list[str] = Field(default_factory=list)
+    workflow_model: Literal["agent", "workflow"] = "agent"
+
+
+class PersonaImportRequest(BaseModel):
+    """Import request body — exactly one of ``manifest`` or ``prompt``.
+
+    ``manifest`` is the primary, deterministic path (no LLM). ``prompt`` is a
+    secondary natural-language convenience that is expanded into a manifest via
+    the Foundry model before the same deterministic mapping runs.
+    """
+
+    manifest: PersonaManifest | None = None
+    prompt: str | None = None
+    name: str | None = None
+    overwrite: bool = False
+    dedupe: bool = True
+
+    @model_validator(mode="after")
+    def _exactly_one_source(self) -> "PersonaImportRequest":
+        if (self.manifest is None) == (self.prompt is None):
+            raise ValueError("Provide exactly one of 'manifest' or 'prompt'")
+        if self.prompt is not None and not self.prompt.strip():
+            raise ValueError("'prompt' must not be empty")
+        return self
+
+
+class PersonaImportResponse(BaseModel):
+    """Result of a persona import."""
+
+    name: str
+    displayName: str
+    description: str
+    skillCount: int
+    created: bool
+    files: list[str]
 
 
 class SystemPromptResponse(BaseModel):

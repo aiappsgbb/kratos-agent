@@ -23,6 +23,7 @@ from app.routers import (
     export,
     files,
     health,
+    import_persona,
     settings,
     traces,
     use_cases,
@@ -245,6 +246,7 @@ app.include_router(admin_mcp.router, prefix="/api/admin/mcp-servers", tags=["adm
 app.include_router(admin_apm.router, prefix="/api/admin/use-cases/{use_case}/apm", tags=["admin"])
 app.include_router(admin_analysis.router, prefix="/api/admin/analysis", tags=["admin"])
 app.include_router(use_cases.router, prefix="/api/use-cases", tags=["use-cases"])
+app.include_router(import_persona.router, prefix="/api/use-cases", tags=["import"])
 app.include_router(export.router, prefix="/api/use-cases", tags=["export"])
 app.include_router(evals.router, prefix="/api/use-cases", tags=["evals"])
 app.include_router(traces.router, prefix="/api/traces", tags=["traces"])
