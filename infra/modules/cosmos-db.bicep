@@ -16,6 +16,20 @@ param vnetId string
 @description('Key Vault name for storing connection info')
 param keyVaultName string
 
+@description('''Public network access for the Cosmos DB account.
+Defaults to 'Enabled' because Foundry hosted agents run in a Microsoft-managed
+network OUTSIDE the customer VNet and therefore cannot reach the private
+endpoint — with 'Disabled' the agent's conversation-persistence calls fail at
+the network layer (before RBAC is even evaluated). The data plane stays locked
+down: local (key) auth is disabled, so only Microsoft Entra ID identities with
+an explicit Cosmos data-plane role can connect. Set to 'Disabled' only if you
+front the agent with VNet injection / a managed private endpoint.''')
+@allowed([
+  'Enabled'
+  'Disabled'
+])
+param publicNetworkAccess string = 'Enabled'
+
 resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2024-02-15-preview' = {
   name: name
   location: location
@@ -38,7 +52,7 @@ resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2024-02-15-preview' = {
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
     }
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: publicNetworkAccess
     disableLocalAuth: true
   }
 }

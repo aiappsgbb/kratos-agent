@@ -79,7 +79,13 @@ hooks:
         name: postdeploy
         kind: sh
         shell: sh
-        run: ./hooks/postdeploy.sh
+        run: |
+            # Grant the Foundry hosted-agent instance identity its least-privilege
+            # data-plane roles. This identity is created by `azd ai agent deploy`
+            # after provisioning, so Bicep cannot assign its roles — this hook does.
+            # Best-effort: never block the rest of postdeploy on it.
+            ./hooks/assign-agent-roles.sh || echo "⚠️  Agent role assignment had issues (see above); continuing."
+            ./hooks/postdeploy.sh
         interactive: true
     postprovision:
         name: postprovision

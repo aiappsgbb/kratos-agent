@@ -13,6 +13,20 @@ param subnetId string
 @description('VNet ID for DNS zone link')
 param vnetId string
 
+@description('''Public network access for the AI Search service.
+Defaults to 'enabled' for the same reason as Cosmos: Foundry hosted agents run
+in a Microsoft-managed network outside the customer VNet and cannot reach the
+private endpoint, so the rag-search skill (which connects to the Search data
+plane with DefaultAzureCredential) fails at the network layer when this is
+'disabled'. Access stays gated by Microsoft Entra ID RBAC via the role
+assignments. Set to 'disabled' only with VNet injection / a managed private
+endpoint in front of the agent.''')
+@allowed([
+  'enabled'
+  'disabled'
+])
+param publicNetworkAccess string = 'enabled'
+
 resource aiSearch 'Microsoft.Search/searchServices@2023-11-01' = {
   name: name
   location: location
@@ -24,7 +38,7 @@ resource aiSearch 'Microsoft.Search/searchServices@2023-11-01' = {
     replicaCount: 1
     partitionCount: 1
     hostingMode: 'default'
-    publicNetworkAccess: 'disabled'
+    publicNetworkAccess: publicNetworkAccess
     authOptions: {
       aadOrApiKey: {
         aadAuthFailureMode: 'http401WithBearerChallenge'
