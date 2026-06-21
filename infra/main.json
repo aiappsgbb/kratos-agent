@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.43.1.21952",
-      "templateHash": "7976651476715481717"
+      "templateHash": "15152576942978395100"
     }
   },
   "parameters": {
@@ -94,6 +94,13 @@
         "description": "Short project prefix prepended to generated resource names for easy identification (e.g. \"luxoai\" -> luxoai-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided."
       }
     },
+    "deployAiGateway": {
+      "type": "string",
+      "defaultValue": "false",
+      "metadata": {
+        "description": "Whether to deploy the optional APIM AI gateway in front of Foundry. Default false — the agent calls Foundry directly. Set to \"true\" to deploy APIM and route the agent LLM through it (governance + ApiManagementGatewayLlmLog capture)."
+      }
+    },
     "apimPublisherEmail": {
       "type": "string",
       "defaultValue": "[format('admin@{0}.com', parameters('environmentName'))]",
@@ -145,6 +152,7 @@
     "resourceToken": "[toLower(uniqueString(subscription().id, parameters('environmentName'), parameters('location')))]",
     "namePrefix": "[if(empty(parameters('resourcePrefix')), '', format('{0}-', parameters('resourcePrefix')))]",
     "namePrefixNoHyphen": "[if(empty(parameters('resourcePrefix')), '', toLower(parameters('resourcePrefix')))]",
+    "aiGatewayEnabled": "[equals(toLower(parameters('deployAiGateway')), 'true')]",
     "tags": {
       "azd-env-name": "[parameters('environmentName')]",
       "project": "kratos-agent"
@@ -2178,6 +2186,7 @@
       ]
     },
     {
+      "condition": "[variables('aiGatewayEnabled')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "ai-gateway",
@@ -3493,9 +3502,7 @@
           "principalId": {
             "value": "[parameters('principalId')]"
           },
-          "apimPrincipalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway'), '2025-04-01').outputs.principalId.value]"
-          }
+          "apimPrincipalId": "[if(variables('aiGatewayEnabled'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway'), '2025-04-01').outputs.principalId.value), createObject('value', ''))]"
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -3869,7 +3876,7 @@
     },
     "AI_GATEWAY_URL": {
       "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway'), '2025-04-01').outputs.gatewayUrl.value]"
+      "value": "[if(variables('aiGatewayEnabled'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway'), '2025-04-01').outputs.gatewayUrl.value, '')]"
     },
     "FOUNDRY_ENDPOINT": {
       "type": "string",

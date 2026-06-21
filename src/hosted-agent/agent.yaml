@@ -19,11 +19,17 @@ environment_variables:
   # AI Services base URL (fallback if platform doesn't inject FOUNDRY_ENDPOINT)
   - name: AI_SERVICES_ENDPOINT
     value: ${AZURE_AI_PROJECT_ENDPOINT}
-  # Route the LLM (chat completions) through the APIM AI gateway so requests are
-  # governed + observable in App Insights. Empty falls back to calling Foundry
-  # directly. The Copilot SDK provider appends /openai/deployments/<model>.
+  # Route the LLM (chat completions) through the OPTIONAL APIM AI gateway when
+  # AI_GATEWAY_URL is set (enable with `azd env set AZURE_DEPLOY_AI_GATEWAY true`).
+  # Empty (the default) => the agent calls Foundry directly. The Copilot SDK
+  # provider appends /openai/deployments/<model>.
   - name: LLM_GATEWAY_BASE_URL
     value: ${AI_GATEWAY_URL}
+  # Capture prompts + completions (gen_ai.input/output.messages) on the
+  # invoke_agent span so the Foundry Traces tab shows the LLM interaction
+  # details. Off by default in OTel; we opt in here.
+  - name: AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED
+    value: "true"
   # Azure service endpoints (injected by Bicep / azd env)
   - name: COSMOS_DB_ENDPOINT
     value: ${AZURE_COSMOS_DB_ENDPOINT}

@@ -23,9 +23,13 @@ template:
     # FOUNDRY_PROJECT_ENDPOINT is auto-injected by the platform.
     - name: MODEL_DEPLOYMENT_NAME
       value: ${FOUNDRY_MODEL_DEPLOYMENT}
-    # Route the LLM through the APIM AI gateway (governance + observability).
+    # Route the LLM through the OPTIONAL APIM AI gateway when AI_GATEWAY_URL is
+    # set; empty (default) => Foundry direct.
     - name: LLM_GATEWAY_BASE_URL
       value: ${AI_GATEWAY_URL}
+    # Capture prompts + completions on the invoke_agent span for Foundry Traces.
+    - name: AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED
+      value: "true"
     - name: COSMOS_DB_ENDPOINT
       value: ${AZURE_COSMOS_DB_ENDPOINT}
     - name: AZURE_AI_SEARCH_ENDPOINT

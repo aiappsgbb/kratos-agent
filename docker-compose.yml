@@ -34,6 +34,8 @@ services:
       # local equivalent of the OBO_MCP_SERVER_MCP_URL env declared in agent.yaml.
       OBO_MCP_SERVER_MCP_URL: "http://obo-mcp-server:8000/mcp"
       OBO_MCP_SERVER_NAME: graph-obo
+      # Capture prompts + completions on the invoke_agent span (gen_ai.* attrs).
+      AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED: "true"
     volumes:
       - ./.local/hosted-agent:/data
       - ./use-cases:/app/use-cases

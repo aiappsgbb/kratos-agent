@@ -13,6 +13,9 @@
     },
     "resourcePrefix": {
       "value": "${AZURE_RESOURCE_PREFIX=luxoai}"
+    },
+    "deployAiGateway": {
+      "value": "${AZURE_DEPLOY_AI_GATEWAY=false}"
     }
   }
 }
