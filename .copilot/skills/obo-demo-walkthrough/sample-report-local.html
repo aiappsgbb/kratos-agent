@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OBO Agent — Under the Hood</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 80px; }
+code, pre, .mono { font-family: Consolas, "Courier New", Courier, monospace; }
+a { color: var(--cp-link); }
+
+/* Header */
+header.hero {
+  background: var(--cp-bg-elevated);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+}
+.hero h1 { margin: 0 0 6px; font-size: 1.5rem; letter-spacing: -0.01em; }
+.hero p.sub { margin: 0; color: var(--cp-text-muted); font-size: 0.95rem; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.badge {
+  font-size: 0.78rem; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid var(--cp-border); background: var(--cp-surface-soft);
+  color: var(--cp-text-muted); display: inline-flex; gap: 6px; align-items: center;
+}
+.badge.accent { background: var(--cp-accent-soft); border-color: var(--cp-accent); color: var(--cp-accent); }
+.badge.ok { color: var(--cp-success); border-color: var(--cp-success); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+
+.prompt-card {
+  margin-top: 16px; background: var(--cp-surface); border: 1px solid var(--cp-border);
+  border-left: 3px solid var(--cp-accent); border-radius: 10px; padding: 12px 14px;
+  font-size: 0.92rem;
+}
+.prompt-card .lbl { color: var(--cp-text-soft); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.controls { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; align-items: center; }
+button.btn {
+  font: inherit; font-size: 0.9rem; cursor: pointer; border-radius: 10px;
+  padding: 8px 16px; border: 1px solid var(--cp-border-strong);
+  background: var(--cp-surface); color: var(--cp-text); transition: all .15s;
+}
+button.btn:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+button.btn.primary { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+button.btn.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+.progress-track { flex: 1; min-width: 140px; height: 6px; background: var(--cp-surface-soft); border-radius: 999px; overflow: hidden; border: 1px solid var(--cp-border); }
+.progress-fill { height: 100%; width: 0%; background: var(--cp-accent); transition: width .4s ease; }
+
+h2.section { font-size: 1.05rem; margin: 34px 0 12px; display: flex; align-items: center; gap: 9px; }
+h2.section .num { color: var(--cp-accent); }
+
+/* Steps */
+.steps { display: flex; flex-direction: column; gap: 12px; }
+.step {
+  background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 12px;
+  overflow: hidden; transition: border-color .2s, box-shadow .2s;
+}
+.step.active { border-color: var(--cp-accent); box-shadow: 0 0 0 3px var(--cp-accent-soft); }
+.step-head { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; user-select: none; }
+.step-num {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 0.85rem; font-weight: 600; background: var(--cp-surface-soft);
+  border: 1px solid var(--cp-border-strong); color: var(--cp-text-muted);
+}
+.step.active .step-num, .step.done .step-num { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+.step-meta { flex: 1; min-width: 0; }
+.step-title { font-weight: 600; font-size: 0.98rem; }
+.step-route { font-size: 0.78rem; color: var(--cp-text-soft); margin-top: 2px; }
+.step-route .arrow { color: var(--cp-accent); padding: 0 5px; }
+.step-summary { font-size: 0.86rem; color: var(--cp-text-muted); margin-top: 4px; }
+.chev { flex: 0 0 auto; color: var(--cp-text-muted); transition: transform .2s; font-size: 0.8rem; }
+.step.open .chev { transform: rotate(90deg); }
+.step-body { display: none; padding: 0 16px 16px 60px; }
+.step.open .step-body { display: block; }
+.detail-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cp-text-soft); margin: 10px 0 5px; }
+pre.payload {
+  margin: 0; background: var(--cp-bg-elevated); border: 1px solid var(--cp-border);
+  border-radius: 10px; padding: 12px 14px; overflow-x: auto; font-size: 0.82rem;
+  white-space: pre; color: var(--cp-text);
+}
+.pill { font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--cp-border); color: var(--cp-text-muted); }
+.pill.ok { color: var(--cp-success); border-color: var(--cp-success); background: color-mix(in srgb, var(--cp-success) 8%, transparent); }
+.copybtn { float: right; font-size: 0.72rem; cursor: pointer; border: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text-muted); border-radius: 7px; padding: 2px 8px; }
+.copybtn:hover { color: var(--cp-accent); border-color: var(--cp-accent); }
+
+/* Proof */
+.proof-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 760px) { .proof-grid { grid-template-columns: 1fr; } }
+.proof-card { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 12px; padding: 16px; }
+.proof-card h3 { margin: 0 0 4px; font-size: 0.95rem; }
+.proof-card .hint { font-size: 0.8rem; color: var(--cp-text-soft); margin: 0 0 12px; }
+.proof-card.token { border-top: 3px solid var(--cp-warning); }
+.proof-card.graph { border-top: 3px solid var(--cp-success); }
+.kv { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--cp-border); font-size: 0.85rem; }
+.kv:last-child { border-bottom: none; }
+.kv .k { color: var(--cp-text-soft); }
+.kv .v { font-family: Consolas, monospace; text-align: right; word-break: break-all; }
+.match-banner {
+  margin-top: 14px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--cp-success);
+  background: color-mix(in srgb, var(--cp-success) 9%, transparent); font-size: 0.9rem;
+}
+.match-banner .eq { font-family: Consolas, monospace; font-size: 0.82rem; color: var(--cp-text); display: block; margin-top: 6px; word-break: break-all; }
+.answer {
+  margin-top: 12px; background: var(--cp-bg-elevated); border: 1px solid var(--cp-border);
+  border-radius: 12px; padding: 14px 16px; font-size: 0.9rem; white-space: pre-wrap;
+}
+.note { font-size: 0.84rem; color: var(--cp-text-muted); background: var(--cp-surface-soft); border: 1px solid var(--cp-border); border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+.note b { color: var(--cp-text); }
+footer { margin-top: 36px; font-size: 0.78rem; color: var(--cp-text-soft); text-align: center; }
+.repro { background: var(--cp-bg-elevated); border: 1px solid var(--cp-border); border-radius: 10px; padding: 12px 14px; font-size: 0.8rem; margin-top: 10px; }
+.repro code { color: var(--cp-accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>On-Behalf-Of Agent — what happens under the hood</h1>
+    <p class="sub">A signed-in user's Entra token flows through the agent to an Entra-protected MCP server, which calls Microsoft&nbsp;Graph <code>/me</code> <b>as that user</b> (delegated / OBO) — never as the agent's own identity.</p>
+    <div class="badges" id="badges"></div>
+    <div class="prompt-card">
+      <div class="lbl">Demo prompt</div>
+      <div id="prompt"></div>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="play">▶ Play walkthrough</button>
+      <button class="btn" id="reset">Reset</button>
+      <button class="btn" id="expandAll">Expand all</button>
+      <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    </div>
+  </header>
+
+  <h2 class="section"><span class="num">1.</span> The journey of one request</h2>
+  <div class="steps" id="steps"></div>
+
+  <h2 class="section"><span class="num">2.</span> Proof it ran as the user (not the agent), live from Graph</h2>
+  <div class="proof-grid">
+    <div class="proof-card token">
+      <h3>① In the access token (JWT)</h3>
+      <p class="hint">Anyone holding the token can read these — so they alone do <b>not</b> prove a Graph call happened.</p>
+      <div id="jwtFields"></div>
+    </div>
+    <div class="proof-card graph">
+      <h3>② Only Microsoft Graph can return these</h3>
+      <p class="hint">Not present in the token. A correct answer here can only come from a <b>live</b> delegated Graph call.</p>
+      <div id="graphFields"></div>
+    </div>
+  </div>
+  <div class="match-banner" id="matchBanner"></div>
+  <div class="detail-label" style="margin-top:18px">Agent's rendered answer</div>
+  <div class="answer" id="answer"></div>
+
+  <h2 class="section"><span class="num">3.</span> Architecture notes &amp; how to reproduce</h2>
+  <div class="note" id="apimNote"></div>
+  <div class="repro" id="repro"></div>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+/* eslint-disable */
+const SAMPLE = {
+  "target": "local",
+  "capturedAt": "2026-06-21 06:09 UTC (local docker)",
+  "prompt": "Use your Microsoft Graph profile tool to look me up. Strictly from the tool result, report displayName, userPrincipalName, id, department, jobTitle, officeLocation, preferredLanguage, graphRequestId and fetchedAtUtc as a simple list.",
+  "endpoints": {
+    "frontend": "http://localhost:5173 (or deployed SWA for token)",
+    "backend": "http://localhost:8000",
+    "oboMcp": "http://obo-mcp-server:8000/mcp (host: http://localhost:8800/mcp)",
+    "foundryInvocations": "http://hosted-agent:8088/invocations (local hosted agent — no Foundry, no APIM)"
+  },
+  "steps": [
+    {
+      "title": "Browser acquires a delegated token & sends it in the request body",
+      "from": "MSAL.js (browser)",
+      "to": "Backend · localhost:8000",
+      "summary": "POST /api/agent/chat — the user's access token rides in the JSON body under mcpAccessTokens, never in prompt text.",
+      "detailLabel": "POST /api/agent/chat (body, token redacted)",
+      "detail": "{\n  \"conversationId\": \"obo-demo-1782022121918\",\n  \"message\": \"Use your Microsoft Graph profile tool to look me up. Strictly from the tool result, report displayName, userPrincipalName, id, department, jobTitle, officeLocation, preferredLanguage, graphRequestId and fetchedAtUtc as a simple list.\",\n  \"mcpAccessTokens\": {\n    \"graph-obo\": \"eyJ0eXAiOiJKV1QiLCJhbGci…<header.payload.signature, 1672 chars, redacted>\"\n  }\n}",
+      "note": "The token's audience is the <b>OBO server app</b> (<code>aud=bec3169c-c01e-4acc-9974-bd9271f9bfae</code>) with scope <code>scp=access_as_user</code> — it is <b>not</b> a Graph token. The OBO server will exchange it."
+    },
+    {
+      "title": "Backend forwards the body to the Foundry Invocations endpoint",
+      "from": "Backend · localhost:8000",
+      "to": "Foundry project (Invocations)",
+      "summary": "Straight to the Foundry project endpoint on the AI Services resource — no APIM in this path.",
+      "detailLabel": "POST …/agents/kratos-agent/endpoint/protocols/invocations",
+      "detail": "http://hosted-agent:8088/invocations (local hosted agent — no Foundry, no APIM)\n\nAuthorization: Bearer <backend managed-identity token for the Foundry resource>\nx-ms-* / x-agent-session-id: <warm-pool session routing>\n\n// The mcpAccessTokens body field is preserved by Foundry's own\n// Invocations gateway and reaches the sandbox (verified via kratos_diag).",
+      "note": "<b>The &quot;gateway&quot; here is Foundry's own Invocations gateway</b> (warm-pool / session manager), <b>not</b> APIM. The APIM AI-gateway fronts LLM calls only, and in this deployment <code>FOUNDRY_ENDPOINT</code> points directly at the AI Services resource, so APIM is not in the live path."
+    },
+    {
+      "title": "Hosted agent receives the token & injects it as the MCP server's Authorization header",
+      "from": "Foundry sandbox (hosted agent)",
+      "to": "graph-obo MCP server",
+      "summary": "The SDK attaches the per-user bearer ONLY as the graph-obo server's HTTP header — never shown to the model, never logged.",
+      "detailLabel": "kratos_diag (keys-only diagnostics emitted by the hosted agent)",
+      "detail": "{\n  \"event\": \"kratos_diag\",\n  \"data\": {\n    \"mcp_token_body_keys\": [\n      \"graph-obo\"\n    ],\n    \"mcp_token_effective_keys\": [\n      \"graph-obo\"\n    ],\n    \"obo_env_url_present\": true,\n    \"obo_env_name\": \"graph-obo\"\n  }\n}",
+      "note": "<code>obo_env_url_present:true</code> means the sandbox has <code>OBO_MCP_SERVER_MCP_URL</code> (declared in <code>agent.yaml</code>), so the SDK auto-attaches the <code>graph-obo</code> tool. When this was empty, the tool never attached and the OBO server saw zero traffic."
+    },
+    {
+      "title": "OBO server validates the token & performs the On-Behalf-Of exchange",
+      "from": "graph-obo MCP · obo-mcp-server:8000",
+      "to": "Microsoft Entra (token endpoint)",
+      "summary": "Validates audience/scope/tenant/client, then exchanges the user assertion for a Graph token (secret-less FIC→MI in cloud; client secret locally).",
+      "detailLabel": "OBO MCP server logs",
+      "detail": "WARNING:obo-mcp-server.obo:Using OBO_CLIENT_SECRET for OBO exchange (LOCAL DEV ONLY)\nINFO:azure.identity._internal.get_token_mixin:OnBehalfOfCredential.get_token succeeded\nINFO:httpx:HTTP Request: GET https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName,mail,jobTitle,officeLocation,department,preferredLanguage,mobilePhone,businessPhones,givenName,surname \"HTTP/1.1 200 OK\"\nINFO:obo-mcp-server:get_my_profile: returned profile for upn=arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\nINFO:obo-mcp-server:get_my_profile result: {\"displayName\": \"Arlind Nocaj\", \"userPrincipalName\": \"arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\", \"mail\": null, \"jobTitle\": null, \"officeLocation\": null, \"department\": null, \"preferredLanguage\": null, \"mobilePhone\": null, \"businessPhones\": [], \"givenName\": null, \"surname\": null, \"id\": \"d4552ae4-ad43-4122-8b29-e4214d945d8f\", \"graphRequestId\": \"e8542c8e-4781-4b82-ab7e-3c4257fe4420\", \"fetchedAtUtc\": \"2026-06-21T06:08:51Z\", \"source\": \"microsoft-graph:/v1.0/me (delegated, on-behalf-of)\"}",
+      "note": "Self-auth differs by environment only: <b>cloud</b> = managed-identity federated credential (no secret); <b>local</b> = a dev client secret on the same app registration. The user-token validation and the Graph call are identical."
+    },
+    {
+      "title": "Graph /me returns the profile — as the signed-in user",
+      "from": "graph-obo MCP · obo-mcp-server:8000",
+      "to": "Microsoft Graph /v1.0/me",
+      "summary": "GET /me with the OBO Graph token → 200. The result carries fields that are NOT in the original token.",
+      "detailLabel": "Tool result returned to the agent",
+      "detail": "{\n  \"displayName\": \"Arlind Nocaj\",\n  \"userPrincipalName\": \"arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\",\n  \"mail\": null,\n  \"jobTitle\": null,\n  \"officeLocation\": null,\n  \"department\": null,\n  \"preferredLanguage\": null,\n  \"mobilePhone\": null,\n  \"businessPhones\": [],\n  \"givenName\": null,\n  \"surname\": null,\n  \"id\": \"d4552ae4-ad43-4122-8b29-e4214d945d8f\",\n  \"graphRequestId\": \"e8542c8e-4781-4b82-ab7e-3c4257fe4420\",\n  \"fetchedAtUtc\": \"2026-06-21T06:08:51Z\",\n  \"source\": \"microsoft-graph:/v1.0/me (delegated, on-behalf-of)\"\n}",
+      "note": "The presence of <code>graphRequestId</code> (a correlation id <b>Graph</b> generated) plus fields like <code>department</code>/<code>preferredLanguage</code> proves this is a live Graph response, not a decoded JWT."
+    }
+  ],
+  "answer": "Here are your profile details, strictly from the tool result:\n\n- **displayName:** Arlind Nocaj\n- **userPrincipalName:** arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\n- **id:** d4552ae4-ad43-4122-8b29-e4214d945d8f\n- **department:** null\n- **jobTitle:** null\n- **officeLocation:** null\n- **preferredLanguage:** null\n- **graphRequestId:** e8542c8e-4781-4b82-ab7e-3c4257fe4420\n- **fetchedAtUtc:** 2026-06-21T06:08:51Z",
+  "proof": {
+    "oidFromToken": "d4552ae4-ad43-4122-8b29-e4214d945d8f",
+    "idFromGraph": "d4552ae4-ad43-4122-8b29-e4214d945d8f",
+    "match": true,
+    "jwtFields": [
+      {
+        "k": "aud",
+        "v": "bec3169c-c01e-4acc-9974-bd9271f9bfae"
+      },
+      {
+        "k": "scp",
+        "v": "access_as_user"
+      },
+      {
+        "k": "azp (client app)",
+        "v": "f31799cd-b0a5-4055-b7f9-574c25ea0238"
+      },
+      {
+        "k": "name",
+        "v": "Arlind Nocaj"
+      },
+      {
+        "k": "preferred_username",
+        "v": "arlindnocaj@MngEnvMCAP039092.onmicrosoft.com"
+      },
+      {
+        "k": "oid",
+        "v": "d4552ae4-ad43-4122-8b29-e4214d945d8f"
+      },
+      {
+        "k": "tid",
+        "v": "f7d09a0b-c429-41ac-b105-9ce32d6e5358"
+      }
+    ],
+    "graphFields": [
+      {
+        "k": "graphRequestId",
+        "v": "e8542c8e-4781-4b82-ab7e-3c4257fe4420"
+      },
+      {
+        "k": "fetchedAtUtc",
+        "v": "2026-06-21T06:08:51Z"
+      }
+    ]
+  },
+  "notes": {
+    "apim": "<b>No APIM in the agent path.</b> Agent invocations go directly to the Foundry project endpoint (<code>…cognitiveservices.azure.com/api/projects/…/agents/kratos-agent/…/invocations</code>). The &quot;gateway&quot; in the logs is Foundry's own Invocations gateway (warm-pool/session manager). The APIM AI-gateway is an optional <b>LLM</b> governance layer; in this deployment <code>FOUNDRY_ENDPOINT</code> targets the AI Services resource directly, so APIM is provisioned but bypassed.",
+    "repro": "<b>Reproduce:</b> <code>cd .copilot/skills/obo-demo-walkthrough &amp;&amp; TARGET=local ./run.sh</code> &nbsp;·&nbsp; local: bring up <code>docker compose up</code> (adds the obo-mcp-server) then <code>TARGET=local ./run.sh</code>. Same proof, same HTML; only the OBO server's self-auth differs.",
+    "footer": "Generated by the <b>obo-demo-walkthrough</b> skill · target=local · 2026-06-21T06:09:35.084Z"
+  }
+};
+const DATA = (window.__WALKTHROUGH__ || SAMPLE);
+
+const $ = (s) => document.querySelector(s);
+const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h != null) n.innerHTML = h; return n; };
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m]));
+
+// Badges
+(() => {
+  const b = $("#badges");
+  const t = DATA.target || "cloud";
+  b.appendChild(el("span", "badge accent", `<span class="dot"></span>${esc(t.toUpperCase())} target`));
+  if (DATA.proof && DATA.proof.match) b.appendChild(el("span", "badge ok", `<span class="dot"></span>oid binding verified`));
+  if (DATA.capturedAt) b.appendChild(el("span", "badge", `captured ${esc(DATA.capturedAt)}`));
+  const eps = DATA.endpoints || {};
+  if (eps.oboMcp) b.appendChild(el("span", "badge", `OBO MCP · ${esc((eps.oboMcp.split("//")[1]||"").split(".")[0])}`));
+})();
+$("#prompt").textContent = DATA.prompt || "";
+
+// Steps
+const stepsRoot = $("#steps");
+(DATA.steps || []).forEach((s, i) => {
+  const step = el("div", "step");
+  step.dataset.idx = i;
+  const head = el("div", "step-head");
+  head.appendChild(el("div", "step-num", String(i + 1)));
+  const meta = el("div", "step-meta");
+  meta.appendChild(el("div", "step-title", esc(s.title)));
+  if (s.from || s.to) meta.appendChild(el("div", "step-route", `${esc(s.from||"")}<span class="arrow">→</span>${esc(s.to||"")}`));
+  if (s.summary) meta.appendChild(el("div", "step-summary", esc(s.summary)));
+  head.appendChild(meta);
+  head.appendChild(el("span", "chev", "▶"));
+  step.appendChild(head);
+  const body = el("div", "step-body");
+  if (s.detailLabel) body.appendChild(el("div", "detail-label", esc(s.detailLabel)));
+  const pre = el("pre", "payload");
+  const copy = el("button", "copybtn", "copy");
+  copy.onclick = (e) => { e.stopPropagation(); navigator.clipboard && navigator.clipboard.writeText(s.detail || ""); copy.textContent = "copied"; setTimeout(()=>copy.textContent="copy",1200); };
+  pre.appendChild(copy);
+  pre.appendChild(document.createTextNode(s.detail || ""));
+  body.appendChild(pre);
+  if (s.note) body.appendChild(el("div", "note", s.note));
+  step.appendChild(body);
+  head.onclick = () => step.classList.toggle("open");
+  stepsRoot.appendChild(step);
+});
+
+// Proof — JWT fields
+(() => {
+  const p = DATA.proof || {};
+  const jr = $("#jwtFields");
+  (p.jwtFields || []).forEach((f) => {
+    const row = el("div", "kv");
+    row.appendChild(el("span", "k", esc(f.k)));
+    row.appendChild(el("span", "v", esc(f.v)));
+    jr.appendChild(row);
+  });
+  const gr = $("#graphFields");
+  (p.graphFields || []).forEach((f) => {
+    const row = el("div", "kv");
+    row.appendChild(el("span", "k", esc(f.k)));
+    row.appendChild(el("span", "v", esc(f.v)));
+    gr.appendChild(row);
+  });
+  const mb = $("#matchBanner");
+  if (p.match) {
+    mb.innerHTML = `<b style="color:var(--cp-success)">✓ Identity binding holds.</b> The token's <code>oid</code> equals the <code>id</code> Microsoft Graph <code>/me</code> returned through the tool — Graph <code>/me</code> only resolves in a delegated user context, so this is dispositive proof the OBO exchange ran for this exact person.<span class="eq">token.oid = ${esc(p.oidFromToken)}<br>graph.id  = ${esc(p.idFromGraph)}</span>`;
+  } else {
+    mb.style.borderColor = "var(--cp-warning)";
+    mb.innerHTML = `<b>Binding not captured in this run.</b>`;
+  }
+})();
+$("#answer").textContent = DATA.answer || "";
+$("#apimNote").innerHTML = (DATA.notes && DATA.notes.apim) || "";
+$("#repro").innerHTML = (DATA.notes && DATA.notes.repro) || "";
+$("#footer").innerHTML = (DATA.notes && DATA.notes.footer) || "";
+
+// Play / controls
+const steps = [...document.querySelectorAll(".step")];
+let playTimer = null;
+function clearActive() { steps.forEach((s) => s.classList.remove("active")); }
+function setProgress(n) { $("#progress").style.width = `${Math.round((n / steps.length) * 100)}%`; }
+function reset() { clearTimeout(playTimer); playTimer = null; clearActive(); steps.forEach((s) => { s.classList.remove("open","done"); }); setProgress(0); $("#play").textContent = "▶ Play walkthrough"; }
+function play() {
+  reset();
+  let i = 0;
+  $("#play").textContent = "■ Playing…";
+  const tick = () => {
+    if (i > 0) { steps[i-1].classList.add("done"); steps[i-1].classList.remove("active","open"); }
+    if (i >= steps.length) { setProgress(steps.length); $("#play").textContent = "▶ Replay"; clearActive(); steps.forEach(s=>s.classList.add("done")); return; }
+    clearActive();
+    const s = steps[i]; s.classList.add("active","open");
+    s.scrollIntoView({ behavior: "smooth", block: "center" });
+    setProgress(i + 1);
+    i++;
+    playTimer = setTimeout(tick, 1500);
+  };
+  tick();
+}
+$("#play").onclick = () => { if (playTimer) { reset(); } else { play(); } };
+$("#reset").onclick = reset;
+let allOpen = false;
+$("#expandAll").onclick = () => { allOpen = !allOpen; steps.forEach((s) => s.classList.toggle("open", allOpen)); $("#expandAll").textContent = allOpen ? "Collapse all" : "Expand all"; };
+</script>
+</body>
+</html>
