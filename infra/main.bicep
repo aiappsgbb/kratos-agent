@@ -28,6 +28,9 @@ param vnetName string = ''
 param storageAccountName string = ''
 param aiGatewayName string = ''
 
+@description('Short project prefix prepended to generated resource names for easy identification (e.g. "luxoai" -> luxoai-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided.')
+param resourcePrefix string = 'luxoai'
+
 @description('Publisher email for the AI Gateway (APIM)')
 param apimPublisherEmail string = 'admin@${environmentName}.com'
 
@@ -47,6 +50,10 @@ param staticWebAppLocation string = 'eastus2'
 // ─── Resource Naming ───
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
+// Human-friendly project prefix for generated names. Hyphenated form for most
+// resources; hyphen-less lower-case form for storage/ACR (which disallow hyphens).
+var namePrefix = empty(resourcePrefix) ? '' : '${resourcePrefix}-'
+var namePrefixNoHyphen = empty(resourcePrefix) ? '' : toLower(resourcePrefix)
 var tags = { 'azd-env-name': environmentName, project: 'kratos-agent' }
 
 // ─── Resource Group ───
@@ -61,7 +68,7 @@ module network './modules/network.bicep' = {
   name: 'network'
   scope: rg
   params: {
-    name: !empty(vnetName) ? vnetName : '${abbrs.networkVirtualNetworks}${resourceToken}'
+    name: !empty(vnetName) ? vnetName : '${namePrefix}${abbrs.networkVirtualNetworks}${resourceToken}'
     location: location
     tags: tags
   }
@@ -72,7 +79,7 @@ module logAnalytics './modules/log-analytics.bicep' = {
   name: 'log-analytics'
   scope: rg
   params: {
-    name: !empty(logAnalyticsName) ? logAnalyticsName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
+    name: !empty(logAnalyticsName) ? logAnalyticsName : '${namePrefix}${abbrs.operationalInsightsWorkspaces}${resourceToken}'
     location: location
     tags: tags
   }
@@ -83,7 +90,7 @@ module appInsights './modules/app-insights.bicep' = {
   name: 'app-insights'
   scope: rg
   params: {
-    name: !empty(appInsightsName) ? appInsightsName : '${abbrs.insightsComponents}${resourceToken}'
+    name: !empty(appInsightsName) ? appInsightsName : '${namePrefix}${abbrs.insightsComponents}${resourceToken}'
     location: location
     tags: tags
     logAnalyticsWorkspaceId: logAnalytics.outputs.id
@@ -95,7 +102,7 @@ module keyVault './modules/key-vault.bicep' = {
   name: 'key-vault'
   scope: rg
   params: {
-    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
+    name: !empty(keyVaultName) ? keyVaultName : '${namePrefix}${abbrs.keyVaultVaults}${resourceToken}'
     location: location
     tags: tags
     principalId: principalId
@@ -109,7 +116,7 @@ module cosmosDb './modules/cosmos-db.bicep' = {
   name: 'cosmos-db'
   scope: rg
   params: {
-    name: !empty(cosmosDbAccountName) ? cosmosDbAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+    name: !empty(cosmosDbAccountName) ? cosmosDbAccountName : '${namePrefix}${abbrs.documentDBDatabaseAccounts}${resourceToken}'
     location: location
     tags: tags
     subnetId: network.outputs.privateEndpointSubnetId
@@ -123,7 +130,7 @@ module aiSearch './modules/ai-search.bicep' = {
   name: 'ai-search'
   scope: rg
   params: {
-    name: !empty(aiSearchName) ? aiSearchName : '${abbrs.searchSearchServices}${resourceToken}'
+    name: !empty(aiSearchName) ? aiSearchName : '${namePrefix}${abbrs.searchSearchServices}${resourceToken}'
     location: location
     tags: tags
     subnetId: network.outputs.privateEndpointSubnetId
@@ -136,7 +143,7 @@ module aiFoundry './modules/ai-services.bicep' = {
   name: 'ai-foundry'
   scope: rg
   params: {
-    name: !empty(aiServicesName) ? aiServicesName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
+    name: !empty(aiServicesName) ? aiServicesName : '${namePrefix}${abbrs.cognitiveServicesAccounts}${resourceToken}'
     location: location
     tags: tags
   }
@@ -147,7 +154,7 @@ module bingSearch './modules/bing-search.bicep' = {
   name: 'bing-search'
   scope: rg
   params: {
-    name: !empty(bingSearchName) ? bingSearchName : '${abbrs.bingSearchAccounts}${resourceToken}'
+    name: !empty(bingSearchName) ? bingSearchName : '${namePrefix}${abbrs.bingSearchAccounts}${resourceToken}'
     tags: tags
     keyVaultName: keyVault.outputs.name
   }
@@ -158,7 +165,7 @@ module blobStorage './modules/blob-storage.bicep' = {
   name: 'blob-storage'
   scope: rg
   params: {
-    name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageAccounts}${resourceToken}'
+    name: !empty(storageAccountName) ? storageAccountName : '${namePrefixNoHyphen}${abbrs.storageAccounts}${resourceToken}'
     location: location
     tags: tags
   }
@@ -169,7 +176,7 @@ module containerRegistry './modules/container-registry.bicep' = {
   name: 'container-registry'
   scope: rg
   params: {
-    name: !empty(containerRegistryName) ? containerRegistryName : '${abbrs.containerRegistryRegistries}${resourceToken}'
+    name: !empty(containerRegistryName) ? containerRegistryName : '${namePrefixNoHyphen}${abbrs.containerRegistryRegistries}${resourceToken}'
     location: location
     tags: tags
   }
@@ -180,7 +187,7 @@ module containerAppsEnv './modules/container-apps-env.bicep' = {
   name: 'container-apps-env'
   scope: rg
   params: {
-    name: !empty(containerAppsEnvName) ? containerAppsEnvName : '${abbrs.appManagedEnvironments}${resourceToken}'
+    name: !empty(containerAppsEnvName) ? containerAppsEnvName : '${namePrefix}${abbrs.appManagedEnvironments}${resourceToken}'
     location: location
     tags: tags
     logAnalyticsWorkspaceId: logAnalytics.outputs.id
@@ -193,7 +200,7 @@ module agentService './modules/agent-service.bicep' = {
   name: 'agent-service'
   scope: rg
   params: {
-    name: !empty(agentServiceName) ? agentServiceName : '${abbrs.appContainerApps}agent-${resourceToken}'
+    name: !empty(agentServiceName) ? agentServiceName : '${namePrefix}${abbrs.appContainerApps}agent-${resourceToken}'
     location: location
     tags: tags
     containerAppsEnvId: containerAppsEnv.outputs.id
@@ -218,7 +225,7 @@ module aiGateway './modules/ai-gateway.bicep' = {
   name: 'ai-gateway'
   scope: rg
   params: {
-    name: !empty(aiGatewayName) ? aiGatewayName : '${abbrs.cognitiveServicesAccounts}${resourceToken}-gateway'
+    name: !empty(aiGatewayName) ? aiGatewayName : '${namePrefix}${abbrs.cognitiveServicesAccounts}${resourceToken}-gateway'
     location: location
     tags: tags
     publisherEmail: apimPublisherEmail
@@ -234,7 +241,7 @@ module staticWebApp './modules/static-web-app.bicep' = {
   name: 'static-web-app'
   scope: rg
   params: {
-    name: !empty(staticWebAppName) ? staticWebAppName : '${abbrs.webStaticSites}${resourceToken}'
+    name: !empty(staticWebAppName) ? staticWebAppName : '${namePrefix}${abbrs.webStaticSites}${resourceToken}'
     location: staticWebAppLocation
     tags: tags
   }
@@ -288,7 +295,7 @@ module oboMcpServer './modules/obo-mcp-server.bicep' = {
   name: 'obo-mcp-server'
   scope: rg
   params: {
-    name: '${abbrs.appContainerApps}obo-${resourceToken}'
+    name: '${namePrefix}${abbrs.appContainerApps}obo-${resourceToken}'
     location: location
     tags: tags
     containerAppsEnvId: containerAppsEnv.outputs.id

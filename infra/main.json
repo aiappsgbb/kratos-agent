@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.43.1.21952",
-      "templateHash": "470227924418281638"
+      "templateHash": "7976651476715481717"
     }
   },
   "parameters": {
@@ -87,6 +87,13 @@
       "type": "string",
       "defaultValue": ""
     },
+    "resourcePrefix": {
+      "type": "string",
+      "defaultValue": "luxoai",
+      "metadata": {
+        "description": "Short project prefix prepended to generated resource names for easy identification (e.g. \"luxoai\" -> luxoai-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided."
+      }
+    },
     "apimPublisherEmail": {
       "type": "string",
       "defaultValue": "[format('admin@{0}.com', parameters('environmentName'))]",
@@ -136,6 +143,8 @@
     },
     "abbrs": "[variables('$fxv#0')]",
     "resourceToken": "[toLower(uniqueString(subscription().id, parameters('environmentName'), parameters('location')))]",
+    "namePrefix": "[if(empty(parameters('resourcePrefix')), '', format('{0}-', parameters('resourcePrefix')))]",
+    "namePrefixNoHyphen": "[if(empty(parameters('resourcePrefix')), '', toLower(parameters('resourcePrefix')))]",
     "tags": {
       "azd-env-name": "[parameters('environmentName')]",
       "project": "kratos-agent"
@@ -160,7 +169,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('vnetName'))), createObject('value', parameters('vnetName')), createObject('value', format('{0}{1}', variables('abbrs').networkVirtualNetworks, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('vnetName'))), createObject('value', parameters('vnetName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').networkVirtualNetworks, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -273,7 +282,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('logAnalyticsName'))), createObject('value', parameters('logAnalyticsName')), createObject('value', format('{0}{1}', variables('abbrs').operationalInsightsWorkspaces, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('logAnalyticsName'))), createObject('value', parameters('logAnalyticsName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').operationalInsightsWorkspaces, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -354,7 +363,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('appInsightsName'))), createObject('value', parameters('appInsightsName')), createObject('value', format('{0}{1}', variables('abbrs').insightsComponents, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('appInsightsName'))), createObject('value', parameters('appInsightsName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').insightsComponents, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -452,7 +461,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('keyVaultName'))), createObject('value', parameters('keyVaultName')), createObject('value', format('{0}{1}', variables('abbrs').keyVaultVaults, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('keyVaultName'))), createObject('value', parameters('keyVaultName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').keyVaultVaults, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -641,7 +650,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('cosmosDbAccountName'))), createObject('value', parameters('cosmosDbAccountName')), createObject('value', format('{0}{1}', variables('abbrs').documentDBDatabaseAccounts, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('cosmosDbAccountName'))), createObject('value', parameters('cosmosDbAccountName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').documentDBDatabaseAccounts, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -1001,7 +1010,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('aiSearchName'))), createObject('value', parameters('aiSearchName')), createObject('value', format('{0}{1}', variables('abbrs').searchSearchServices, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('aiSearchName'))), createObject('value', parameters('aiSearchName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').searchSearchServices, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -1191,7 +1200,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('aiServicesName'))), createObject('value', parameters('aiServicesName')), createObject('value', format('{0}{1}', variables('abbrs').cognitiveServicesAccounts, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('aiServicesName'))), createObject('value', parameters('aiServicesName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').cognitiveServicesAccounts, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -1374,7 +1383,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('bingSearchName'))), createObject('value', parameters('bingSearchName')), createObject('value', format('{0}{1}', variables('abbrs').bingSearchAccounts, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('bingSearchName'))), createObject('value', parameters('bingSearchName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').bingSearchAccounts, variables('resourceToken'))))]",
           "tags": {
             "value": "[variables('tags')]"
           },
@@ -1469,7 +1478,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('storageAccountName'))), createObject('value', parameters('storageAccountName')), createObject('value', format('{0}{1}', variables('abbrs').storageAccounts, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('storageAccountName'))), createObject('value', parameters('storageAccountName')), createObject('value', format('{0}{1}{2}', variables('namePrefixNoHyphen'), variables('abbrs').storageAccounts, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -1589,7 +1598,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('containerRegistryName'))), createObject('value', parameters('containerRegistryName')), createObject('value', format('{0}{1}', variables('abbrs').containerRegistryRegistries, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('containerRegistryName'))), createObject('value', parameters('containerRegistryName')), createObject('value', format('{0}{1}{2}', variables('namePrefixNoHyphen'), variables('abbrs').containerRegistryRegistries, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -1674,7 +1683,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('containerAppsEnvName'))), createObject('value', parameters('containerAppsEnvName')), createObject('value', format('{0}{1}', variables('abbrs').appManagedEnvironments, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('containerAppsEnvName'))), createObject('value', parameters('containerAppsEnvName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').appManagedEnvironments, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -1787,7 +1796,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('agentServiceName'))), createObject('value', parameters('agentServiceName')), createObject('value', format('{0}agent-{1}', variables('abbrs').appContainerApps, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('agentServiceName'))), createObject('value', parameters('agentServiceName')), createObject('value', format('{0}{1}agent-{2}', variables('namePrefix'), variables('abbrs').appContainerApps, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -2179,7 +2188,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('aiGatewayName'))), createObject('value', parameters('aiGatewayName')), createObject('value', format('{0}{1}-gateway', variables('abbrs').cognitiveServicesAccounts, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('aiGatewayName'))), createObject('value', parameters('aiGatewayName')), createObject('value', format('{0}{1}{2}-gateway', variables('namePrefix'), variables('abbrs').cognitiveServicesAccounts, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('location')]"
           },
@@ -2194,6 +2203,12 @@
           },
           "appInsightsInstrumentationKey": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights'), '2025-04-01').outputs.instrumentationKey.value]"
+          },
+          "aiServicesEndpoint": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-foundry'), '2025-04-01').outputs.endpoint.value]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'log-analytics'), '2025-04-01').outputs.id.value]"
           }
         },
         "template": {
@@ -2203,7 +2218,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.43.1.21952",
-              "templateHash": "10683557007499849765"
+              "templateHash": "17962970171479666544"
             }
           },
           "parameters": {
@@ -2250,6 +2265,18 @@
               "metadata": {
                 "description": "Application Insights instrumentation key"
               }
+            },
+            "aiServicesEndpoint": {
+              "type": "string",
+              "metadata": {
+                "description": "AI Services (Foundry) account endpoint, e.g. https://acct.cognitiveservices.azure.com/ (trailing slash expected)"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics workspace resource ID — destination for the GenAI gateway LLM logs (ApiManagementGatewayLlmLog)."
+              }
             }
           },
           "resources": [
@@ -2276,6 +2303,43 @@
               }
             },
             {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]",
+              "name": "apim-to-law",
+              "properties": {
+                "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+                "logAnalyticsDestinationType": "Dedicated",
+                "logs": [
+                  {
+                    "categoryGroup": "allLogs",
+                    "enabled": true
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ApiManagement/service/loggers",
+              "apiVersion": "2024-06-01-preview",
+              "name": "[format('{0}/{1}', parameters('name'), 'azuremonitor')]",
+              "properties": {
+                "loggerType": "azureMonitor",
+                "isBuffered": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
+              ]
+            },
+            {
               "type": "Microsoft.ApiManagement/service/loggers",
               "apiVersion": "2024-06-01-preview",
               "name": "[format('{0}/{1}', parameters('name'), 'appinsights')]",
@@ -2291,19 +2355,132 @@
               ]
             },
             {
-              "type": "Microsoft.ApiManagement/service/diagnostics",
+              "type": "Microsoft.ApiManagement/service/backends",
               "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'applicationinsights')]",
+              "name": "[format('{0}/{1}', parameters('name'), 'aoai-foundry')]",
               "properties": {
-                "loggerId": "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'appinsights')]",
+                "description": "Azure AI Services (Foundry) OpenAI endpoint",
+                "protocol": "http",
+                "url": "[format('{0}openai', parameters('aiServicesEndpoint'))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ApiManagement/service/apis",
+              "apiVersion": "2024-06-01-preview",
+              "name": "[format('{0}/{1}', parameters('name'), 'aoai')]",
+              "properties": {
+                "displayName": "Azure OpenAI (Foundry)",
+                "description": "Chat completions passthrough to the AI Services account, MI-authenticated. Fronts the hosted agent LLM calls so prompts + completions are captured in the GenAI gateway log.",
+                "path": "openai",
+                "protocols": [
+                  "https"
+                ],
+                "subscriptionRequired": false,
+                "serviceUrl": "[format('{0}openai', parameters('aiServicesEndpoint'))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ApiManagement/service/apis/operations",
+              "apiVersion": "2024-06-01-preview",
+              "name": "[format('{0}/{1}/{2}', parameters('name'), 'aoai', 'chat-completions')]",
+              "properties": {
+                "displayName": "Create chat completion",
+                "method": "POST",
+                "urlTemplate": "/deployments/{deployment-id}/chat/completions",
+                "templateParameters": [
+                  {
+                    "name": "deployment-id",
+                    "description": "Model deployment name",
+                    "type": "string",
+                    "required": true
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('name'), 'aoai')]"
+              ]
+            },
+            {
+              "type": "Microsoft.ApiManagement/service/apis/policies",
+              "apiVersion": "2024-06-01-preview",
+              "name": "[format('{0}/{1}/{2}', parameters('name'), 'aoai', 'policy')]",
+              "properties": {
+                "format": "rawxml",
+                "value": "<policies>\n  <inbound>\n    <base />\n    <set-backend-service backend-id=\"aoai-foundry\" />\n    <authentication-managed-identity resource=\"https://cognitiveservices.azure.com\" />\n  </inbound>\n  <backend>\n    <forward-request timeout=\"240\" buffer-response=\"false\" />\n  </backend>\n  <outbound>\n    <base />\n  </outbound>\n  <on-error>\n    <base />\n  </on-error>\n</policies>"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('name'), 'aoai')]",
+                "[resourceId('Microsoft.ApiManagement/service/backends', parameters('name'), 'aoai-foundry')]"
+              ]
+            },
+            {
+              "type": "Microsoft.ApiManagement/service/apis/diagnostics",
+              "apiVersion": "2024-06-01-preview",
+              "name": "[format('{0}/{1}/{2}', parameters('name'), 'aoai', 'azuremonitor')]",
+              "properties": {
+                "alwaysLog": "allErrors",
+                "verbosity": "verbose",
                 "logClientIp": true,
+                "loggerId": "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'azuremonitor')]",
                 "sampling": {
                   "samplingType": "fixed",
-                  "percentage": 100
+                  "percentage": "[json('100')]"
+                },
+                "largeLanguageModel": {
+                  "logs": "enabled",
+                  "requests": {
+                    "messages": "all",
+                    "maxSizeInBytes": 262144
+                  },
+                  "responses": {
+                    "messages": "all",
+                    "maxSizeInBytes": 262144
+                  }
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]",
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('name'), 'aoai')]",
+                "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'azuremonitor')]"
+              ]
+            },
+            {
+              "type": "Microsoft.ApiManagement/service/apis/diagnostics",
+              "apiVersion": "2024-06-01-preview",
+              "name": "[format('{0}/{1}/{2}', parameters('name'), 'aoai', 'applicationinsights')]",
+              "properties": {
+                "alwaysLog": "allErrors",
+                "httpCorrelationProtocol": "W3C",
+                "logClientIp": true,
+                "loggerId": "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'appinsights')]",
+                "metrics": true,
+                "verbosity": "verbose",
+                "sampling": {
+                  "samplingType": "fixed",
+                  "percentage": "[json('100')]"
+                },
+                "frontend": {
+                  "request": {
+                    "body": {
+                      "bytes": 8192
+                    }
+                  }
+                },
+                "backend": {
+                  "request": {
+                    "body": {
+                      "bytes": 8192
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('name'), 'aoai')]",
                 "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'appinsights')]"
               ]
             }
@@ -2320,12 +2497,18 @@
             "gatewayUrl": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.ApiManagement/service', parameters('name')), '2024-06-01-preview').gatewayUrl]"
+            },
+            "principalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ApiManagement/service', parameters('name')), '2024-06-01-preview', 'full').identity.principalId]"
             }
           }
         }
       },
       "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-foundry')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'log-analytics')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', format('rg-{0}', parameters('environmentName')))]"
       ]
     },
@@ -2340,7 +2523,7 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "name": "[if(not(empty(parameters('staticWebAppName'))), createObject('value', parameters('staticWebAppName')), createObject('value', format('{0}{1}', variables('abbrs').webStaticSites, variables('resourceToken'))))]",
+          "name": "[if(not(empty(parameters('staticWebAppName'))), createObject('value', parameters('staticWebAppName')), createObject('value', format('{0}{1}{2}', variables('namePrefix'), variables('abbrs').webStaticSites, variables('resourceToken'))))]",
           "location": {
             "value": "[parameters('staticWebAppLocation')]"
           },
@@ -2996,7 +3179,7 @@
         "mode": "Incremental",
         "parameters": {
           "name": {
-            "value": "[format('{0}obo-{1}', variables('abbrs').appContainerApps, variables('resourceToken'))]"
+            "value": "[format('{0}{1}obo-{2}', variables('namePrefix'), variables('abbrs').appContainerApps, variables('resourceToken'))]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -3309,6 +3492,9 @@
           },
           "principalId": {
             "value": "[parameters('principalId')]"
+          },
+          "apimPrincipalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway'), '2025-04-01').outputs.principalId.value]"
           }
         },
         "template": {
@@ -3318,7 +3504,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.43.1.21952",
-              "templateHash": "4246901981803907543"
+              "templateHash": "12082248348791853156"
             }
           },
           "parameters": {
@@ -3391,6 +3577,13 @@
               "metadata": {
                 "description": "Deploying user principal ID"
               }
+            },
+            "apimPrincipalId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "APIM (AI gateway) system-assigned principal ID — granted OpenAI User so APIM can MI-authenticate to the AI Services backend it fronts."
+              }
             }
           },
           "variables": {
@@ -3457,6 +3650,18 @@
               "properties": {
                 "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAIUser'))]",
                 "principalId": "[parameters('agentServicePrincipalId')]",
+                "principalType": "ServicePrincipal"
+              }
+            },
+            {
+              "condition": "[not(empty(parameters('apimPrincipalId')))]",
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('aiServicesName'))]",
+              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('aiServicesName')), parameters('apimPrincipalId'), variables('cognitiveServicesOpenAIUser'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAIUser'))]",
+                "principalId": "[parameters('apimPrincipalId')]",
                 "principalType": "ServicePrincipal"
               }
             },
@@ -3606,6 +3811,7 @@
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'agent-service')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-foundry')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-search')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'blob-storage')]",
