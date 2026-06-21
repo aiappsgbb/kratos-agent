@@ -59,10 +59,17 @@ def get_my_profile(ctx: Context) -> dict:
         profile = fetch_my_profile(token)
         logger.info("get_my_profile: returned profile for upn=%s", profile.get("userPrincipalName"))
         # Full (non-sensitive) projection at INFO so demos/observability can show
-        # exactly what Graph returned — including graph-only proof fields like
-        # graphRequestId that are absent from the access token.
+        # exactly what Graph returned — including the live profile photo + the
+        # graph-only proof fields (graphRequestId, account/password dates) that
+        # are absent from the access token. The report harness reads this line.
         logger.info("get_my_profile result: %s", json.dumps(profile, default=str))
-        return profile
+        # The 48x48 photo is a base64 data URI — useful for the report (captured
+        # from the log above) but noise for the model, which might echo the blob.
+        # Hand the model everything EXCEPT the raw image bytes.
+        model_view = {k: v for k, v in profile.items() if k != "photoDataUri"}
+        if "photoDataUri" in profile:
+            model_view["hasProfilePhoto"] = True
+        return model_view
     except TokenValidationError as exc:
         # Do not leak the token; surface a clean, actionable error.
         logger.warning("get_my_profile: token rejected: %s", exc)

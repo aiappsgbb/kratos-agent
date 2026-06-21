@@ -102,4 +102,7 @@ writeFileSync(OUT, JSON.stringify(out, null, 2));
 console.error(
   `[capture] token=${capturedToken ? "captured" : "MISSING"} keys=[${capturedKeys}] tokenLeak=${out.tokenVisibleOnPage} -> ${OUT}`,
 );
-await browser.close().catch(() => undefined);
+// NB: do NOT close the browser — this is a CDP-attached Edge owned by the
+// operator. Just exit; the process exit drops our CDP connection cleanly
+// without tearing down their tabs/session.
+process.exit(0);

@@ -13,30 +13,41 @@ It is the "explain + prove" companion to the `obo-identity-proof` skill (which
 
 `out/report.html` — open it or share the file. It contains:
 
-1. **The 5 real hops** (interactive stepper, click to expand the real payload,
-   or press **Play** to auto-advance):
-   1. Browser → Backend: `POST /api/agent/chat` with the user token in the body
+1. **A numbered ①–⑤ flow diagram** at the top that maps 1:1 to the detail steps
+   below — click a node (or use **Prev / Next**) to jump to that step. Manual
+   step-through (no auto-play), so each hop is readable at a demo pace.
+2. **The 5 hops**, including the **LLM tool-call round-trip**:
+   1. You → Backend: `POST /api/agent/chat` with the user token in the body
       under `mcpAccessTokens` (token redacted in the report).
    2. Backend → **Foundry Invocations endpoint** (directly on the AI Services
       resource — **no APIM** in this path).
-   3. Hosted agent injects the token as the `graph-obo` MCP server's
-      `Authorization` header (shown via the keys-only `kratos_diag` diagnostics).
-   4. OBO server validates + performs the On-Behalf-Of exchange (real server logs).
-   5. Graph `/me` 200 → the tool result.
-2. **Proof panel** — the killer contrast:
-   - **In the token (JWT):** `aud`, `scp`, `oid`, `name`, `preferred_username`…
-     (anyone holding the token can read these, so they alone prove nothing).
-   - **Only Graph can return:** `graphRequestId` (a correlation id *Graph*
-     generated), `fetchedAtUtc`, `department`, `preferredLanguage`,
-     `mobilePhone`, `jobTitle`… — **not present in the token**, so a correct
-     answer can only come from a live delegated Graph call.
+   3. **Agent ↔ LLM** — the model is sent your question + the available tools and
+      replies with a tool call (`graph-obo-get_my_profile`). Shown as request +
+      response in the OpenAI chat-completions shape (assembled from the real
+      prompt, tool schema and tool call).
+   4. **Agent → OBO MCP → Graph** — token injected as the server's header
+      (keys-only `kratos_diag`), On-Behalf-Of exchange (real server logs), and the
+      live `/me` tool result.
+   5. **Agent ↔ LLM → You** — the tool result goes back to the model, which
+      streams the final answer.
+3. **Proof panel** — persona-first:
+   - **This is really you** — your live directory profile (`jobTitle`,
+     `department`, `officeLocation`, `preferredLanguage`, `givenName`, `surname`)
+     plus your live **profile photo**. These can never appear in an access token
+     (job/dept/office aren't even on the optional-claims list), so they prove a
+     live delegated Graph read. A `null` field is shown as genuinely empty, not
+     an error.
+   - **What the login token contains:** `aud`, `scp`, `oid`, `name`,
+     `preferred_username` — identity only.
+   - **Technical proof of a live call:** `graphRequestId` (a correlation id
+     *Graph* stamped on this response) + `fetchedAtUtc`.
    - **oid binding:** `token.oid == graph./me.id` (dispositive — Graph `/me` only
      resolves in a delegated user context).
 
-> Why the Graph-only fields matter: the original demo reported `displayName` /
+> Why the persona fields matter: the original demo reported `displayName` /
 > `userPrincipalName` / `oid`, which all live **in the token** — a skeptic could
-> claim the model just decoded the JWT. The Graph-issued `request-id` plus
-> profile fields the token never carries close that loophole.
+> claim the model just decoded the JWT. Job title / department / office (and the
+> photo) close that loophole in a way anyone can grasp at a glance.
 
 ## Architecture note (important, and a correction)
 

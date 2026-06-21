@@ -120,6 +120,44 @@ button.btn.primary:hover { background: var(--cp-accent-hover); color: var(--cp-a
 h2.section { font-size: 1.05rem; margin: 34px 0 12px; display: flex; align-items: center; gap: 9px; }
 h2.section .num { color: var(--cp-accent); }
 
+/* Flow diagram */
+.flow { display: flex; align-items: stretch; gap: 0; flex-wrap: nowrap; overflow-x: auto; padding: 6px 2px 10px; }
+.flow-node {
+  flex: 1 1 0; min-width: 110px; background: var(--cp-surface); border: 1px solid var(--cp-border);
+  border-radius: 12px; padding: 12px 10px 11px; text-align: center; cursor: pointer; position: relative;
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+.flow-node:hover { border-color: var(--cp-accent); transform: translateY(-1px); }
+.flow-node.active { border-color: var(--cp-accent); box-shadow: 0 0 0 3px var(--cp-accent-soft); }
+.flow-node .fn-badge {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 6px;
+  font-size: 0.8rem; font-weight: 700; background: var(--cp-surface-soft); border: 1px solid var(--cp-border-strong);
+  color: var(--cp-text-muted);
+}
+.flow-node.active .fn-badge, .flow-node.done .fn-badge { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+.flow-node .fn-label { font-weight: 600; font-size: 0.9rem; line-height: 1.2; }
+.flow-node .fn-sub { font-size: 0.72rem; color: var(--cp-text-soft); margin-top: 3px; }
+.flow-arrow { flex: 0 0 auto; display: grid; place-items: center; color: var(--cp-accent); font-size: 1.1rem; padding: 0 4px; align-self: center; }
+@media (max-width: 720px) { .flow-node .fn-sub { display: none; } .flow-node { min-width: 84px; } }
+
+/* Persona proof */
+.persona-card { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; }
+@media (max-width: 560px) { .persona-card { grid-template-columns: 1fr; } }
+.avatar {
+  width: 96px; height: 96px; border-radius: 16px; object-fit: cover; border: 2px solid var(--cp-accent);
+  background: var(--cp-surface-soft); display: grid; place-items: center; color: var(--cp-text-soft); font-size: 0.7rem; text-align: center;
+}
+.persona-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+@media (max-width: 560px) { .persona-list { grid-template-columns: 1fr; } }
+.persona-item { padding: 7px 0; border-bottom: 1px dashed var(--cp-border); }
+.persona-item .pl { font-size: 0.72rem; color: var(--cp-text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.persona-item .pv { font-size: 0.98rem; font-weight: 600; margin-top: 2px; }
+.persona-item .pv.null { color: var(--cp-text-soft); font-weight: 400; font-style: italic; }
+.null-note { font-size: 0.82rem; color: var(--cp-text-muted); margin-top: 12px; }
+
+/* Step blocks (multiple labelled payloads) */
+.block-label { font-size: 0.78rem; font-weight: 600; color: var(--cp-accent); margin: 12px 0 5px; }
+
 /* Steps */
 .steps { display: flex; flex-direction: column; gap: 12px; }
 .step {
@@ -193,26 +231,41 @@ footer { margin-top: 36px; font-size: 0.78rem; color: var(--cp-text-soft); text-
       <div id="prompt"></div>
     </div>
     <div class="controls">
-      <button class="btn primary" id="play">▶ Play walkthrough</button>
+      <button class="btn" id="prev">‹ Prev</button>
+      <button class="btn primary" id="next">Next step ›</button>
       <button class="btn" id="reset">Reset</button>
       <button class="btn" id="expandAll">Expand all</button>
       <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
     </div>
   </header>
 
+  <div class="flow" id="flow"></div>
+
   <h2 class="section"><span class="num">1.</span> The journey of one request</h2>
   <div class="steps" id="steps"></div>
 
-  <h2 class="section"><span class="num">2.</span> Proof it ran as the user (not the agent), live from Graph</h2>
-  <div class="proof-grid">
+  <h2 class="section"><span class="num">2.</span> Proof it ran as you (not the agent), live from Microsoft Graph</h2>
+  <div class="proof-card graph" style="border-top:3px solid var(--cp-success)">
+    <h3 style="margin:0 0 4px">This is really you — your live directory profile</h3>
+    <p class="hint" style="margin:0 0 14px">A login token proves <i>who you are</i>, but it never carries your job title, department or office — those aren't even available as token claims. They came back from Microsoft Graph, fetched live <b>on your behalf</b> — so they prove the call ran as you.</p>
+    <div class="persona-card">
+      <div id="avatarWrap"></div>
+      <div>
+        <div class="persona-list" id="personaList"></div>
+        <div class="null-note" id="nullNote"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="proof-grid" style="margin-top:14px">
     <div class="proof-card token">
-      <h3>① In the access token (JWT)</h3>
-      <p class="hint">Anyone holding the token can read these — so they alone do <b>not</b> prove a Graph call happened.</p>
+      <h3>What the login token contains</h3>
+      <p class="hint">Only identity claims. Anyone holding the token can read these — they don't prove a Graph call happened.</p>
       <div id="jwtFields"></div>
     </div>
     <div class="proof-card graph">
-      <h3>② Only Microsoft Graph can return these</h3>
-      <p class="hint">Not present in the token. A correct answer here can only come from a <b>live</b> delegated Graph call.</p>
+      <h3>Technical proof of a live call</h3>
+      <p class="hint">Stamped by Graph on this exact response — impossible to derive from the token.</p>
       <div id="graphFields"></div>
     </div>
   </div>
@@ -231,78 +284,133 @@ footer { margin-top: 36px; font-size: 0.78rem; color: var(--cp-text-soft); text-
 /* eslint-disable */
 const SAMPLE = {
   "target": "cloud",
-  "capturedAt": "2026-06-20 21:07 UTC",
-  "prompt": "Use your Microsoft Graph profile tool (graph-obo) to look me up. Strictly from the tool result, report for the signed-in user as a simple list: displayName, userPrincipalName, Entra object id (id), department, jobTitle, officeLocation, preferredLanguage, givenName, surname, and the tool's graphRequestId and fetchedAtUtc values.",
+  "capturedAt": "2026-06-21 07:04 UTC",
+  "prompt": "Use your Microsoft Graph profile tool (graph-obo) to look me up. Report displayName, jobTitle, department, officeLocation, preferredLanguage, givenName, surname, userPrincipalName, id, whether I have a profile photo, graphRequestId and fetchedAtUtc — strictly from the tool result.",
   "endpoints": {
     "frontend": "https://victorious-rock-036b9810f.7.azurestaticapps.net",
     "backend": "https://ca-agent-nvlnwt2b3d4bw.whitesea-2db72c77.swedencentral.azurecontainerapps.io",
     "oboMcp": "https://ca-obo-nvlnwt2b3d4bw.whitesea-2db72c77.swedencentral.azurecontainerapps.io/mcp",
     "foundryInvocations": "https://oai-nvlnwt2b3d4bw.cognitiveservices.azure.com/api/projects/oai-nvlnwt2b3d4bw-proj/agents/kratos-agent/endpoint/protocols/invocations"
   },
-  "steps": [
+  "diagram": [
     {
-      "title": "Browser acquires a delegated token & sends it in the request body",
-      "from": "MSAL.js (browser)",
-      "to": "Backend · ca-agent-nvlnwt2b3d4bw",
-      "summary": "POST /api/agent/chat — the user's access token rides in the JSON body under mcpAccessTokens, never in prompt text.",
-      "detailLabel": "POST /api/agent/chat (body, token redacted)",
-      "detail": "{\n  \"conversationId\": \"6eae33db-74c5-4bb0-bc75-f1d77b7638cc\",\n  \"message\": \"Use your Microsoft Graph profile tool (graph-obo) to look me up. Strictly from the tool result, report for the signed-in user as a simple list: displayName, userPrincipalName, Entra object id (id), department, jobTitle, officeLocation, preferredLanguage, givenName, surname, and the tool's graphRequestId and fetchedAtUtc values.\",\n  \"mcpAccessTokens\": {\n    \"graph-obo\": \"eyJ0eXAiOiJKV1QiLCJhbGci…<header.payload.signature, 692 chars, redacted>\"\n  }\n}",
-      "note": "The token's audience is the <b>OBO server app</b> (<code>aud=bec3169c-c01e-4acc-9974-bd9271f9bfae</code>) with scope <code>scp=access_as_user</code> — it is <b>not</b> a Graph token. The OBO server will exchange it."
+      "n": 1,
+      "label": "You",
+      "sub": "+ delegated token"
     },
     {
-      "title": "Backend forwards the body to the Foundry Invocations endpoint",
-      "from": "Backend · ca-agent-nvlnwt2b3d4bw",
-      "to": "Foundry project (Invocations)",
-      "summary": "Straight to the Foundry project endpoint on the AI Services resource — no APIM in this path.",
-      "detailLabel": "POST …/agents/kratos-agent/endpoint/protocols/invocations",
-      "detail": "https://oai-nvlnwt2b3d4bw.cognitiveservices.azure.com/api/projects/oai-nvlnwt2b3d4bw-proj/agents/kratos-agent/endpoint/protocols/invocations\n\nAuthorization: Bearer <backend managed-identity token for the Foundry resource>\nx-ms-* / x-agent-session-id: <warm-pool session routing>\n\n// The mcpAccessTokens body field is preserved by Foundry's own\n// Invocations gateway and reaches the sandbox (verified via kratos_diag).",
-      "note": "<b>The &quot;gateway&quot; here is Foundry's own Invocations gateway</b> (warm-pool / session manager), <b>not</b> APIM. The APIM AI-gateway fronts LLM calls only, and in this deployment <code>FOUNDRY_ENDPOINT</code> points directly at the AI Services resource, so APIM is not in the live path."
+      "n": 2,
+      "label": "Backend",
+      "sub": "→ Foundry agent"
     },
     {
-      "title": "Hosted agent receives the token & injects it as the MCP server's Authorization header",
-      "from": "Foundry sandbox (hosted agent)",
-      "to": "graph-obo MCP server",
-      "summary": "The SDK attaches the per-user bearer ONLY as the graph-obo server's HTTP header — never shown to the model, never logged.",
-      "detailLabel": "kratos_diag (keys-only diagnostics emitted by the hosted agent)",
-      "detail": "{\n  \"event\": \"kratos_diag\",\n  \"data\": {\n    \"mcp_token_body_keys\": [\n      \"graph-obo\"\n    ],\n    \"mcp_token_effective_keys\": [\n      \"graph-obo\"\n    ],\n    \"obo_env_url_present\": true,\n    \"obo_env_name\": \"graph-obo\"\n  }\n}",
-      "note": "<code>obo_env_url_present:true</code> means the sandbox has <code>OBO_MCP_SERVER_MCP_URL</code> (declared in <code>agent.yaml</code>), so the SDK auto-attaches the <code>graph-obo</code> tool. When this was empty, the tool never attached and the OBO server saw zero traffic."
+      "n": 3,
+      "label": "LLM",
+      "sub": "decides: call tool"
     },
     {
-      "title": "OBO server validates the token & performs the On-Behalf-Of exchange",
-      "from": "graph-obo MCP · ca-obo-nvlnwt2b3d4bw",
-      "to": "Microsoft Entra (token endpoint)",
-      "summary": "Validates audience/scope/tenant/client, then exchanges the user assertion for a Graph token (secret-less FIC→MI in cloud; client secret locally).",
-      "detailLabel": "OBO MCP server logs",
-      "detail": "INFO:azure.identity._internal.get_token_mixin:OnBehalfOfCredential.get_token succeeded\nINFO:httpx:HTTP Request: GET https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName,mail,jobTitle,officeLocation,department,preferredLanguage,mobilePhone,businessPhones,givenName,surname \"HTTP/1.1 200 OK\"\nINFO:obo-mcp-server:get_my_profile: returned profile for upn=arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\nINFO:obo-mcp-server:get_my_profile result: { … graphRequestId=1ec4e905-c861-4100-a64a-8685354f041c }",
-      "note": "Self-auth differs by environment only: <b>cloud</b> = managed-identity federated credential (no secret); <b>local</b> = a dev client secret on the same app registration. The user-token validation and the Graph call are identical."
+      "n": 4,
+      "label": "OBO → Graph",
+      "sub": "runs as YOU"
     },
     {
-      "title": "Graph /me returns the profile — as the signed-in user",
-      "from": "graph-obo MCP · ca-obo-nvlnwt2b3d4bw",
-      "to": "Microsoft Graph /v1.0/me",
-      "summary": "GET /me with the OBO Graph token → 200. The result carries fields that are NOT in the original token.",
-      "detailLabel": "Tool result returned to the agent",
-      "detail": "{\n  \"displayName\": \"Arlind Nocaj\",\n  \"userPrincipalName\": \"arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\",\n  \"mail\": null,\n  \"jobTitle\": null,\n  \"officeLocation\": null,\n  \"department\": null,\n  \"preferredLanguage\": null,\n  \"mobilePhone\": null,\n  \"businessPhones\": [],\n  \"givenName\": null,\n  \"surname\": null,\n  \"id\": \"d4552ae4-ad43-4122-8b29-e4214d945d8f\",\n  \"graphRequestId\": \"1ec4e905-c861-4100-a64a-8685354f041c\",\n  \"fetchedAtUtc\": \"2026-06-20T21:07:45Z\",\n  \"source\": \"microsoft-graph:/v1.0/me (delegated, on-behalf-of)\"\n}",
-      "note": "The presence of <code>graphRequestId</code> (a correlation id <b>Graph</b> generated) plus fields like <code>department</code>/<code>preferredLanguage</code> proves this is a live Graph response, not a decoded JWT."
+      "n": 5,
+      "label": "Answer",
+      "sub": "streamed back"
     }
   ],
-  "answer": "displayName: Arlind Nocaj\nuserPrincipalName: arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\nEntra object id (id): d4552ae4-ad43-4122-8b29-e4214d945d8f\ndepartment: null\njobTitle: null\nofficeLocation: null\npreferredLanguage: null\ngivenName: null\nsurname: null\ngraphRequestId: 1ec4e905-c861-4100-a64a-8685354f041c\nfetchedAtUtc: 2026-06-20T21:07:45Z",
+  "steps": [
+    {
+      "title": "You ask — your delegated token rides along in the request body",
+      "from": "Browser (MSAL.js)",
+      "to": "Backend · ca-agent-nvlnwt2b3d4bw",
+      "summary": "POST /api/agent/chat. Your Entra access token travels in the JSON body under mcpAccessTokens — never in the prompt, never as a header the model can see.",
+      "detailLabel": "POST /api/agent/chat (body — token redacted)",
+      "detail": "{\n  \"conversationId\": \"f6fc0185-e2e2-4cb4-b11a-6a229a689b65\",\n  \"message\": \"Use your Microsoft Graph profile tool (graph-obo) to look me up. Report displayName, jobTitle, department, officeLocation, preferredLanguage, givenName, surname, userPrincipalName, id, whether I have a profile photo, graphRequestId and fetchedAtUtc — strictly from the tool result.\",\n  \"mcpAccessTokens\": {\n    \"graph-obo\": \"eyJ0eXAiOiJKV1QiLCJhbGci…<header.payload.signature — 670 chars, redacted>\"\n  }\n}",
+      "note": "The token's audience is the <b>OBO server app</b> (<code>aud=bec3169c-c01e-4acc-9974-bd9271f9bfae</code>), scope <code>scp=access_as_user</code> — it is <b>not</b> a Graph token yet. The OBO server will exchange it."
+    },
+    {
+      "title": "Backend forwards it to the Foundry-hosted agent",
+      "from": "Backend · ca-agent-nvlnwt2b3d4bw",
+      "to": "Hosted agent (Foundry Invocations)",
+      "summary": "Straight to the Foundry project Invocations endpoint — no APIM in this path. The mcpAccessTokens body field is preserved and reaches the sandbox.",
+      "detailLabel": "POST …/agents/kratos-agent/endpoint/protocols/invocations",
+      "detail": "https://oai-nvlnwt2b3d4bw.cognitiveservices.azure.com/api/projects/oai-nvlnwt2b3d4bw-proj/agents/kratos-agent/endpoint/protocols/invocations\n\nAuthorization: Bearer <backend managed-identity token for the Foundry resource>\nx-agent-session-id: <warm-pool session routing>\n\n// Body carries the user's mcpAccessTokens through to the hosted agent.",
+      "note": "The &quot;gateway&quot; here is <b>Foundry's own Invocations gateway</b> (warm-pool / session manager), <b>not</b> APIM. The APIM AI-gateway fronts LLM calls only and is bypassed in this deployment."
+    },
+    {
+      "title": "The agent asks the model — and the model decides to call the tool",
+      "from": "Hosted agent ↔ LLM",
+      "to": "graph-obo tool selected",
+      "summary": "The agent sends the model your question plus the tools it has. The model replies with a tool call: run graph-obo-get_my_profile. (No arguments — you're identified by the attached token, not by prompt text.)",
+      "detailLabel": "The model round-trip",
+      "blocks": [
+        {
+          "label": "① Agent → LLM  (request: your message + available tools)",
+          "content": "{\n  \"model\": \"gpt-54 (Foundry-hosted via Copilot SDK)\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are the kratos agent. Use the available tools to answer about the signed-in user.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Use your Microsoft Graph profile tool (graph-obo) to look me up. Report displayName, jobTitle, department, officeLocation, preferredLanguage, givenName, surname, userPrincipalName, id, whether I have a profile photo, graphRequestId and fetchedAtUtc — strictly from the tool result.\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"graph-obo-get_my_profile\",\n        \"description\": \"Return the signed-in user's Microsoft 365 profile, fetched live from Microsoft Graph on behalf of the user.\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {},\n          \"required\": []\n        }\n      }\n    }\n  ],\n  \"tool_choice\": \"auto\"\n}"
+        },
+        {
+          "label": "② LLM → Agent  (response: “call graph-obo-get_my_profile”)",
+          "content": "{\n  \"role\": \"assistant\",\n  \"content\": null,\n  \"tool_calls\": [\n    {\n      \"id\": \"call_graph_obo_1\",\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"graph-obo-get_my_profile\",\n        \"arguments\": \"{}\"\n      }\n    }\n  ]\n}"
+        }
+      ],
+      "note": "This is the moment the agent decides to act. The model only chooses the tool — it never sees your token; the SDK injects that as the tool's HTTP header in the next step."
+    },
+    {
+      "title": "The agent runs the tool as YOU — On-Behalf-Of → Microsoft Graph",
+      "from": "Hosted agent → graph-obo MCP",
+      "to": "Microsoft Graph /v1.0/me",
+      "summary": "The SDK attaches your token as the graph-obo server's Authorization header. The server validates it, exchanges it On-Behalf-Of for a Graph token, and calls /me — so Graph answers as YOU.",
+      "detailLabel": "What happens inside the tool call",
+      "blocks": [
+        {
+          "label": "① Agent injects your token as the MCP server's header (keys-only diag)",
+          "content": "{\n  \"event\": \"kratos_diag\",\n  \"data\": {\n    \"mcp_token_effective_keys\": [\n      \"graph-obo\"\n    ],\n    \"obo_env_url_present\": true,\n    \"obo_env_name\": \"graph-obo\"\n  }\n}"
+        },
+        {
+          "label": "② OBO server: validate → On-Behalf-Of exchange → GET /me 200 (real logs)",
+          "content": "INFO:azure.identity._internal.get_token_mixin:OnBehalfOfCredential.get_token succeeded\nINFO:httpx:HTTP Request: GET https://graph.microsoft.com/v1.0/me?$select=id,displayName,userPrincipalName,mail,jobTitle,officeLocation,department,preferredLanguage,mobilePhone,businessPhones,givenName,surname \"HTTP/1.1 200 OK\"\nINFO:httpx:HTTP Request: GET https://graph.microsoft.com/v1.0/me/photos/48x48/$value \"HTTP/1.1 200 OK\"\nINFO:obo-mcp-server:get_my_profile: returned profile for upn=arlindnocaj@MngEnvMCAP039092.onmicrosoft.com"
+        },
+        {
+          "label": "③ Tool result handed back to the agent (your live profile)",
+          "content": "{\n  \"displayName\": \"Arlind Nocaj\",\n  \"userPrincipalName\": \"arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\",\n  \"mail\": null,\n  \"jobTitle\": \"CSA and Agent Whisperer\",\n  \"officeLocation\": \"Zürich\",\n  \"department\": \"Dep. Challenge The Agent\",\n  \"preferredLanguage\": \"en-US\",\n  \"mobilePhone\": null,\n  \"businessPhones\": [],\n  \"givenName\": \"Arlind\",\n  \"surname\": \"Nocaj\",\n  \"id\": \"d4552ae4-ad43-4122-8b29-e4214d945d8f\",\n  \"graphRequestId\": \"5a1c0ac4-27a4-4379-b355-1cd3c7158d48\",\n  \"fetchedAtUtc\": \"2026-06-21T07:04:05Z\",\n  \"source\": \"microsoft-graph:/v1.0/me (delegated, on-behalf-of)\",\n  \"photoDataUri\": \"data:image/jpeg;base64,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\"\n}"
+        }
+      ],
+      "note": "Self-auth differs by environment only: <b>cloud</b> = secret-less managed-identity federation; <b>local</b> = a dev client secret on the same app reg. The token validation and the Graph call are identical."
+    },
+    {
+      "title": "The model writes the answer — and you see it",
+      "from": "Hosted agent ↔ LLM",
+      "to": "Browser (streamed answer)",
+      "summary": "The tool result goes back to the model, which turns it into a human answer and streams it to you. The words below could only come from a live Graph call made on your behalf.",
+      "detailLabel": "The model round-trip (answer)",
+      "blocks": [
+        {
+          "label": "① Agent → LLM  (request: here is the tool result)",
+          "content": "{\n  \"role\": \"tool\",\n  \"tool_call_id\": \"call_graph_obo_1\",\n  \"name\": \"graph-obo-get_my_profile\",\n  \"content\": \"{\\n  \\\"displayName\\\": \\\"Arlind Nocaj\\\",\\n  \\\"userPrincipalName\\\": \\\"arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\\\",\\n  \\\"mail\\\": null,\\n  \\\"jobTitle\\\": \\\"CSA and Agent Whisperer\\\",\\n  \\\"officeLocation\\\": \\\"Zürich\\\",\\n  \\\"department\\\": \\\"Dep. Challenge The Agent\\\",\\n  \\\"preferredLanguage\\\": \\\"en-US\\\",\\n  \\\"mobilePhone\\\": null,\\n  \\\"businessPhones\\\": [],\\n  \\\"givenName\\\": \\\"Arlind\\\",\\n  \\\"surname\\\": \\\"Nocaj\\\",\\n  \\\"id\\\": \\\"d4552ae4-ad43-4122-8b29-e4214d945d8f\\\",\\n  \\\"graphRequestId\\\": \\\"5a1c0ac4-27a4-4379-b355-1cd3c7158d48\\\",\\n  \\\"fetchedAtUtc\\\": \\\"2026-06-21T07:04:05Z\\\",\\n  \\\"source\\\": \\\"microsoft-graph:/v1.0/me (delegated, on-behalf-of)\\\",\\n  \\\"photoDataUri\\\": \\\"<48x48 image data-uri, omitted>\\\"\\n}\"\n}"
+        },
+        {
+          "label": "② LLM → Agent → You  (final answer)",
+          "content": "{\n  \"role\": \"assistant\",\n  \"content\": \"displayName: Arlind Nocaj\\njobTitle: CSA and Agent Whisperer\\ndepartment: Dep. Challenge The Agent\\nofficeLocation: Zürich\\npreferredLanguage: en-US\\ngivenName: Arlind\\nsurname: Nocaj\\nuserPrincipalName: arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\\nEntra object id (id): d4552ae4-ad43-4122-8b29-e4214d945d8f\\nprofile photo: yes (returned by the tool)\\ngraphRequestId: 5a1c0ac4-27a4-4379-b355-1cd3c7158d48\\nfetchedAtUtc: 2026-06-21T07:04:05Z\"\n}"
+        }
+      ],
+      "note": "Everything in the answer that isn't your name/login came from <b>Microsoft Graph</b>, live, as you — see the proof below."
+    }
+  ],
+  "answer": "displayName: Arlind Nocaj\njobTitle: CSA and Agent Whisperer\ndepartment: Dep. Challenge The Agent\nofficeLocation: Zürich\npreferredLanguage: en-US\ngivenName: Arlind\nsurname: Nocaj\nuserPrincipalName: arlindnocaj@MngEnvMCAP039092.onmicrosoft.com\nEntra object id (id): d4552ae4-ad43-4122-8b29-e4214d945d8f\nprofile photo: yes (returned by the tool)\ngraphRequestId: 5a1c0ac4-27a4-4379-b355-1cd3c7158d48\nfetchedAtUtc: 2026-06-21T07:04:05Z",
+  "photoDataUri": "data:image/jpeg;base64,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",
   "proof": {
     "oidFromToken": "d4552ae4-ad43-4122-8b29-e4214d945d8f",
     "idFromGraph": "d4552ae4-ad43-4122-8b29-e4214d945d8f",
     "match": true,
     "jwtFields": [
       {
-        "k": "aud",
+        "k": "aud (who it's for)",
         "v": "bec3169c-c01e-4acc-9974-bd9271f9bfae"
       },
       {
-        "k": "scp",
+        "k": "scp (what it allows)",
         "v": "access_as_user"
-      },
-      {
-        "k": "azp (client app)",
-        "v": "f31799cd-b0a5-4055-b7f9-574c25ea0238"
       },
       {
         "k": "name",
@@ -313,29 +421,66 @@ const SAMPLE = {
         "v": "arlindnocaj@MngEnvMCAP039092.onmicrosoft.com"
       },
       {
-        "k": "oid",
+        "k": "oid (your Entra id)",
         "v": "d4552ae4-ad43-4122-8b29-e4214d945d8f"
-      },
-      {
-        "k": "tid",
-        "v": "f7d09a0b-c429-41ac-b105-9ce32d6e5358"
       }
     ],
-    "graphFields": [
+    "personaFields": [
+      {
+        "k": "jobTitle",
+        "label": "Job title",
+        "v": "CSA and Agent Whisperer"
+      },
+      {
+        "k": "department",
+        "label": "Department",
+        "v": "Dep. Challenge The Agent"
+      },
+      {
+        "k": "officeLocation",
+        "label": "Office",
+        "v": "Zürich"
+      },
+      {
+        "k": "preferredLanguage",
+        "label": "Preferred language",
+        "v": "en-US"
+      },
+      {
+        "k": "givenName",
+        "label": "First name",
+        "v": "Arlind"
+      },
+      {
+        "k": "surname",
+        "label": "Last name",
+        "v": "Nocaj"
+      },
+      {
+        "k": "mail",
+        "label": "Mail",
+        "v": null
+      }
+    ],
+    "technicalFields": [
       {
         "k": "graphRequestId",
-        "v": "1ec4e905-c861-4100-a64a-8685354f041c"
+        "v": "5a1c0ac4-27a4-4379-b355-1cd3c7158d48",
+        "hint": "a tracking id Microsoft Graph stamped on THIS response"
       },
       {
         "k": "fetchedAtUtc",
-        "v": "2026-06-20T21:07:45Z"
+        "v": "2026-06-21T07:04:05Z",
+        "hint": "the moment the live call happened"
       }
-    ]
+    ],
+    "nullNote": "A field shown as <b>null</b> isn't an error — it means that field is genuinely empty in the directory. The agent reports exactly what Graph returns, live; it never guesses or fills blanks."
   },
   "notes": {
     "apim": "<b>No APIM in the agent path.</b> Agent invocations go directly to the Foundry project endpoint (<code>…cognitiveservices.azure.com/api/projects/…/agents/kratos-agent/…/invocations</code>). The &quot;gateway&quot; in the logs is Foundry's own Invocations gateway (warm-pool/session manager). The APIM AI-gateway is an optional <b>LLM</b> governance layer; in this deployment <code>FOUNDRY_ENDPOINT</code> targets the AI Services resource directly, so APIM is provisioned but bypassed.",
-    "repro": "<b>Reproduce:</b> <code>cd .copilot/skills/obo-demo-walkthrough &amp;&amp; TARGET=cloud ./run.sh</code> &nbsp;·&nbsp; local: bring up <code>docker compose up</code> (adds the obo-mcp-server) then <code>TARGET=local ./run.sh</code>. Same proof, same HTML; only the OBO server's self-auth differs.",
-    "footer": "Generated by the <b>obo-demo-walkthrough</b> skill · target=cloud · 2026-06-20T21:10:19.069Z"
+    "llm": "The model round-trip (steps 3 &amp; 5) is shown in the OpenAI chat-completions shape, assembled from the <b>real</b> prompt, tool schema, tool call and result captured this run. The model only ever sees the tool's <i>result</i> — never your access token.",
+    "repro": "<b>Reproduce:</b> <code>cd .copilot/skills/obo-demo-walkthrough &amp;&amp; TARGET=cloud ./run.sh</code> &nbsp;·&nbsp; local: <code>docker compose up</code> then <code>TARGET=local ./run.sh</code>. Same proof, same HTML; only the OBO server's self-auth differs.",
+    "footer": "Generated by the <b>obo-demo-walkthrough</b> skill · target=cloud · 2026-06-21T07:06:15.817Z"
   }
 };
 const DATA = (window.__WALKTHROUGH__ || SAMPLE);
@@ -356,6 +501,19 @@ const esc = (s) => String(s == null ? "" : s).replace(/[&<>]/g, (m) => ({ "&": "
 })();
 $("#prompt").textContent = DATA.prompt || "";
 
+// Flow diagram (1:1 with steps)
+const flowRoot = $("#flow");
+(DATA.diagram || []).forEach((d, i, arr) => {
+  const node = el("div", "flow-node");
+  node.dataset.idx = i;
+  node.appendChild(el("div", "fn-badge", String(d.n != null ? d.n : i + 1)));
+  node.appendChild(el("div", "fn-label", esc(d.label)));
+  if (d.sub) node.appendChild(el("div", "fn-sub", esc(d.sub)));
+  node.onclick = () => focusStep(i, true);
+  flowRoot.appendChild(node);
+  if (i < arr.length - 1) flowRoot.appendChild(el("div", "flow-arrow", "→"));
+});
+
 // Steps
 const stepsRoot = $("#steps");
 (DATA.steps || []).forEach((s, i) => {
@@ -371,22 +529,46 @@ const stepsRoot = $("#steps");
   head.appendChild(el("span", "chev", "▶"));
   step.appendChild(head);
   const body = el("div", "step-body");
-  if (s.detailLabel) body.appendChild(el("div", "detail-label", esc(s.detailLabel)));
-  const pre = el("pre", "payload");
-  const copy = el("button", "copybtn", "copy");
-  copy.onclick = (e) => { e.stopPropagation(); navigator.clipboard && navigator.clipboard.writeText(s.detail || ""); copy.textContent = "copied"; setTimeout(()=>copy.textContent="copy",1200); };
-  pre.appendChild(copy);
-  pre.appendChild(document.createTextNode(s.detail || ""));
-  body.appendChild(pre);
+  // A step has either a single `detail` or multiple labelled `blocks`.
+  const blocks = s.blocks || (s.detail != null ? [{ label: s.detailLabel, content: s.detail }] : []);
+  blocks.forEach((blk) => {
+    if (blk.label) body.appendChild(el("div", "block-label", esc(blk.label)));
+    const pre = el("pre", "payload");
+    const copy = el("button", "copybtn", "copy");
+    copy.onclick = (e) => { e.stopPropagation(); navigator.clipboard && navigator.clipboard.writeText(blk.content || ""); copy.textContent = "copied"; setTimeout(()=>copy.textContent="copy",1200); };
+    pre.appendChild(copy);
+    pre.appendChild(document.createTextNode(blk.content || ""));
+    body.appendChild(pre);
+  });
   if (s.note) body.appendChild(el("div", "note", s.note));
   step.appendChild(body);
-  head.onclick = () => step.classList.toggle("open");
+  head.onclick = () => { step.classList.toggle("open"); syncFlow(i); };
   stepsRoot.appendChild(step);
 });
 
-// Proof — JWT fields
+// Proof — persona (hero) + login token + technical
 (() => {
   const p = DATA.proof || {};
+  // Avatar
+  const aw = $("#avatarWrap");
+  if (DATA.photoDataUri) {
+    const img = el("img", "avatar"); img.src = DATA.photoDataUri; img.alt = "Live profile photo from Microsoft Graph";
+    aw.appendChild(img);
+  } else {
+    aw.appendChild(el("div", "avatar", "live photo<br>(none set)"));
+  }
+  // Persona fields
+  const pl = $("#personaList");
+  (p.personaFields || []).forEach((f) => {
+    const item = el("div", "persona-item");
+    item.appendChild(el("div", "pl", esc(f.label || f.k)));
+    if (f.v == null) item.appendChild(el("div", "pv null", "null"));
+    else item.appendChild(el("div", "pv", esc(f.v)));
+    pl.appendChild(item);
+  });
+  $("#nullNote").innerHTML = p.nullNote || "";
+
+  // Login token fields
   const jr = $("#jwtFields");
   (p.jwtFields || []).forEach((f) => {
     const row = el("div", "kv");
@@ -394,16 +576,17 @@ const stepsRoot = $("#steps");
     row.appendChild(el("span", "v", esc(f.v)));
     jr.appendChild(row);
   });
+  // Technical proof fields
   const gr = $("#graphFields");
-  (p.graphFields || []).forEach((f) => {
+  (p.technicalFields || []).forEach((f) => {
     const row = el("div", "kv");
-    row.appendChild(el("span", "k", esc(f.k)));
+    row.appendChild(el("span", "k", `${esc(f.k)}${f.hint ? `<br><span style="font-weight:400;color:var(--cp-text-soft);text-transform:none;letter-spacing:0">${esc(f.hint)}</span>` : ""}`));
     row.appendChild(el("span", "v", esc(f.v)));
     gr.appendChild(row);
   });
   const mb = $("#matchBanner");
   if (p.match) {
-    mb.innerHTML = `<b style="color:var(--cp-success)">✓ Identity binding holds.</b> The token's <code>oid</code> equals the <code>id</code> Microsoft Graph <code>/me</code> returned through the tool — Graph <code>/me</code> only resolves in a delegated user context, so this is dispositive proof the OBO exchange ran for this exact person.<span class="eq">token.oid = ${esc(p.oidFromToken)}<br>graph.id  = ${esc(p.idFromGraph)}</span>`;
+    mb.innerHTML = `<b style="color:var(--cp-success)">✓ Identity binding holds.</b> The token's <code>oid</code> equals the <code>id</code> Microsoft Graph <code>/me</code> returned through the tool — Graph <code>/me</code> only resolves in a delegated user context, so this is dispositive proof the call ran for this exact person.<span class="eq">token.oid = ${esc(p.oidFromToken)}<br>graph.id  = ${esc(p.idFromGraph)}</span>`;
   } else {
     mb.style.borderColor = "var(--cp-warning)";
     mb.innerHTML = `<b>Binding not captured in this run.</b>`;
@@ -414,30 +597,41 @@ $("#apimNote").innerHTML = (DATA.notes && DATA.notes.apim) || "";
 $("#repro").innerHTML = (DATA.notes && DATA.notes.repro) || "";
 $("#footer").innerHTML = (DATA.notes && DATA.notes.footer) || "";
 
-// Play / controls
+// Manual step-through controls + diagram<->steps sync
 const steps = [...document.querySelectorAll(".step")];
-let playTimer = null;
-function clearActive() { steps.forEach((s) => s.classList.remove("active")); }
-function setProgress(n) { $("#progress").style.width = `${Math.round((n / steps.length) * 100)}%`; }
-function reset() { clearTimeout(playTimer); playTimer = null; clearActive(); steps.forEach((s) => { s.classList.remove("open","done"); }); setProgress(0); $("#play").textContent = "▶ Play walkthrough"; }
-function play() {
-  reset();
-  let i = 0;
-  $("#play").textContent = "■ Playing…";
-  const tick = () => {
-    if (i > 0) { steps[i-1].classList.add("done"); steps[i-1].classList.remove("active","open"); }
-    if (i >= steps.length) { setProgress(steps.length); $("#play").textContent = "▶ Replay"; clearActive(); steps.forEach(s=>s.classList.add("done")); return; }
-    clearActive();
-    const s = steps[i]; s.classList.add("active","open");
-    s.scrollIntoView({ behavior: "smooth", block: "center" });
-    setProgress(i + 1);
-    i++;
-    playTimer = setTimeout(tick, 1500);
-  };
-  tick();
+const flowNodes = [...document.querySelectorAll(".flow-node")];
+let cursor = -1; // -1 = nothing selected yet
+function clearActive() { steps.forEach((s) => s.classList.remove("active")); flowNodes.forEach((n)=>n.classList.remove("active")); }
+function syncFlow(i) { flowNodes.forEach((n, j) => n.classList.toggle("active", j === i)); }
+function setProgress(n) { $("#progress").style.width = `${Math.round((Math.max(0,n) / steps.length) * 100)}%`; }
+function markDoneUpTo(i) {
+  steps.forEach((s, j) => s.classList.toggle("done", j < i));
+  flowNodes.forEach((n, j) => n.classList.toggle("done", j < i));
 }
-$("#play").onclick = () => { if (playTimer) { reset(); } else { play(); } };
+function focusStep(i, openIt) {
+  if (i < 0 || i >= steps.length) return;
+  cursor = i;
+  clearActive();
+  markDoneUpTo(i);
+  const s = steps[i];
+  s.classList.add("active"); if (openIt) s.classList.add("open");
+  flowNodes[i] && flowNodes[i].classList.add("active");
+  setProgress(i + 1);
+  s.scrollIntoView({ behavior: "smooth", block: "center" });
+  $("#prev").disabled = i <= 0;
+  $("#next").textContent = i >= steps.length - 1 ? "✓ Done" : "Next step ›";
+}
+function reset() {
+  cursor = -1; clearActive();
+  steps.forEach((s) => s.classList.remove("open","done"));
+  flowNodes.forEach((n)=>n.classList.remove("done"));
+  setProgress(0);
+  $("#prev").disabled = true; $("#next").textContent = "Next step ›";
+}
+$("#next").onclick = () => { if (cursor < steps.length - 1) focusStep(cursor + 1, true); };
+$("#prev").onclick = () => { if (cursor > 0) focusStep(cursor - 1, true); };
 $("#reset").onclick = reset;
+reset();
 let allOpen = false;
 $("#expandAll").onclick = () => { allOpen = !allOpen; steps.forEach((s) => s.classList.toggle("open", allOpen)); $("#expandAll").textContent = allOpen ? "Collapse all" : "Expand all"; };
 </script>

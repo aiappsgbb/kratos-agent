@@ -20,6 +20,7 @@ the app registration trusts the MI's token-exchange assertion instead.
 
 from __future__ import annotations
 
+import base64
 import logging
 import os
 import threading
@@ -49,7 +50,7 @@ UAMI_CLIENT_ID = os.environ.get("AZURE_CLIENT_ID", "")
 # OBO -> Graph hop on a laptop. Never set this in a deployed environment — use
 # the secret-less FIC path there.
 OBO_CLIENT_SECRET = os.environ.get("OBO_CLIENT_SECRET", "")
-# Downstream Graph delegated scope(s) to request via OBO.
+# Downstream Graph delegated scope(s) to request via OBO for the core profile.
 GRAPH_SCOPES = os.environ.get("GRAPH_SCOPES", "https://graph.microsoft.com/User.Read").split()
 # Fields fetched from Graph /me. Several of these (department, preferredLanguage,
 # mobilePhone, businessPhones, givenName, surname, officeLocation, jobTitle) do
@@ -60,6 +61,9 @@ GRAPH_ME_SELECT = (
     "department,preferredLanguage,mobilePhone,businessPhones,givenName,surname"
 )
 GRAPH_ME_URL = f"https://graph.microsoft.com/v1.0/me?$select={GRAPH_ME_SELECT}"
+# Small (48x48) live profile photo — covered by User.Read (no extra consent).
+# Returned as a data URI so the report can show the user's actual photo.
+GRAPH_PHOTO_URL = "https://graph.microsoft.com/v1.0/me/photos/48x48/$value"
 
 # The audience Entra expects when the MI mints its token-exchange assertion.
 TOKEN_EXCHANGE_SCOPE = "api://AzureADTokenExchange/.default"
@@ -225,21 +229,41 @@ def _graph_token_for_user(user_token: str) -> str:
     return credential.get_token(*GRAPH_SCOPES).token
 
 
+def _fetch_photo_data_uri(graph_token: str) -> str | None:
+    """BEST-EFFORT: the signed-in user's live 48x48 profile photo as a data URI.
+    Covered by ``User.Read``; accounts with no photo return 404 → ``None``.
+    """
+    try:
+        resp = httpx.get(
+            GRAPH_PHOTO_URL,
+            headers={"Authorization": f"Bearer {graph_token}"},
+            timeout=15.0,
+        )
+        if resp.status_code != 200 or not resp.content:
+            return None
+        ctype = resp.headers.get("content-type", "image/jpeg").split(";")[0]
+        return f"data:{ctype};base64," + base64.b64encode(resp.content).decode("ascii")
+    except Exception:  # noqa: BLE001
+        logger.info("profile photo fetch skipped", exc_info=True)
+        return None
+
+
 def get_my_profile(user_token: str) -> dict[str, Any]:
     """Call Microsoft Graph ``/me`` on behalf of the signed-in user.
 
     ``user_token`` must already have passed ``validate_user_token``.
 
-    The returned dict deliberately includes signals that are **not present in the
+    The returned dict deliberately includes fields that are **not present in the
     inbound access token** — so a correct answer proves the call hit Graph live
     on the user's behalf and was not decoded from the JWT:
 
-    * ``graphRequestId`` — the ``request-id`` correlation GUID that the Graph
-      service generates for this exact HTTP response. It exists nowhere in the
-      token and can be cross-referenced in Graph's own sign-in/audit telemetry.
+    * Profile fields a login token never carries: ``jobTitle`` / ``department`` /
+      ``officeLocation`` / ``preferredLanguage`` / ``givenName`` / ``surname`` —
+      the human-readable "this is really my directory record" proof.
+    * ``graphRequestId`` — the ``request-id`` correlation GUID Graph generates for
+      this exact HTTP response (technical, cross-referenceable proof).
     * ``fetchedAtUtc`` — server timestamp of the live call.
-    * profile fields such as ``department`` / ``preferredLanguage`` /
-      ``mobilePhone`` that the token never carries.
+    * ``photoDataUri`` — the user's live profile photo (best-effort).
     """
     graph_token = _graph_token_for_user(user_token)
     resp = httpx.get(
@@ -253,7 +277,7 @@ def get_my_profile(user_token: str) -> dict[str, Any]:
     # live round-trip (the model cannot fabricate a Graph-issued request-id).
     graph_request_id = resp.headers.get("request-id") or resp.headers.get("client-request-id")
     # Return a compact, non-sensitive projection of the profile.
-    return {
+    profile = {
         "displayName": data.get("displayName"),
         "userPrincipalName": data.get("userPrincipalName"),
         "mail": data.get("mail"),
@@ -271,3 +295,9 @@ def get_my_profile(user_token: str) -> dict[str, Any]:
         "fetchedAtUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source": "microsoft-graph:/v1.0/me (delegated, on-behalf-of)",
     }
+
+    # ── Live profile photo (best-effort; never breaks the core call) ──
+    photo = _fetch_photo_data_uri(graph_token)
+    if photo:
+        profile["photoDataUri"] = photo
+    return profile
