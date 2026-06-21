@@ -31,9 +31,6 @@ param containerRegistryName string = ''
 @description('Deploying user principal ID')
 param principalId string = ''
 
-@description('APIM (AI gateway) system-assigned principal ID — granted OpenAI User so APIM can MI-authenticate to the AI Services backend it fronts.')
-param apimPrincipalId string = ''
-
 // ─── Built-in Role Definition IDs ───
 var cosmosDbDataContributor = '00000000-0000-0000-0000-000000000002'
 var keyVaultSecretsUser = '4633458b-17de-408a-b874-0445c86b69e6'
@@ -129,20 +126,6 @@ resource agentAiServicesRole 'Microsoft.Authorization/roleAssignments@2022-04-01
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAIUser)
     principalId: agentServicePrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-// ─── AI Gateway (APIM) → Microsoft Foundry ───
-// APIM fronts the agent's LLM (chat completions) calls and authenticates to the
-// AI Services backend with its own managed identity; OpenAI User grants it
-// inference access to the same account.
-resource apimAiServicesRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(apimPrincipalId)) {
-  name: guid(aiServices.id, apimPrincipalId, cognitiveServicesOpenAIUser)
-  scope: aiServices
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAIUser)
-    principalId: apimPrincipalId
     principalType: 'ServicePrincipal'
   }
 }

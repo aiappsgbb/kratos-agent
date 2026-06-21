@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.43.1.21952",
-      "templateHash": "11053644592309607346"
+      "templateHash": "16085256171296829239"
     }
   },
   "parameters": {
@@ -83,29 +83,11 @@
       "type": "string",
       "defaultValue": ""
     },
-    "aiGatewayName": {
-      "type": "string",
-      "defaultValue": ""
-    },
     "resourcePrefix": {
       "type": "string",
       "defaultValue": "lux",
       "metadata": {
-        "description": "Short project prefix prepended to generated resource names for easy identification (e.g. \"luxoai\" -> luxoai-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided."
-      }
-    },
-    "deployAiGateway": {
-      "type": "string",
-      "defaultValue": "false",
-      "metadata": {
-        "description": "Whether to deploy the optional APIM AI gateway in front of Foundry. Default false — the agent calls Foundry directly. Set to \"true\" to deploy APIM and route the agent LLM through it (governance + ApiManagementGatewayLlmLog capture)."
-      }
-    },
-    "apimPublisherEmail": {
-      "type": "string",
-      "defaultValue": "[format('admin@{0}.com', parameters('environmentName'))]",
-      "metadata": {
-        "description": "Publisher email for the AI Gateway (APIM)"
+        "description": "Short project prefix prepended to generated resource names for easy identification (e.g. \"lux\" -> lux-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided."
       }
     },
     "agentApiPath": {
@@ -152,7 +134,6 @@
     "resourceToken": "[toLower(uniqueString(subscription().id, parameters('environmentName'), parameters('location')))]",
     "namePrefix": "[if(empty(parameters('resourcePrefix')), '', format('{0}-', parameters('resourcePrefix')))]",
     "namePrefixNoHyphen": "[if(empty(parameters('resourcePrefix')), '', toLower(parameters('resourcePrefix')))]",
-    "aiGatewayEnabled": "[equals(toLower(parameters('deployAiGateway')), 'true')]",
     "tags": {
       "azd-env-name": "[parameters('environmentName')]",
       "project": "kratos-agent"
@@ -2186,342 +2167,6 @@
       ]
     },
     {
-      "condition": "[variables('aiGatewayEnabled')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
-      "name": "ai-gateway",
-      "resourceGroup": "[format('rg-{0}', parameters('environmentName'))]",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "name": "[if(not(empty(parameters('aiGatewayName'))), createObject('value', parameters('aiGatewayName')), createObject('value', format('{0}{1}{2}-gateway', variables('namePrefix'), variables('abbrs').cognitiveServicesAccounts, variables('resourceToken'))))]",
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "tags": {
-            "value": "[variables('tags')]"
-          },
-          "publisherEmail": {
-            "value": "[parameters('apimPublisherEmail')]"
-          },
-          "appInsightsId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights'), '2025-04-01').outputs.id.value]"
-          },
-          "appInsightsInstrumentationKey": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights'), '2025-04-01').outputs.instrumentationKey.value]"
-          },
-          "aiServicesEndpoint": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-foundry'), '2025-04-01').outputs.endpoint.value]"
-          },
-          "logAnalyticsWorkspaceId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'log-analytics'), '2025-04-01').outputs.id.value]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.43.1.21952",
-              "templateHash": "17962970171479666544"
-            }
-          },
-          "parameters": {
-            "name": {
-              "type": "string",
-              "metadata": {
-                "description": "Name of the API Management service"
-              }
-            },
-            "location": {
-              "type": "string",
-              "metadata": {
-                "description": "Location"
-              }
-            },
-            "tags": {
-              "type": "object",
-              "defaultValue": {},
-              "metadata": {
-                "description": "Tags"
-              }
-            },
-            "publisherEmail": {
-              "type": "string",
-              "metadata": {
-                "description": "Publisher email for APIM"
-              }
-            },
-            "publisherName": {
-              "type": "string",
-              "defaultValue": "[format('{0} AI Gateway', parameters('name'))]",
-              "metadata": {
-                "description": "Publisher name for APIM"
-              }
-            },
-            "appInsightsId": {
-              "type": "string",
-              "metadata": {
-                "description": "Application Insights resource ID"
-              }
-            },
-            "appInsightsInstrumentationKey": {
-              "type": "string",
-              "metadata": {
-                "description": "Application Insights instrumentation key"
-              }
-            },
-            "aiServicesEndpoint": {
-              "type": "string",
-              "metadata": {
-                "description": "AI Services (Foundry) account endpoint, e.g. https://acct.cognitiveservices.azure.com/ (trailing slash expected)"
-              }
-            },
-            "logAnalyticsWorkspaceId": {
-              "type": "string",
-              "metadata": {
-                "description": "Log Analytics workspace resource ID — destination for the GenAI gateway LLM logs (ApiManagementGatewayLlmLog)."
-              }
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.ApiManagement/service",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[parameters('name')]",
-              "location": "[parameters('location')]",
-              "tags": "[parameters('tags')]",
-              "sku": {
-                "name": "BasicV2",
-                "capacity": 1
-              },
-              "identity": {
-                "type": "SystemAssigned"
-              },
-              "properties": {
-                "publisherEmail": "[parameters('publisherEmail')]",
-                "publisherName": "[parameters('publisherName')]",
-                "customProperties": {
-                  "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10": "false",
-                  "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11": "false"
-                }
-              }
-            },
-            {
-              "type": "Microsoft.Insights/diagnosticSettings",
-              "apiVersion": "2021-05-01-preview",
-              "scope": "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]",
-              "name": "apim-to-law",
-              "properties": {
-                "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
-                "logAnalyticsDestinationType": "Dedicated",
-                "logs": [
-                  {
-                    "categoryGroup": "allLogs",
-                    "enabled": true
-                  }
-                ],
-                "metrics": [
-                  {
-                    "category": "AllMetrics",
-                    "enabled": true
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.ApiManagement/service/loggers",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'azuremonitor')]",
-              "properties": {
-                "loggerType": "azureMonitor",
-                "isBuffered": false
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.ApiManagement/service/loggers",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'appinsights')]",
-              "properties": {
-                "loggerType": "applicationInsights",
-                "credentials": {
-                  "instrumentationKey": "[parameters('appInsightsInstrumentationKey')]"
-                },
-                "resourceId": "[parameters('appInsightsId')]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.ApiManagement/service/backends",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'aoai-foundry')]",
-              "properties": {
-                "description": "Azure AI Services (Foundry) OpenAI endpoint",
-                "protocol": "http",
-                "url": "[format('{0}openai', parameters('aiServicesEndpoint'))]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.ApiManagement/service/apis",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'aoai')]",
-              "properties": {
-                "displayName": "Azure OpenAI (Foundry)",
-                "description": "Chat completions passthrough to the AI Services account, MI-authenticated. Fronts the hosted agent LLM calls so prompts + completions are captured in the GenAI gateway log.",
-                "path": "openai",
-                "protocols": [
-                  "https"
-                ],
-                "subscriptionRequired": false,
-                "serviceUrl": "[format('{0}openai', parameters('aiServicesEndpoint'))]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.ApiManagement/service/apis/operations",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}/{2}', parameters('name'), 'aoai', 'chat-completions')]",
-              "properties": {
-                "displayName": "Create chat completion",
-                "method": "POST",
-                "urlTemplate": "/deployments/{deployment-id}/chat/completions",
-                "templateParameters": [
-                  {
-                    "name": "deployment-id",
-                    "description": "Model deployment name",
-                    "type": "string",
-                    "required": true
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('name'), 'aoai')]"
-              ]
-            },
-            {
-              "type": "Microsoft.ApiManagement/service/apis/policies",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}/{2}', parameters('name'), 'aoai', 'policy')]",
-              "properties": {
-                "format": "rawxml",
-                "value": "<policies>\n  <inbound>\n    <base />\n    <set-backend-service backend-id=\"aoai-foundry\" />\n    <authentication-managed-identity resource=\"https://cognitiveservices.azure.com\" />\n  </inbound>\n  <backend>\n    <forward-request timeout=\"240\" buffer-response=\"false\" />\n  </backend>\n  <outbound>\n    <base />\n  </outbound>\n  <on-error>\n    <base />\n  </on-error>\n</policies>"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('name'), 'aoai')]",
-                "[resourceId('Microsoft.ApiManagement/service/backends', parameters('name'), 'aoai-foundry')]"
-              ]
-            },
-            {
-              "type": "Microsoft.ApiManagement/service/apis/diagnostics",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}/{2}', parameters('name'), 'aoai', 'azuremonitor')]",
-              "properties": {
-                "alwaysLog": "allErrors",
-                "verbosity": "verbose",
-                "logClientIp": true,
-                "loggerId": "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'azuremonitor')]",
-                "sampling": {
-                  "samplingType": "fixed",
-                  "percentage": "[json('100')]"
-                },
-                "largeLanguageModel": {
-                  "logs": "enabled",
-                  "requests": {
-                    "messages": "all",
-                    "maxSizeInBytes": 262144
-                  },
-                  "responses": {
-                    "messages": "all",
-                    "maxSizeInBytes": 262144
-                  }
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('name'), 'aoai')]",
-                "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'azuremonitor')]"
-              ]
-            },
-            {
-              "type": "Microsoft.ApiManagement/service/apis/diagnostics",
-              "apiVersion": "2024-06-01-preview",
-              "name": "[format('{0}/{1}/{2}', parameters('name'), 'aoai', 'applicationinsights')]",
-              "properties": {
-                "alwaysLog": "allErrors",
-                "httpCorrelationProtocol": "W3C",
-                "logClientIp": true,
-                "loggerId": "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'appinsights')]",
-                "metrics": true,
-                "verbosity": "verbose",
-                "sampling": {
-                  "samplingType": "fixed",
-                  "percentage": "[json('100')]"
-                },
-                "frontend": {
-                  "request": {
-                    "body": {
-                      "bytes": 8192
-                    }
-                  }
-                },
-                "backend": {
-                  "request": {
-                    "body": {
-                      "bytes": 8192
-                    }
-                  }
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('name'), 'aoai')]",
-                "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('name'), 'appinsights')]"
-              ]
-            }
-          ],
-          "outputs": {
-            "id": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.ApiManagement/service', parameters('name'))]"
-            },
-            "name": {
-              "type": "string",
-              "value": "[parameters('name')]"
-            },
-            "gatewayUrl": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.ApiManagement/service', parameters('name')), '2024-06-01-preview').gatewayUrl]"
-            },
-            "principalId": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.ApiManagement/service', parameters('name')), '2024-06-01-preview', 'full').identity.principalId]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-foundry')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'log-analytics')]",
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', format('rg-{0}', parameters('environmentName')))]"
-      ]
-    },
-    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
       "name": "static-web-app",
@@ -3501,8 +3146,7 @@
           },
           "principalId": {
             "value": "[parameters('principalId')]"
-          },
-          "apimPrincipalId": "[if(variables('aiGatewayEnabled'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway'), '2025-04-01').outputs.principalId.value), createObject('value', ''))]"
+          }
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -3511,7 +3155,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.43.1.21952",
-              "templateHash": "12082248348791853156"
+              "templateHash": "4246901981803907543"
             }
           },
           "parameters": {
@@ -3584,13 +3228,6 @@
               "metadata": {
                 "description": "Deploying user principal ID"
               }
-            },
-            "apimPrincipalId": {
-              "type": "string",
-              "defaultValue": "",
-              "metadata": {
-                "description": "APIM (AI gateway) system-assigned principal ID — granted OpenAI User so APIM can MI-authenticate to the AI Services backend it fronts."
-              }
             }
           },
           "variables": {
@@ -3657,18 +3294,6 @@
               "properties": {
                 "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAIUser'))]",
                 "principalId": "[parameters('agentServicePrincipalId')]",
-                "principalType": "ServicePrincipal"
-              }
-            },
-            {
-              "condition": "[not(empty(parameters('apimPrincipalId')))]",
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2022-04-01",
-              "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('aiServicesName'))]",
-              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('aiServicesName')), parameters('apimPrincipalId'), variables('cognitiveServicesOpenAIUser'))]",
-              "properties": {
-                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAIUser'))]",
-                "principalId": "[parameters('apimPrincipalId')]",
                 "principalType": "ServicePrincipal"
               }
             },
@@ -3818,7 +3443,6 @@
       "dependsOn": [
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'agent-service')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-foundry')]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-search')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'app-insights')]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'blob-storage')]",
@@ -3873,10 +3497,6 @@
     "AGENT_SERVICE_URL": {
       "type": "string",
       "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'agent-service'), '2025-04-01').outputs.url.value]"
-    },
-    "AI_GATEWAY_URL": {
-      "type": "string",
-      "value": "[if(variables('aiGatewayEnabled'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('rg-{0}', parameters('environmentName'))), 'Microsoft.Resources/deployments', 'ai-gateway'), '2025-04-01').outputs.gatewayUrl.value, '')]"
     },
     "FOUNDRY_ENDPOINT": {
       "type": "string",

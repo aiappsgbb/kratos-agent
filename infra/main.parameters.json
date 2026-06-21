@@ -13,9 +13,6 @@
     },
     "resourcePrefix": {
       "value": "${AZURE_RESOURCE_PREFIX=lux}"
-    },
-    "deployAiGateway": {
-      "value": "${AZURE_DEPLOY_AI_GATEWAY=false}"
     }
   }
 }

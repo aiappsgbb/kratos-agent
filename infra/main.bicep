@@ -26,16 +26,9 @@ param staticWebAppName string = ''
 param agentServiceName string = ''
 param vnetName string = ''
 param storageAccountName string = ''
-param aiGatewayName string = ''
 
-@description('Short project prefix prepended to generated resource names for easy identification (e.g. "luxoai" -> luxoai-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided.')
+@description('Short project prefix prepended to generated resource names for easy identification (e.g. "lux" -> lux-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided.')
 param resourcePrefix string = 'lux'
-
-@description('Whether to deploy the optional APIM AI gateway in front of Foundry. Default false — the agent calls Foundry directly. Set to "true" to deploy APIM and route the agent LLM through it (governance + ApiManagementGatewayLlmLog capture).')
-param deployAiGateway string = 'false'
-
-@description('Publisher email for the AI Gateway (APIM)')
-param apimPublisherEmail string = 'admin@${environmentName}.com'
 
 @description('Path prefix for the agent API on the gateway (set during Foundry portal registration)')
 param agentApiPath string = 'kratos-agent'
@@ -57,8 +50,6 @@ var resourceToken = toLower(uniqueString(subscription().id, environmentName, loc
 // resources; hyphen-less lower-case form for storage/ACR (which disallow hyphens).
 var namePrefix = empty(resourcePrefix) ? '' : '${resourcePrefix}-'
 var namePrefixNoHyphen = empty(resourcePrefix) ? '' : toLower(resourcePrefix)
-// APIM AI gateway is OFF by default — the hosted agent talks to Foundry directly.
-var aiGatewayEnabled = toLower(deployAiGateway) == 'true'
 var tags = { 'azd-env-name': environmentName, project: 'kratos-agent' }
 
 // ─── Resource Group ───
@@ -225,22 +216,6 @@ module agentService './modules/agent-service.bicep' = {
   }
 }
 
-// ─── AI Gateway (API Management) — OPTIONAL, off by default ───
-module aiGateway './modules/ai-gateway.bicep' = if (aiGatewayEnabled) {
-  name: 'ai-gateway'
-  scope: rg
-  params: {
-    name: !empty(aiGatewayName) ? aiGatewayName : '${namePrefix}${abbrs.cognitiveServicesAccounts}${resourceToken}-gateway'
-    location: location
-    tags: tags
-    publisherEmail: apimPublisherEmail
-    appInsightsId: appInsights.outputs.id
-    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
-    aiServicesEndpoint: aiFoundry.outputs.endpoint
-    logAnalyticsWorkspaceId: logAnalytics.outputs.id
-  }
-}
-
 // ─── Static Web App ───
 module staticWebApp './modules/static-web-app.bicep' = {
   name: 'static-web-app'
@@ -331,7 +306,6 @@ module roleAssignments './modules/role-assignments.bicep' = {
     appInsightsName: appInsights.outputs.name
     containerRegistryName: containerRegistry.outputs.name
     principalId: principalId
-    apimPrincipalId: aiGatewayEnabled ? aiGateway.outputs.principalId : ''
   }
 }
 
@@ -347,7 +321,6 @@ output AZURE_APP_INSIGHTS_CONNECTION_STRING string = appInsights.outputs.connect
 output AZURE_STATIC_WEB_APP_URL string = staticWebApp.outputs.url
 output AGENT_SERVICE_DIRECT_URL string = agentService.outputs.url
 output AGENT_SERVICE_URL string = agentService.outputs.url
-output AI_GATEWAY_URL string = aiGatewayEnabled ? aiGateway.outputs.gatewayUrl : ''
 output FOUNDRY_ENDPOINT string = aiFoundry.outputs.endpoint
 output FOUNDRY_MODEL_DEPLOYMENT string = aiFoundry.outputs.modelDeploymentName
 output AZURE_AI_PROJECT_ENDPOINT string = aiFoundry.outputs.projectEndpoint
