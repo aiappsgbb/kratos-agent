@@ -65,7 +65,7 @@ pull_logs() {  # $1 = container app name (cloud) | service (local)
 BACKEND_LOGS="$(pull_logs "${CA_BACKEND:-backend}")"
 OBO_LOGS="$(pull_logs "${CA_OBO:-obo-mcp-server}")"
 
-DIAG_LINE="$(printf '%s\n' "$BACKEND_LOGS" | grep -F 'kratos_diag' | tail -1 || true)"
+DIAG_LINE="$(printf '%s\n' "$BACKEND_LOGS" | grep -E 'kratos_diag|hosted-agent diag' | tail -1 || true)"
 OBO_PROOF="$(printf '%s\n' "$OBO_LOGS" | grep -E 'OnBehalfOfCredential|/v1.0/me|returned profile|get_my_profile' | tail -12 || true)"
 TOOL_RESULT_JSON="$(printf '%s\n' "$OBO_LOGS" | grep -F 'get_my_profile result:' | tail -1 | sed -E 's/.*get_my_profile result: //' || true)"
 
