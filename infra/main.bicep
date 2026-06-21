@@ -29,7 +29,7 @@ param storageAccountName string = ''
 param aiGatewayName string = ''
 
 @description('Short project prefix prepended to generated resource names for easy identification (e.g. "luxoai" -> luxoai-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided.')
-param resourcePrefix string = 'luxoai'
+param resourcePrefix string = 'lux'
 
 @description('Whether to deploy the optional APIM AI gateway in front of Foundry. Default false — the agent calls Foundry directly. Set to "true" to deploy APIM and route the agent LLM through it (governance + ApiManagementGatewayLlmLog capture).')
 param deployAiGateway string = 'false'

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.43.1.21952",
-      "templateHash": "15152576942978395100"
+      "templateHash": "11053644592309607346"
     }
   },
   "parameters": {
@@ -89,7 +89,7 @@
     },
     "resourcePrefix": {
       "type": "string",
-      "defaultValue": "luxoai",
+      "defaultValue": "lux",
       "metadata": {
         "description": "Short project prefix prepended to generated resource names for easy identification (e.g. \"luxoai\" -> luxoai-oai-<token>). Set to empty string to use the legacy <abbr><token> naming. Does not affect resources whose explicit *Name param is provided."
       }
