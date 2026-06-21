@@ -142,6 +142,8 @@ module aiFoundry './modules/ai-services.bicep' = {
     name: !empty(aiServicesName) ? aiServicesName : '${namePrefix}${abbrs.cognitiveServicesAccounts}${resourceToken}'
     location: location
     tags: tags
+    appInsightsId: appInsights.outputs.id
+    appInsightsConnectionString: appInsights.outputs.connectionString
   }
 }
 

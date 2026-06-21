@@ -22,6 +22,13 @@ param modelVersion string = '2026-03-05'
 @description('Deployment SKU capacity (thousands of tokens per minute)')
 param modelCapacity int = 350
 
+@description('Application Insights resource ID to connect to the project (powers the Foundry Traces tab). Empty = no connection.')
+param appInsightsId string = ''
+
+@description('Application Insights connection string used as the connection credential.')
+@secure()
+param appInsightsConnectionString string = ''
+
 resource aiFoundry 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   name: name
   location: location
@@ -63,6 +70,27 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
       format: 'OpenAI'
       name: modelName
       version: modelVersion
+    }
+  }
+}
+
+// Connect Application Insights to the project so the Foundry portal Traces tab
+// has a data source AND the platform injects the trace connection string into
+// hosted agents (their OpenTelemetry gen_ai spans land here).
+resource appInsightsConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-06-01' = if (!empty(appInsightsId)) {
+  parent: project
+  name: 'appinsights'
+  properties: {
+    category: 'AppInsights'
+    target: appInsightsId
+    authType: 'ApiKey'
+    isSharedToAll: true
+    credentials: {
+      key: appInsightsConnectionString
+    }
+    metadata: {
+      ApiType: 'Azure'
+      ResourceId: appInsightsId
     }
   }
 }
