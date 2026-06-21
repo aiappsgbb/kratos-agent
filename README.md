@@ -258,6 +258,104 @@ The agent streams structured events to the frontend in real-time:
 | `done` | Completion signal with execution metrics |
 | `error` | Error details |
 
+### Entra On-Behalf-Of (OBO) — the agent acts as the signed-in user
+
+Most agent tools run as the **agent's own** identity (its managed identity / API
+keys). That is the right model for shared resources, but it cannot answer
+"what does *Microsoft Graph* return for **me**?" without the agent impersonating
+the user — which is exactly what a delegated **On-Behalf-Of** flow is for.
+
+This sample ships a dedicated, Entra-protected MCP server — **`graph-obo`**
+(`src/obo-mcp-server/`) — that exposes a `get_my_profile` tool. When the agent
+calls it, the tool runs **as the signed-in user**: it performs an Entra OBO token
+exchange and calls `GET https://graph.microsoft.com/v1.0/me`, returning the
+*user's own* profile (display name, UPN, Entra object id, job title, office,
+profile photo, and Graph-only proof fields like `graphRequestId`).
+
+#### The token's journey (user identity, end to end)
+
+```
+1. Frontend (MSAL): user signs in; acquireTokenSilent for the OBO API scope
+   api://<obo-server-app-id>/access_as_user  →  a delegated USER access token.
+2. POST /api/agent/chat carries the token in the body:
+   { "message": "...", "mcpAccessTokens": { "graph-obo": "<user JWT>" } }
+   (NOT the Authorization header, which carries the app/session auth.)
+3. Backend forwards the per-conversation token to the Foundry hosted agent.
+4. Hosted agent (CopilotAgent._apply_mcp_tokens) injects it as the
+   Authorization: Bearer header ONLY on the matching remote MCP server
+   (graph-obo) for THIS conversation — so the model never sees the raw token.
+5. graph-obo MCP server validates the inbound user token (audience, scope
+   = access_as_user, tenant, signature, expiry), then performs the Entra OBO
+   exchange and calls Graph /me AS THE USER.
+6. The user's profile flows back as the tool result; the agent summarises it.
+```
+
+```mermaid
+sequenceDiagram
+    participant U as User (browser, MSAL)
+    participant B as Backend (FastAPI)
+    participant A as Hosted Agent (Copilot SDK)
+    participant M as graph-obo MCP server
+    participant E as Microsoft Entra ID
+    participant G as Microsoft Graph
+    U->>B: POST /api/agent/chat<br/>mcpAccessTokens.graph-obo = user JWT
+    B->>A: forward invocation + per-conversation token
+    A->>M: call get_my_profile<br/>Authorization: Bearer <user JWT>
+    M->>M: validate token (aud, scp=access_as_user, tid, sig, exp)
+    M->>E: OBO exchange (user token → Graph token, User.Read)
+    E-->>M: delegated Graph access token
+    M->>G: GET /v1.0/me  (as the signed-in user)
+    G-->>M: the USER's profile
+    M-->>A: tool result (profile + graphRequestId)
+    A-->>U: "Here is your profile: …"
+```
+
+#### How the MCP server proves its own identity (no secrets in the cloud)
+
+The OBO exchange needs the server to authenticate **itself** to Entra as the
+confidential client. In the cloud this is **secret-less**: a **Federated
+Identity Credential (FIC)** lets the server's **user-assigned managed identity**
+mint the client assertion — no client secret is ever stored. Locally (docker
+compose) the same app registration falls back to a `OBO_CLIENT_SECRET` so you
+can run the identical flow on your laptop.
+
+| Aspect | Cloud (Container App) | Local (docker compose) |
+|--------|----------------------|------------------------|
+| Server → Entra auth | FIC → user-assigned managed identity (no secret) | `OBO_CLIENT_SECRET` (dev only) |
+| Inbound token validation | identical (aud / `access_as_user` / tenant / sig / exp) | identical |
+| Graph call | `GET /me` as the user, `User.Read` | same |
+
+#### Why it is safe (the guardrails that matter)
+
+> **Important:** the raw user token is treated as a secret. It is injected as the
+> `Authorization` header **only** on the `graph-obo` MCP server, **only** for the
+> conversation it belongs to, and is **stripped from anything the model sees** —
+> the model receives `hasProfilePhoto: true`, never the token or photo bytes.
+
+- **Confused-deputy guard:** `ALLOWED_CLIENT_APP_IDS` restricts which client app
+  may act on the user's behalf — a token minted by a different app is rejected.
+- **Audience/scope pinning:** the server only accepts tokens whose audience is
+  its own API and whose scope contains `access_as_user`.
+- **Least privilege:** the Graph token is scoped to `User.Read` only.
+
+#### Try it
+
+After deploying (or running the local stack), sign in with the
+**"Sign in (On-Behalf-Of)"** button, then ask:
+
+```
+Use the graph-obo tool to look me up and report my displayName,
+userPrincipalName, id, jobTitle and officeLocation.
+```
+
+The agent calls `graph-obo-get_my_profile` and reports **your** Graph profile —
+proof the tool ran with your delegated identity, not the agent's.
+
+See [`src/obo-mcp-server/`](src/obo-mcp-server/) (`obo.py`, `server.py`) for the
+validation + exchange, and `CopilotAgent._apply_mcp_tokens` in
+[`src/backend/app/services/copilot_agent.py`](src/backend/app/services/copilot_agent.py)
+for the per-conversation header injection.
+
 ### Session Pinning
 
 Multi-turn conversations require routing to the same hosted agent container to preserve in-memory SDK state:
@@ -566,6 +664,7 @@ python scripts/fetch_traces.py --conversation-id abc123
 | **Content safety** | Foundry guardrails (prompt shields, jailbreak detection) |
 | **File serving** | Path traversal protection, MIME type allowlisting, safe filename validation |
 | **Frontend auth** | MSAL (Microsoft Entra ID) with `@azure/msal-react` |
+| **Delegated access (OBO)** | Agent acts as the signed-in user via Entra On-Behalf-Of: per-conversation user token injected only on the `graph-obo` MCP server, stripped from model context; secret-less FIC→managed-identity client assertion in the cloud; `access_as_user` + `ALLOWED_CLIENT_APP_IDS` confused-deputy guard |
 
 ---
 
