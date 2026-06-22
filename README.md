@@ -12,7 +12,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14-000?logo=nextdotjs)](https://nextjs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-One-command deploy (`azd up`) provisions 15+ Azure services, builds containers, deploys a hosted agent to Microsoft Foundry, and serves a production frontend — all wired with Managed Identity, VNet isolation, and OpenTelemetry tracing.
+One-command deploy (`azd up`) provisions Azure services, builds containers, deploys a hosted agent to Microsoft Foundry, and serves a production frontend — all wired with Managed Identity, VNet isolation, and OpenTelemetry tracing. The agent calls Foundry models **directly** (no API Management gateway) and ships an **Entra On-Behalf-Of** MCP server that calls Microsoft Graph as the signed-in user.
 
 </div>
 
@@ -66,7 +66,7 @@ Each turn follows a Reason → Act → Observe cycle powered by the Copilot SDK.
 
 ### System Overview
 
-End-to-end request flow from the frontend through the AI Gateway to the Foundry-hosted agent, which calls models and executes skills against platform services.
+End-to-end request flow from the frontend to the Foundry-hosted agent, which calls models directly and executes skills against platform services.
 
 <div align="center">
 <img src="docs/static/img/architecture-overview.png" alt="Architecture Overview" width="800">
@@ -81,7 +81,7 @@ Kratos runs two compute layers that work together:
 | **Hosted Agent** | Microsoft Foundry (auto-scaled, Invocations protocol, port 8088) | Runs the Copilot SDK agentic loop, executes skills, calls models |
 | **Backend Proxy** | Azure Container Apps (FastAPI, port 8000) | Frontend API, conversation persistence, file serving, admin endpoints |
 
-The backend proxies all chat requests to the Foundry hosted agent via the Invocations REST API and streams SSE events back to the frontend. Gateway session pinning (`x-agent-session-id` header) ensures multi-turn conversations route to the same agent container, preserving in-memory SDK state.
+The backend proxies all chat requests to the Foundry hosted agent via the Invocations REST API and streams SSE events back to the frontend. Agent session pinning (`x-agent-session-id` header) ensures multi-turn conversations route to the same agent container, preserving in-memory SDK state.
 
 ### Core Pillars
 
@@ -125,9 +125,9 @@ The backend proxies all chat requests to the Foundry hosted agent via the Invoca
 
 ### Infrastructure (Bicep)
 
-15 Azure services provisioned via `azd up`:
+Azure services provisioned via `azd up`:
 
-> VNet · Container Apps Environment · Container App · Container Registry · Static Web App · API Management (AI Gateway) · AI Services · AI Search · Cosmos DB · Blob Storage · Key Vault · App Insights · Log Analytics · Bing Search · RBAC Role Assignments
+> VNet · Container Apps Environment · Container Apps (backend proxy **+** OBO MCP server) · Container Registry · Static Web App · AI Services (Foundry — agent calls models **directly**, no APIM) · AI Search · Cosmos DB · Blob Storage · Key Vault · App Insights · Log Analytics · Bing Search · Entra OBO app registrations + user-assigned managed identity · RBAC Role Assignments
 
 ---
 
@@ -149,10 +149,10 @@ azd up
 ```
 
 This single command:
-1. Provisions all Azure infrastructure via Bicep (VNet, Cosmos DB, AI Gateway, etc.)
+1. Provisions all Azure infrastructure via Bicep (VNet, Cosmos DB, AI Services, OBO MCP server, etc.)
 2. Builds Docker images for the backend and hosted agent
 3. Pushes images to Azure Container Registry
-4. Deploys the backend to Container Apps
+4. Deploys the backend and the Entra OBO MCP server to Container Apps
 5. Deploys the hosted agent to Microsoft Foundry (via `azd ai agent` extension)
 6. Exports the frontend as a static site and deploys to Static Web Apps
 7. Configures all Managed Identity role assignments
@@ -164,12 +164,12 @@ After `azd up`, register the agent in the Foundry portal so traces appear in the
 
 1. Open [Microsoft Foundry](https://ai.azure.com) → your project → **Operate** → **Agents**
 2. Click **+ Register agent** (Custom Agent)
-3. Set **Name** to `kratos-agent`, select the provisioned APIM gateway, enter the Container App URL as backend, and `kratos-agent` as API path
+3. Set **Name** to `kratos-agent`, enter the backend Container App URL as the agent endpoint, and `kratos-agent` as the API path
 4. Complete the wizard
 
-> **Tip:** `azd env get-values | grep AGENT_SERVICE` shows the Container App URL and gateway URL.
+> **Tip:** `azd env get-values | grep AGENT_SERVICE` shows the backend Container App URL.
 
-This is the only manual step — it cannot be automated because the Foundry Control Plane creates internal metadata linking the APIM API to the tracing pipeline.
+This is the only manual step. Traces appear automatically: the deployment connects Application Insights to the Foundry **project**, so the hosted agent emits OpenTelemetry spans that surface in the **Traces** tab (see [Foundry Traces](#foundry-traces)).
 
 ### Validating a Deployment
 
@@ -233,7 +233,7 @@ npm install && npm run dev
 ```
 1. User sends message via frontend
 2. POST /api/agent/chat → Backend (FastAPI)
-3. Backend looks up gateway session ID for the conversation
+3. Backend looks up the agent session ID for the conversation
 4. Backend forwards to Foundry hosted agent via Invocations REST API
 5. Hosted agent runs CopilotClient agentic loop:
    a. Load system prompt + use-case skills
@@ -381,7 +381,7 @@ async for event in client.run(message=msg, session_id=conv_id):
 
 - **Auth:** `ChainedTokenCredential` (ManagedIdentity → AzureCLI) with `get_bearer_token_provider` for keyless model access
 - **Multi-use-case:** Each use case gets its own `SkillRegistry` and system prompt; selected per conversation
-- **Session resume:** SDK sessions are keyed by `conversation_id`; gateway session pinning ensures the same container handles all turns
+- **Session resume:** SDK sessions are keyed by `conversation_id`; agent session pinning ensures the same container handles all turns
 
 ---
 
@@ -561,7 +561,7 @@ Full-stack instrumentation following [GenAI semantic conventions](https://opente
 
 ### Foundry Traces
 
-All frontend traffic routes through the **AI Gateway (APIM)**, configured with an Application Insights logger at 100% sampling. The Foundry Traces tab reads from App Insights to display end-to-end agent execution traces including:
+Traces come from the application's **OpenTelemetry** instrumentation exporting to Application Insights — **not** from any gateway. The Foundry **Traces** tab lights up because the deployment connects the Application Insights resource to the Foundry **project** (an `appinsights` project connection provisioned in `infra/modules/ai-services.bicep`). Once connected, Foundry injects the App Insights connection string into the hosted-agent sandbox and reads the spans back, displaying end-to-end agent execution traces including:
 
 - User messages and agent responses
 - Tool/skill invocations with inputs and outputs
@@ -672,16 +672,18 @@ python scripts/fetch_traces.py --conversation-id abc123
 
 ```
 kratos-agent/
-├── azure.yaml                      # azd config: 3 services (agent-service, hosted-agent, web)
-├── docker-compose.yml              # Local dev: backend + azurite
+├── azure.yaml                      # azd config: 4 services (agent-service, hosted-agent, obo-mcp-server, web)
+├── docker-compose.yml              # Local dev: backend + hosted-agent + obo-mcp-server + azurite
 │
-├── infra/                          # Bicep IaC (15 modules)
+├── infra/                          # Bicep IaC (18 modules)
 │   ├── main.bicep
 │   └── modules/
 │       ├── network.bicep           # VNet + subnets + private endpoints
 │       ├── agent-service.bicep     # Container App (backend proxy)
-│       ├── ai-gateway.bicep        # APIM BasicV2 (AI Gateway + diagnostics)
-│       ├── ai-services.bicep       # Azure AI Services (model hosting)
+│       ├── ai-services.bicep       # AI Services (Foundry account + project + App Insights connection)
+│       ├── obo-mcp-server.bicep    # Container App — Entra-protected OBO MCP server (graph-obo)
+│       ├── obo-entra-app.bicep     # Entra app registrations for the OBO API (server + client)
+│       ├── obo-identity.bicep      # User-assigned MI + federated credential (secret-less OBO)
 │       ├── ai-search.bicep         # Azure AI Search (RAG index)
 │       ├── cosmos-db.bicep         # Cosmos DB serverless (4 containers)
 │       ├── blob-storage.bicep      # Storage Account (skills, APM)
@@ -812,19 +814,18 @@ kratos-agent/
 | `conversations` | `/userId` | Conversation metadata |
 | `messages` | `/conversationId` | Chat messages + tool call metadata |
 | `settings` | `/category` | System prompt, configuration |
-| `sessions` | `/conversationId` | Gateway session ID ↔ conversation mappings |
+| `sessions` | `/conversationId` | Agent session ID ↔ conversation mappings |
 
 ### Network Topology
 
 ```
 VNet
-├── container-apps-subnet      # Container Apps Environment
-├── private-endpoints-subnet   # Private endpoints for:
-│                                 - Cosmos DB
-│                                 - Key Vault
-│                                 - Blob Storage
-│                                 - AI Search
-└── apim-subnet                # API Management (AI Gateway)
+├── container-apps-subnet      # Container Apps Environment (backend + OBO MCP server)
+└── private-endpoints-subnet   # Private endpoints for:
+                                  - Cosmos DB
+                                  - Key Vault
+                                  - Blob Storage
+                                  - AI Search
 ```
 
 ### Identity & RBAC
@@ -848,16 +849,16 @@ All service-to-service auth uses Managed Identity with least-privilege roles:
 |---------|-----------------|
 | Container Apps (consumption) | $0 – $50 |
 | Static Web Apps (free tier) | $0 |
-| API Management (BasicV2) | ~$175 |
 | Cosmos DB (serverless) | $5 – $25 |
 | AI Search (Basic) | ~$75 |
 | Key Vault | ~$1 |
 | Container Registry (Basic) | ~$5 |
 | Application Insights | $5 – $20 |
 | Foundry Models (per-token) | Variable |
-| **Total baseline** | **~$265 – $350/month** |
+| **Total baseline** | **~$90 – $175/month** |
 
 > Model costs (GPT-4o, GPT-5) are usage-dependent and not included in the baseline.
+> Removing the API Management gateway (the agent now calls Foundry directly) cuts ~$175/month off the previous baseline.
 
 ---
 
