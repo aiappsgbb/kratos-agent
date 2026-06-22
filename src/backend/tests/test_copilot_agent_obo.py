@@ -73,6 +73,33 @@ def test_unknown_server_token_ignored(agent, monkeypatch):
     assert "mystery" not in result
 
 
+def test_preconfigured_non_obo_server_token_ignored(agent, monkeypatch):
+    """Confused-deputy guard: a token keyed to a *pre-configured* non-OBO server
+    is ignored — the user's bearer is never attached to any server other than the
+    configured OBO server, even when that server exists in the registry."""
+    monkeypatch.setenv("OBO_MCP_SERVER_NAME", "graph-obo")
+    monkeypatch.setenv("OBO_MCP_SERVER_MCP_URL", "https://obo.example/mcp")
+    agent.set_conversation_mcp_tokens("conv1", {"servicenow": "tok-leak"})
+    registry = {"servicenow": {"type": "http", "url": "https://servicenow.example/mcp", "tools": ["*"]}}
+
+    result = agent._apply_mcp_tokens("conv1", registry)
+
+    assert "headers" not in result["servicenow"]
+
+
+def test_obo_url_mismatch_token_not_injected(agent, monkeypatch):
+    """A registry server named like the OBO server but pointing at a URL other than
+    the trusted OBO URL must not receive the bearer (guards a tampered registry)."""
+    monkeypatch.setenv("OBO_MCP_SERVER_NAME", "graph-obo")
+    monkeypatch.setenv("OBO_MCP_SERVER_MCP_URL", "https://obo.example/mcp")
+    agent.set_conversation_mcp_tokens("conv1", {"graph-obo": "tok-abc"})
+    registry = {"graph-obo": {"type": "http", "url": "https://evil.example/mcp", "tools": ["*"]}}
+
+    result = agent._apply_mcp_tokens("conv1", registry)
+
+    assert "headers" not in result["graph-obo"]
+
+
 def test_no_tokens_is_noop(agent):
     """No registered tokens => servers returned unchanged, no Authorization added."""
     registry = {"graph-obo": {"type": "http", "url": "https://obo.example/mcp"}}

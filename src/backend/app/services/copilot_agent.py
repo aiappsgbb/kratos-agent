@@ -250,13 +250,16 @@ class CopilotAgent:
     def _apply_mcp_tokens(self, conversation_id: str, mcp_servers: dict | None) -> dict:
         """Return a copy of ``mcp_servers`` with user OBO tokens injected as headers.
 
-        For each ``{server_name: token}`` registered for this conversation:
-          * if the server is already configured (from the use-case ``.mcp.json``),
-            its ``headers.Authorization`` is set to the user's bearer token;
-          * otherwise, if it matches the env-configured OBO server
-            (``OBO_MCP_SERVER_NAME`` / ``OBO_MCP_SERVER_MCP_URL``), a remote HTTP
-            MCP server entry is created on the fly. This lets the OBO tool light
-            up across every use-case without editing each ``.mcp.json``.
+        Only the configured OBO server (``OBO_MCP_SERVER_NAME``) ever receives a
+        user bearer — never any other MCP server the client may name (confused
+        deputy). For that server:
+          * if it is already configured (from the use-case ``.mcp.json``) its
+            ``headers.Authorization`` is set to the user's bearer token (provided
+            its URL matches the trusted ``OBO_MCP_SERVER_MCP_URL`` when that env
+            is set);
+          * otherwise a remote HTTP MCP server entry is created on the fly from
+            ``OBO_MCP_SERVER_MCP_URL``, so the OBO tool lights up across every
+            use-case without editing each ``.mcp.json``.
 
         The original registry dict is never mutated (deep-copied first).
         """
@@ -271,17 +274,37 @@ class CopilotAgent:
         for server_name, token in tokens.items():
             if not token:
                 continue
+            # Confused-deputy guard: a user OBO bearer is only ever attached to the
+            # known OBO server (OBO_MCP_SERVER_NAME). Never to any other MCP server
+            # the client may name — even one pre-configured from a use-case
+            # .mcp.json — since that would transmit the user's token to an
+            # unintended endpoint.
+            if server_name != obo_name:
+                logger.warning(
+                    "Ignoring OBO token for non-OBO MCP server '%s' (only '%s' may carry it)",
+                    server_name, obo_name,
+                )
+                continue
             entry = servers.get(server_name)
             if entry is None:
-                # Only auto-create the known OBO server, and only if we have a URL.
-                if server_name == obo_name and obo_url:
+                # Auto-create the known OBO server, but only with a configured URL.
+                if obo_url:
                     entry = {"type": "http", "url": obo_url, "tools": ["*"]}
                     servers[server_name] = entry
                 else:
                     logger.warning(
-                        "OBO token provided for unknown MCP server '%s' — ignoring", server_name
+                        "OBO token provided for '%s' but OBO_MCP_SERVER_MCP_URL is unset — ignoring",
+                        server_name,
                     )
                     continue
+            elif obo_url and entry.get("url") and entry["url"] != obo_url:
+                # A pre-configured OBO-named server whose URL does not match the
+                # trusted OBO URL must not receive the bearer (tampered registry).
+                logger.warning(
+                    "Configured server '%s' url=%r != trusted OBO url — not attaching token",
+                    server_name, entry.get("url"),
+                )
+                continue
             headers = dict(entry.get("headers") or {})
             headers["Authorization"] = f"Bearer {token}"
             entry["headers"] = headers
