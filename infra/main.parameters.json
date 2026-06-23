@@ -8,6 +8,9 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
+    "resourcePrefix": {
+      "value": "${AZURE_RESOURCE_PREFIX}"
+    },
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
     }
