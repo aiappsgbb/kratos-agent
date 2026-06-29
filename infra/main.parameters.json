@@ -11,6 +11,9 @@
     "resourcePrefix": {
       "value": "${AZURE_RESOURCE_PREFIX}"
     },
+    "voiceEnabled": {
+      "value": "${VOICE_ENABLED=false}"
+    },
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
     }

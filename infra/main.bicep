@@ -30,6 +30,9 @@ param storageAccountName string = ''
 @description('Optional prefix prepended to generated resource names. Empty (default) yields names identical to the base template, so the canonical/prod deployment is unaffected. Set per-subscription (e.g. via AZURE_RESOURCE_PREFIX) to avoid cross-subscription resource name collisions.')
 param resourcePrefix string = ''
 
+@description('Enable opt-in voice mode (deploys gpt-realtime + flags backend/frontend)')
+param voiceEnabled bool = false
+
 @description('Path prefix for the agent API on the gateway (set during Foundry portal registration)')
 param agentApiPath string = 'kratos-agent'
 
@@ -142,6 +145,7 @@ module aiFoundry './modules/ai-services.bicep' = {
     tags: tags
     appInsightsId: appInsights.outputs.id
     appInsightsConnectionString: appInsights.outputs.connectionString
+    deployRealtime: voiceEnabled
   }
 }
 
@@ -208,6 +212,8 @@ module agentService './modules/agent-service.bicep' = {
     keyVaultUri: keyVault.outputs.uri
     foundryEndpoint: aiFoundry.outputs.endpoint
     foundryModelDeployment: aiFoundry.outputs.modelDeploymentName
+    voiceEnabled: voiceEnabled
+    voiceDeployment: aiFoundry.outputs.realtimeDeploymentName
     foundryProjectName: aiFoundry.outputs.projectName
     foundryProjectEndpoint: aiFoundry.outputs.projectEndpoint
     bingSearchEndpoint: bingSearch.outputs.endpoint

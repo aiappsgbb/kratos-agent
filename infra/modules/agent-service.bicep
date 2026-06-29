@@ -28,6 +28,12 @@ param aiSearchEndpoint string
 @description('Key Vault URI')
 param keyVaultUri string
 
+@description('Voice mode flag (opt-in speech-to-speech)')
+param voiceEnabled bool = false
+
+@description('gpt-realtime deployment name for voice mode')
+param voiceDeployment string = ''
+
 @description('Microsoft Foundry endpoint')
 param foundryEndpoint string
 
@@ -132,6 +138,8 @@ resource agentService 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'KEY_VAULT_URI', value: keyVaultUri }
             { name: 'FOUNDRY_ENDPOINT', value: foundryEndpoint }
             { name: 'FOUNDRY_MODEL_DEPLOYMENT', value: foundryModelDeployment }
+            { name: 'VOICE_ENABLED', value: string(voiceEnabled) }
+            { name: 'VOICE_DEPLOYMENT', value: voiceDeployment }
             { name: 'FOUNDRY_PROJECT_NAME', value: foundryProjectName }
             { name: 'FOUNDRY_PROJECT_ENDPOINT', value: foundryProjectEndpoint }
             { name: 'FOUNDRY_AGENT_NAME', value: foundryAgentName }

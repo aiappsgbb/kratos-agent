@@ -22,6 +22,21 @@ param modelVersion string = '2026-03-05'
 @description('Deployment SKU capacity (thousands of tokens per minute)')
 param modelCapacity int = 350
 
+@description('Deploy a gpt-realtime model for opt-in voice mode')
+param deployRealtime bool = false
+
+@description('Name of the gpt-realtime deployment (voice mode)')
+param realtimeDeploymentName string = 'gpt-realtime'
+
+@description('Realtime model name')
+param realtimeModelName string = 'gpt-realtime'
+
+@description('Realtime model version')
+param realtimeModelVersion string = '2025-08-28'
+
+@description('Realtime deployment capacity (RPM/TPM units)')
+param realtimeCapacity int = 1
+
 @description('Application Insights resource ID to connect to the project (powers the Foundry Traces tab). Empty = no connection.')
 param appInsightsId string = ''
 
@@ -74,6 +89,25 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
   }
 }
 
+// Opt-in gpt-realtime deployment for voice mode (STT + TTS over WebRTC).
+// Sequenced after the main deployment — model deployments must serialize.
+resource realtimeDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = if (deployRealtime) {
+  parent: aiFoundry
+  name: realtimeDeploymentName
+  dependsOn: [modelDeployment]
+  sku: {
+    name: 'GlobalStandard'
+    capacity: realtimeCapacity
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: realtimeModelName
+      version: realtimeModelVersion
+    }
+  }
+}
+
 // Connect Application Insights to the project so the Foundry portal Traces tab
 // has a data source AND the platform injects the trace connection string into
 // hosted agents (their OpenTelemetry gen_ai spans land here).
@@ -99,6 +133,7 @@ output id string = aiFoundry.id
 output name string = aiFoundry.name
 output endpoint string = aiFoundry.properties.endpoint
 output modelDeploymentName string = modelDeployment.name
+output realtimeDeploymentName string = deployRealtime ? realtimeDeployment.name : ''
 output projectName string = project.name
 output projectEndpoint string = '${aiFoundry.properties.endpoint}api/projects/${project.name}'
 output projectId string = project.id

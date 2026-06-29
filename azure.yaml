@@ -79,6 +79,14 @@ services:
                       node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('out/config.json','utf8'));c.auth=JSON.parse(process.argv[1]);fs.writeFileSync('out/config.json',JSON.stringify(c));" "$AUTH_JSON"
                       echo "Merged OBO auth config into config.json (scope=${SCOPE})"
                     fi
+                    # Surface the opt-in voice flag to the static frontend so the
+                    # mic button only appears when VOICE_ENABLED=true server-side.
+                    if [ -n "${VOICE_ENABLED}" ]; then
+                      [ -f out/config.json ] || echo "{}" > out/config.json
+                      VE="$(printf '%s' "${VOICE_ENABLED}" | tr '[:upper:]' '[:lower:]')"
+                      node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('out/config.json','utf8'));c.voiceEnabled=(process.argv[1]==='true');fs.writeFileSync('out/config.json',JSON.stringify(c));" "$VE"
+                      echo "Merged voiceEnabled=${VE} into config.json"
+                    fi
                     # Emit a basePath-aware staticwebapp.config.json into out/ so the
                     # SWA EasyAuth 401 redirect + /api/* gating stay inside the mount
                     # path (e.g. /kratos) when hosted behind Front Door. Empty base
