@@ -324,6 +324,11 @@ output AGENT_SERVICE_URL string = agentService.outputs.url
 output FOUNDRY_ENDPOINT string = aiFoundry.outputs.endpoint
 output FOUNDRY_MODEL_DEPLOYMENT string = aiFoundry.outputs.modelDeploymentName
 output AZURE_AI_PROJECT_ENDPOINT string = aiFoundry.outputs.projectEndpoint
+// Extension contract drift (per foundry-hosted-agents skill): azure.ai.agents
+// extension v0.1.31+ reads FOUNDRY_PROJECT_ENDPOINT, older versions read
+// AZURE_AI_PROJECT_ENDPOINT. Emit both with the same value until the
+// extension settles on one name.
+output FOUNDRY_PROJECT_ENDPOINT string = aiFoundry.outputs.projectEndpoint
 // Full ARM resource ID of the Foundry project. Surfacing it as an azd output
 // writes AZURE_AI_PROJECT_ID into the environment during `azd provision`, so the
 // `azure.ai.agent` extension can deploy the hosted agent without a manual
