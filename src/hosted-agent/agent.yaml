@@ -18,7 +18,7 @@ environment_variables:
     value: ${FOUNDRY_MODEL_DEPLOYMENT}
   # AI Services base URL (fallback if platform doesn't inject FOUNDRY_ENDPOINT)
   - name: AI_SERVICES_ENDPOINT
-    value: ${AZURE_AI_PROJECT_ENDPOINT}
+    value: ${FOUNDRY_ENDPOINT}
   # Capture prompts + completions (gen_ai.input/output.messages) on the
   # invoke_agent span so the Foundry Traces tab shows the LLM interaction
   # details. Off by default in OTel; we opt in here.

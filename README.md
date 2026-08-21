@@ -214,6 +214,7 @@ SKIP_BROWSER=1 ./run.sh  # API-only, skips the Chromium download
 `run.sh` reads `AZURE_STATIC_WEB_APP_URL` and `AGENT_SERVICE_URL` from `azd env get-values`, so it always follows whichever environment is currently selected. Override with `KRATOS_FRONTEND_URL` / `KRATOS_BACKEND_URL` to point it elsewhere. It fails fast rather than falling back to a stale default.
 
 See [`.copilot/skills/e2e-smoke/SKILL.md`](./.copilot/skills/e2e-smoke/SKILL.md) for the spec catalogue, env-var reference, and tips for running just the API or just the UX project.
+See [`docs/runbooks/post-azd-setup-manual.md`](./docs/runbooks/post-azd-setup-manual.md) for the full post-`azd up` setup and verification checklist.
 
 ---
 
