@@ -104,7 +104,7 @@ Gotchas that have bitten before:
   `az storage account update --public-network-access Enabled` reports success
   and then silently reverts. So the skills upload cannot run from *any* host
   outside the VNet: not a GitHub-hosted runner, and not a developer laptop.
-  `hooks/postdeploy.sh` skips the upload when nothing asked for it, and fails
+  `hooks/postdeploy.py` skips the upload when nothing asked for it, and fails
   with `AuthorizationFailure` / "request may be blocked by network rules" when
   something did. That error is a *network* denial, not a missing role — check
   the private endpoint before touching RBAC.
@@ -123,13 +123,11 @@ Gotchas that have bitten before:
   `ClusterExecFailure ... code: 500`.
 - Hooks must not prompt mid-run. `azd` repaints its progress table over hook
   output, which silently ate the skills menu and its prompt. Questions belong
-  in `hooks/select-use-cases.sh` at preprovision, before that table starts;
-  `hooks/postdeploy.sh` reads the answer and never prompts.
-  Two mechanisms enforce that, so don't drop either: `azure.yaml` passes
-  `--from-deploy`, which disables prompting in the script outright, and the
-  `postdeploy` hook is deliberately **not** `interactive`, so azd hands it no
-  terminal to read from. Run `./hooks/postdeploy.sh` by hand (no flag) and the
-  menu comes back.
+  in `hooks/preprovision.py` at preprovision, before that table starts;
+  `hooks/postdeploy.py` reads the answer and never prompts.
+  The `postdeploy` hook is deliberately **not** `interactive`, so azd hands it
+  no terminal to read from. Run `azd hooks run preprovision --interactive`
+  followed by `azd hooks run postdeploy` to upload after deployment.
 - Never use `|| true` on a test that is meant to gate a release.
 - Entra directory operations are not Azure RBAC. Granting admin consent
   (`oauth2PermissionGrants` with `AllPrincipals`) needs a directory role —
@@ -138,7 +136,7 @@ Gotchas that have bitten before:
   `infra/modules/obo-entra-app.bicep` and failed the whole provision with a bare
   `Authorization_RequestDenied` for anyone whose tenant admin-gates consent.
   Bicep cannot continue past a forbidden resource, so it now lives in
-  `hooks/grant-obo-consent.sh` (postprovision, best-effort). Keep privileged
+  `hooks/postprovision.py` (postprovision, best-effort). Keep privileged
   directory writes out of Bicep for this reason — the app registration may still
   *request* permissions declaratively, which needs no special rights.
 
