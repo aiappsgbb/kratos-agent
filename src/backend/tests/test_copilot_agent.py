@@ -54,6 +54,35 @@ async def test_copilot_agent_start_stop(settings):
 
 
 @pytest.mark.asyncio
+async def test_cloud_provider_registers_refreshable_bearer_token(settings):
+    """The SDK must receive its supported callback key and callback signature."""
+    cloud_agent = CopilotAgent(settings.model_copy(update={"local_mode": False}))
+    mock_client = AsyncMock()
+    azure_token_provider = AsyncMock(return_value="test-value")
+
+    with (
+        patch("app.services.copilot_agent.CopilotClient", return_value=mock_client),
+        patch("app.services.copilot_agent.ManagedIdentityCredential", return_value=AsyncMock()),
+        patch("app.services.copilot_agent._HAS_CLI_CREDENTIAL", False),
+        patch(
+            "app.services.copilot_agent.get_bearer_token_provider",
+            return_value=azure_token_provider,
+        ) as provider_factory,
+    ):
+        await cloud_agent.start()
+
+    provider_factory.assert_called_once()
+    provider = cloud_agent._build_provider_config()
+
+    assert provider is not None
+    assert "token_provider" not in provider
+    assert provider["bearer_token_provider"] is cloud_agent._token_provider
+    result = await provider["bearer_token_provider"]({"provider_name": "default", "session_id": "test-session"})
+    assert result == "test-value"
+    azure_token_provider.assert_awaited_once_with()
+
+
+@pytest.mark.asyncio
 async def test_copilot_agent_run_streams_content(copilot_agent):
     """Test that run() yields ContentEvent from SDK assistant.message.delta events."""
     mock_session = AsyncMock()
