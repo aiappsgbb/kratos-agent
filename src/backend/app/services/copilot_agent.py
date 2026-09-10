@@ -487,12 +487,9 @@ class CopilotAgent:
                 )
 
             # Cloud, or local opted-in to the APIM gateway: authenticate to the
-            # Azure endpoint. NOTE: the Copilot SDK's backing engine authenticates
-            # to the provider with its OWN ambient Azure credentials
-            # (DefaultAzureCredential): Managed Identity in the Foundry sandbox /
-            # Container App, an EnvironmentCredential service principal, or the az
-            # CLI locally. The token_provider we set here is best-effort and may be
-            # ignored by the engine — so a failure to pre-warm it is NOT fatal.
+            # Azure endpoint. The SDK expects a one-argument bearer-token callback,
+            # while azure-identity returns a zero-argument callback. Adapt the
+            # signatures so the runtime can request a fresh token for every call.
             #   * Cloud sandbox   → Managed Identity (with az-CLI fallback for dev).
             #   * Local + gateway → az CLI credential (operator is `az login`-ed),
             #     so LLM calls flow through the APIM gateway and are captured in
@@ -509,20 +506,24 @@ class CopilotAgent:
             else:
                 self._credential = ManagedIdentityCredential()
             scope = "https://cognitiveservices.azure.com/.default"
-            self._token_provider = get_bearer_token_provider(self._credential, scope)
+            azure_token_provider = get_bearer_token_provider(self._credential, scope)
+
+            async def copilot_token_provider(_args: dict) -> str:
+                return await azure_token_provider()
+
+            self._token_provider = copilot_token_provider
 
             # Pre-warm the token so a request doesn't pay first-token latency. This
-            # is best-effort: the engine has its own ambient credential, so a
-            # failure here is only a warning (e.g. local container without az CLI —
-            # the engine still authenticates via its ambient managed identity / SP).
+            # is best-effort because the SDK callback retries token acquisition when
+            # the first model request is sent.
             try:
                 t0 = time.monotonic()
                 await self._credential.get_token(scope)
                 logger.info("Token pre-warmed successfully in %.1fms", (time.monotonic() - t0) * 1000)
             except Exception:
                 logger.warning(
-                    "Token pre-warm failed (non-fatal — engine uses its own ambient credential). "
-                    "If LLM calls fail, ensure ambient Azure creds are available (Managed Identity, "
+                    "Token pre-warm failed (non-fatal — the provider callback will retry). "
+                    "If LLM calls fail, ensure Azure credentials are available (Managed Identity, "
                     "AZURE_CLIENT_ID/SECRET/TENANT_ID, or `az login`).",
                     exc_info=True,
                 )
@@ -686,7 +687,7 @@ class CopilotAgent:
         return {
             "type": "azure",
             "base_url": llm_base,
-            "token_provider": self._token_provider,
+            "bearer_token_provider": self._token_provider,
             "wire_api": "responses",
         }
 
