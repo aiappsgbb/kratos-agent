@@ -66,30 +66,25 @@ services:
         dist: out
         hooks:
             predeploy:
-                name: predeploy
                 kind: python
                 run: ./scripts/prepare_deploy.py
                 dir: .
 hooks:
     postdeploy:
-        name: postdeploy
         kind: python
         run: ./hooks/postdeploy.py
         dir: .
         # Nothing here may stop and wait for user input at the end of a deploy.
         interactive: false
     postprovision:
-        name: postprovision
         kind: python
         run: ./hooks/postprovision.py
         dir: .
     predeploy:
-        name: predeploy
         kind: python
         run: ./hooks/predeploy.py
         dir: .
     preprovision:
-        name: preprovision
         kind: python
         run: ./hooks/preprovision.py
         dir: .

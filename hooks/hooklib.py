@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -23,6 +24,9 @@ def run(
     check: bool = False,
     capture: bool = True,
 ) -> subprocess.CompletedProcess[str]:
+    executable = shutil.which(args[0])
+    if executable:
+        args = [executable, *args[1:]]
     return subprocess.run(
         args,
         cwd=ROOT,

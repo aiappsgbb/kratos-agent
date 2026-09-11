@@ -37,6 +37,15 @@ class HookTests(unittest.TestCase):
             ["retail-banking", "insurance"],
         )
 
+    def test_run_resolves_windows_command_shims(self) -> None:
+        with (
+            patch.object(hooklib.shutil, "which", return_value=r"C:\tools\az.cmd"),
+            patch.object(hooklib.subprocess, "run", return_value=completed()) as runner,
+        ):
+            hooklib.run(["az", "account", "show"])
+
+        self.assertEqual(runner.call_args.args[0][0], r"C:\tools\az.cmd")
+
     def test_choose_use_cases_uses_noninteractive_environment_override(self) -> None:
         selection_path = self.enterContext(tempfile.TemporaryDirectory())
         path = Path(selection_path) / "selection"
