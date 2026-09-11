@@ -1,6 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
 requiredVersions:
+    # Native Python hooks remove the Bash/WSL/Git Bash ambiguity on Windows.
+    # azd checks this before running any hook and prints an upgrade link when
+    # the installed CLI is too old.
+    azd: '>=1.33.0'
     extensions:
         azure.ai.agents: '>=0.1.25-preview'
 name: kratos-agent
@@ -62,104 +66,26 @@ services:
         dist: out
         hooks:
             predeploy:
-                name: predeploy
-                kind: sh
-                shell: sh
-                run: |
-                    # config.json tells the static frontend where the backend API is.
-                    # When hosted behind Front Door under a sub-path (NEXT_PUBLIC_BASE_PATH,
-                    # e.g. /kratos), the embedded UI calls the backend SAME-ORIGIN at
-                    # <basePath>/api/* — Front Door routes /kratos/api/* to the Container
-                    # App (stripping the /kratos prefix). This avoids CORS entirely.
-                    # In standalone (root) deployments there is no sub-path, so we point
-                    # config.json at the backend's own URL (AGENT_SERVICE_URL).
-                    BP="$(printf '%s' "${NEXT_PUBLIC_BASE_PATH:-}" | sed 's#/*$##')"
-                    if [ -n "$BP" ]; then
-                      echo "{\"apiUrl\":\"${BP}\"}" > out/config.json
-                      echo "Injected same-origin config.json with apiUrl=${BP} (behind Front Door)"
-                    elif [ -n "${AGENT_SERVICE_URL}" ]; then
-                      echo "{\"apiUrl\":\"${AGENT_SERVICE_URL}\"}" > out/config.json
-                      echo "Injected config.json with apiUrl=${AGENT_SERVICE_URL}"
-                    fi
-                    # Merge the OBO sign-in config (Entra app + MCP scope) into
-                    # config.json so MSAL.js can sign the user in and acquire a
-                    # token for the OBO MCP server. Skipped if outputs are unset.
-                    if [ -n "${OBO_CLIENT_APP_CLIENT_ID}" ] && [ -n "${OBO_TENANT_ID}" ] && [ -n "${OBO_SERVER_APP_IDENTIFIER_URI}" ]; then
-                      [ -f out/config.json ] || echo "{}" > out/config.json
-                      SCOPE="${OBO_SERVER_APP_IDENTIFIER_URI}/${OBO_SERVER_APP_SCOPE_VALUE:-access_as_user}"
-                      AUTH_JSON="{\"clientId\":\"${OBO_CLIENT_APP_CLIENT_ID}\",\"tenantId\":\"${OBO_TENANT_ID}\",\"mcpScope\":\"${SCOPE}\",\"mcpServerName\":\"${OBO_MCP_SERVER_NAME:-graph-obo}\"}"
-                      node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('out/config.json','utf8'));c.auth=JSON.parse(process.argv[1]);fs.writeFileSync('out/config.json',JSON.stringify(c));" "$AUTH_JSON"
-                      echo "Merged OBO auth config into config.json (scope=${SCOPE})"
-                    fi
-                    # Emit a basePath-aware staticwebapp.config.json into out/ so the
-                    # SWA EasyAuth 401 redirect + /api/* gating stay inside the mount
-                    # path (e.g. /kratos) when hosted behind Front Door. Empty base
-                    # path → straight copy (standalone root deployment).
-                    if [ -f staticwebapp.config.json ]; then
-                      if [ -n "$BP" ]; then
-                        sed "s#/.auth/login/aad#${BP}/.auth/login/aad#g; s#\"/api/\*\"#\"${BP}/api/*\"#g" \
-                          staticwebapp.config.json > out/staticwebapp.config.json
-                        echo "Wrote basePath-aware staticwebapp.config.json (basePath=${BP})"
-                      else
-                        cp staticwebapp.config.json out/staticwebapp.config.json
-                      fi
-                    fi
+                kind: python
+                run: ./scripts/prepare_deploy.py
+                dir: .
 hooks:
     postdeploy:
-        name: postdeploy
-        kind: sh
-        shell: sh
-        run: |
-            # Grant the Foundry hosted-agent instance identity its least-privilege
-            # data-plane roles. This identity is created by `azd ai agent deploy`
-            # after provisioning, so Bicep cannot assign its roles — this hook does.
-            # Best-effort: never block the rest of postdeploy on it.
-            ./hooks/assign-agent-roles.sh || echo "⚠️  Agent role assignment had issues (see above); continuing."
-            # --from-deploy forbids the script from prompting. Which skills to
-            # upload was already asked at preprovision, before azd started
-            # painting its progress table over hook output.
-            ./hooks/postdeploy.sh --from-deploy
-        # Deliberately NOT interactive: nothing here may stop and wait for the
-        # user at the end of a deploy. Belt and braces with --from-deploy above.
+        kind: python
+        run: ./hooks/postdeploy.py
+        dir: .
+        # Nothing here may stop and wait for user input at the end of a deploy.
+        interactive: false
     postprovision:
-        name: postprovision
-        kind: sh
-        shell: sh
-        run: |
-            # The azure.ai.agents extension requires AZURE_TENANT_ID in the azd
-            # environment to deploy the hosted agent and auto-assign Foundry User
-            # to its identity. azd does not populate this automatically, so set it
-            # from the current Azure CLI session if it isn't already present.
-            if [ -z "${AZURE_TENANT_ID:-}" ]; then
-                TID="$(az account show --query tenantId -o tsv 2>/dev/null || true)"
-                if [ -n "$TID" ]; then
-                    azd env set AZURE_TENANT_ID "$TID"
-                    echo "Set AZURE_TENANT_ID=$TID"
-                fi
-            fi
-            echo "Post-provisioning: configuring services..."
-            # Tenant-wide admin consent for the OBO server app's Graph User.Read.
-            # Lives here rather than in Bicep because it needs an Entra directory
-            # role that most deployers do not have, and Bicep cannot continue past
-            # a forbidden resource. Best-effort: never blocks the deploy.
-            ./hooks/grant-obo-consent.sh || echo "⚠️  OBO admin consent step had issues (see above); continuing."
-            echo "Deployment complete."
+        kind: python
+        run: ./hooks/postprovision.py
+        dir: .
     predeploy:
-        name: predeploy
-        kind: sh
-        shell: sh
-        run: |
-            BUILD_TS="$(date +%s)"
-            azd env set KRATOS_BUILD_TS "$BUILD_TS"
-            echo "KRATOS_BUILD_TS=$BUILD_TS (forces new hosted-agent version)"
+        kind: python
+        run: ./hooks/predeploy.py
+        dir: .
     preprovision:
-        name: preprovision
-        kind: sh
-        shell: sh
-        # Ask which skills to upload here, at the very start, rather than at
-        # upload time. azd repaints its progress table over anything a hook
-        # prints once the run is under way, which was swallowing the menu and
-        # the prompt. hooks/postdeploy.sh reads the answer and uploads without
-        # prompting.
-        run: ./hooks/select-use-cases.sh
+        kind: python
+        run: ./hooks/preprovision.py
+        dir: .
         interactive: true

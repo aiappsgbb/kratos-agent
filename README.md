@@ -108,6 +108,7 @@ The backend proxies all chat requests to the Foundry hosted agent via the Invoca
 | Hosted agent protocol | `azure-ai-agentserver-invocations` | ≥1.0.0b3 |
 | Database | Azure Cosmos DB (serverless) / SQLite (local) | — |
 | Blob storage | Azure Storage / Azurite (local) | — |
+| Knowledge retrieval | Bundled synthetic demo documents / optional Azure AI Search | — |
 | PDF rendering | Playwright Chromium | — |
 | Telemetry | OpenTelemetry + Azure Monitor Exporter | — |
 | Package manager | APM CLI (`apm-cli`) | ≥0.5.0 |
@@ -134,16 +135,44 @@ Azure services provisioned via `azd up`:
 
 ### Prerequisites
 
-- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/) ≥1.12
+- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/) 1.33 or newer
 - [Azure CLI](https://learn.microsoft.com/cli/azure/)
 - [Docker](https://www.docker.com/)
 - [Node.js 20+](https://nodejs.org/)
 - [Python 3.11+](https://www.python.org/)
 
+The deployment uses native Python hooks so the same `azd up` path works in
+PowerShell, Command Prompt, macOS, Linux, and WSL without Git Bash.
+
+Check your Azure Developer CLI version:
+
+```text
+azd version
+```
+
+If `azd` is already installed but older than 1.33, update it:
+
+```text
+azd update
+```
+
+If `azd` is not installed, use the command for your operating system:
+
+| Operating system | Install command |
+|---|---|
+| Windows | `winget install microsoft.azd` |
+| macOS | `brew install azure/azd/azd` |
+| Linux or WSL | `curl -fsSL https://aka.ms/install-azd.sh \| bash` |
+
+Restart the terminal after installation if `azd version` is still not found.
+The version requirement is also enforced by `azure.yaml`; an older CLI stops
+before provisioning and links to the Azure Developer CLI installer.
+
 ### Deploy to Azure
 
-```bash
+```text
 git clone https://github.com/aiappsgbb/kratos-agent && cd kratos-agent
+azd auth login
 azd up
 ```
 
@@ -430,6 +459,12 @@ Kratos ships with four configurable agent personas, each with its own system pro
 | **HR Onboarding** | `use-cases/hr-onboarding/` | People-team co-pilot — drafts pre-hire records, briefs managers on their teams, approves PTO with explicit user confirmation on every write, against the in-repo `workday-mcp-server` mock |
 | **IT Service Desk L1** | `use-cases/it-service-desk/` | L1 support co-pilot — triages tickets, searches the KB, surfaces VIP queues, and resolves/reassigns tickets with explicit user confirmation on every write, against the in-repo `servicenow-mcp-server` mock |
 | **Clinician Visit Prep** | `use-cases/clinician-visit-prep/` | Outpatient-clinic co-pilot — daily schedule briefings, pre-visit summaries with derived clinical focus, lab trends, and med-problem reconciliation against the in-repo `epic-fhir-mcp-server` mock (FHIR R4 resources) |
+
+The insurance demo includes a small synthetic policy corpus under
+`use-cases/insurance/knowledge-base/`, so its policy-wording prompts work
+immediately after `azd up` without provisioning a paid search service. The
+`rag_search` tool uses Azure AI Search instead when `AZURE_AI_SEARCH_ENDPOINT`
+is configured, preserving the bring-your-own knowledge-base path.
 
 Each use case has:
 - `SYSTEM_PROMPT.md` — Agent persona and behavior instructions
@@ -785,10 +820,11 @@ kratos-agent/
 │   └── insurance/                  # Insurance agent
 │
 └── hooks/
-    ├── assign-agent-roles.sh       # Grants the hosted agent its data-plane roles
-    ├── grant-obo-consent.sh        # Admin-consents the OBO app's Graph permission
-    ├── postdeploy.sh               # Uploads the selected skills after deploy
-    └── select-use-cases.sh         # Asks which skills to upload (runs first)
+    ├── hooklib.py                  # Cross-platform azd hook implementation
+    ├── preprovision.py             # Asks which skills to upload (runs first)
+    ├── postprovision.py            # Sets tenant context and attempts OBO consent
+    ├── predeploy.py                # Forces a new hosted-agent version
+    └── postdeploy.py               # Assigns agent roles and uploads selected skills
 ```
 
 ---
@@ -976,8 +1012,8 @@ Privileged Role Administrator, or Cloud Application Administrator. Azure RBAC
 does not include it, so being subscription **Owner** is not enough. This trips
 people up because every other part of the deploy is pure Azure RBAC.
 
-The consent therefore lives in `hooks/grant-obo-consent.sh` at postprovision
-rather than in Bicep: Bicep cannot continue past a forbidden resource, so a
+The consent therefore lives in the cross-platform `hooks/postprovision.py`
+hook rather than in Bicep: Bicep cannot continue past a forbidden resource, so a
 consent it was not allowed to make failed the entire provision with a bare
 `Authorization_RequestDenied` and no clue that the cause was a directory role.
 The hook attempts the grant, and if it is refused it says so and lets the
@@ -1002,28 +1038,31 @@ The answer is recorded and acted on after the deploy finishes.
 **Why it is asked up front:** `azd` paints a live progress table for the whole
 run and repaints over anything a hook prints. Asking at upload time meant the
 menu lost its last options and the prompt itself, so you were answering a
-question you could not see. `hooks/select-use-cases.sh` runs before that table
-starts; `hooks/postdeploy.sh` then uploads without prompting.
+question you could not see. `hooks/preprovision.py` runs before that table
+starts; `hooks/postdeploy.py` then uploads without prompting.
 
-A deploy will never stop and wait for you at the end: `azd` invokes the hook
-with `--from-deploy`, which disables prompting entirely. If no answer was
-recorded, it says so and uploads nothing rather than asking.
+A deploy will never stop and wait for you at the end: the postdeploy hook is
+non-interactive. If no answer was recorded, it says so and uploads nothing
+rather than asking.
 
 Press Enter to skip — nothing is uploaded unless you ask for it.
 
-To choose without being prompted:
+To choose without being prompted, store the choice in the selected azd
+environment. These commands work in PowerShell, Command Prompt, Bash, and zsh:
 
-```bash
-KRATOS_UPLOAD_USE_CASES=all azd up                      # every use-case
-KRATOS_UPLOAD_USE_CASES=retail-banking,insurance azd up # just these
-KRATOS_UPLOAD_USE_CASES=none azd up                     # skip
+```text
+azd env set KRATOS_UPLOAD_USE_CASES all
+azd env set KRATOS_UPLOAD_USE_CASES retail-banking,insurance
+azd env set KRATOS_UPLOAD_USE_CASES none
+azd up
 ```
 
-To upload later, without redeploying, run the hook directly — that gives you
-the same menu, with nothing painting over it:
+To upload later without redeploying, run the hooks directly. This works from
+PowerShell, Command Prompt, Bash, and zsh:
 
-```bash
-./hooks/postdeploy.sh
+```text
+azd hooks run preprovision --interactive
+azd hooks run postdeploy
 ```
 
 With no terminal at all (CI, `--no-prompt`, a piped shell) the upload is

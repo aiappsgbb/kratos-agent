@@ -14,6 +14,32 @@ env:
   NODE_VERSION: "20"
 
 jobs:
+  hook-portability:
+    name: Hooks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: Azure/setup-azd@v2.3.0
+
+      - name: Run hook unit tests
+        run: python -m unittest hooks.test_hooklib
+
+      - name: Create local azd environment
+        run: azd env new hook-ci --no-prompt
+
+      - name: Run preprovision through azd
+        env:
+          KRATOS_UPLOAD_USE_CASES: none
+        run: azd hooks run preprovision --no-prompt
+
   # ─── Stage 1: Lint & Static Analysis ───
   lint:
     name: Lint & Static Analysis
