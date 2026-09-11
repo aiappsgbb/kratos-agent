@@ -108,6 +108,7 @@ The backend proxies all chat requests to the Foundry hosted agent via the Invoca
 | Hosted agent protocol | `azure-ai-agentserver-invocations` | ≥1.0.0b3 |
 | Database | Azure Cosmos DB (serverless) / SQLite (local) | — |
 | Blob storage | Azure Storage / Azurite (local) | — |
+| Knowledge retrieval | Bundled synthetic demo documents / optional Azure AI Search | — |
 | PDF rendering | Playwright Chromium | — |
 | Telemetry | OpenTelemetry + Azure Monitor Exporter | — |
 | Package manager | APM CLI (`apm-cli`) | ≥0.5.0 |
@@ -458,6 +459,12 @@ Kratos ships with four configurable agent personas, each with its own system pro
 | **HR Onboarding** | `use-cases/hr-onboarding/` | People-team co-pilot — drafts pre-hire records, briefs managers on their teams, approves PTO with explicit user confirmation on every write, against the in-repo `workday-mcp-server` mock |
 | **IT Service Desk L1** | `use-cases/it-service-desk/` | L1 support co-pilot — triages tickets, searches the KB, surfaces VIP queues, and resolves/reassigns tickets with explicit user confirmation on every write, against the in-repo `servicenow-mcp-server` mock |
 | **Clinician Visit Prep** | `use-cases/clinician-visit-prep/` | Outpatient-clinic co-pilot — daily schedule briefings, pre-visit summaries with derived clinical focus, lab trends, and med-problem reconciliation against the in-repo `epic-fhir-mcp-server` mock (FHIR R4 resources) |
+
+The insurance demo includes a small synthetic policy corpus under
+`use-cases/insurance/knowledge-base/`, so its policy-wording prompts work
+immediately after `azd up` without provisioning a paid search service. The
+`rag_search` tool uses Azure AI Search instead when `AZURE_AI_SEARCH_ENDPOINT`
+is configured, preserving the bring-your-own knowledge-base path.
 
 Each use case has:
 - `SYSTEM_PROMPT.md` — Agent persona and behavior instructions
