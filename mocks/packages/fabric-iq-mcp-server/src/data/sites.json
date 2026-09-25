@@ -1,0 +1,11 @@
+[
+  {
+    "id": "PLANT-RIVERTON",
+    "name": "Aster Works - Riverton",
+    "region": "Riverton Valley",
+    "status": "Watch",
+    "timezone": "America/Chicago",
+    "output_target_units_per_day": 4800,
+    "notes": "Packaging and secondary finish lines run near capacity during the evening shift."
+  }
+]

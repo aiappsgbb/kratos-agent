@@ -1,0 +1,100 @@
+[
+  {
+    "id": "DOC-RIVERTON-101",
+    "source_id": "SRC-RIVERTON-101",
+    "title": "Line 2 packaging label registration recovery",
+    "category": "process",
+    "plant_id": "PLANT-RIVERTON",
+    "machine_id": "MACH-RIV-2B",
+    "tags": [
+      "packaging",
+      "label",
+      "registration",
+      "alignment",
+      "LABEL-DRIFT",
+      "CP-2200"
+    ],
+    "summary": "Recovery procedure for LABEL-DRIFT on the CP-2200 secondary packaging case packer on Line 2 at the Riverton plant.",
+    "content": "Confirm case index marks are aligned with the label sensor before restarting the line. Set the side register to +0.6 mm and re-center the carton guide. Run a 12-pack validation before returning to the full-speed mode, and inspect the film feed tension if the drift repeats.",
+    "citations": [
+      {
+        "source_id": "SRC-RIVERTON-101",
+        "title": "Line 2 packaging label registration recovery",
+        "section": "Recovery checklist",
+        "url": "https://docs.example.com/asterworks/riverton/line2/label-registration-recovery"
+      },
+      {
+        "source_id": "SRC-RIVERTON-110",
+        "title": "Riverton packaging sensor calibration",
+        "section": "Sensor setup",
+        "url": "https://docs.example.com/asterworks/riverton/quality/sensor-calibration"
+      }
+    ],
+    "last_updated": "2026-09-10T08:20:00-05:00",
+    "confidence": 0.97
+  },
+  {
+    "id": "DOC-RIVERTON-102",
+    "source_id": "SRC-RIVERTON-102",
+    "title": "Carton jam clearance and lockout",
+    "category": "safety",
+    "plant_id": "PLANT-RIVERTON",
+    "machine_id": "MACH-RIV-2A",
+    "tags": [
+      "safety",
+      "jam",
+      "lockout",
+      "carton"
+    ],
+    "summary": "Required steps for clearing a carton jam while preventing conveyor restart hazards on the secondary packer.",
+    "content": "Place the line in safe stop, verify the carryway is below 0.3 m/s, and use lockout/tagout before opening the guard. Remove material with hand tools only, and never reach across the transfer section until the E-stop reset test passes.",
+    "citations": [
+      {
+        "source_id": "SRC-RIVERTON-102",
+        "title": "Carton jam clearance and lockout",
+        "section": "Lockout and hazard control",
+        "url": "https://docs.example.com/asterworks/riverton/line2/carton-jam-lockout"
+      },
+      {
+        "source_id": "SRC-RIVERTON-118",
+        "title": "Riverton safety interactions",
+        "section": "Guard access",
+        "url": "https://docs.example.com/asterworks/riverton/safety/guard-access"
+      }
+    ],
+    "last_updated": "2026-09-02T13:15:00-05:00",
+    "confidence": 0.95
+  },
+  {
+    "id": "DOC-RIVERTON-103",
+    "source_id": "SRC-RIVERTON-103",
+    "title": "Line 2 glue bead and seam check standard",
+    "category": "maintenance",
+    "plant_id": "PLANT-RIVERTON",
+    "machine_id": "MACH-RIV-2C",
+    "tags": [
+      "glue",
+      "seam",
+      "maintenance",
+      "quality"
+    ],
+    "summary": "Inspection and maintenance standard to keep the glue bead profile stable during medium-rate packaging runs.",
+    "content": "Inspect the glue bead width every 45 minutes during a standard run. If bead spread exceeds 1.8 mm, reduce speed by 10% and verify nozzle temperature remains within 42-46C. Replace the applicator tip whenever the bead edge shows scalloping for two consecutive checks.",
+    "citations": [
+      {
+        "source_id": "SRC-RIVERTON-103",
+        "title": "Line 2 glue bead and seam check standard",
+        "section": "Inspection timing",
+        "url": "https://docs.example.com/asterworks/riverton/line2/glue-bead-standard"
+      },
+      {
+        "source_id": "SRC-RIVERTON-121",
+        "title": "Maintenance check frequency",
+        "section": "Tool wear",
+        "url": "https://docs.example.com/asterworks/riverton/maintenance/tool-wear"
+      }
+    ],
+    "last_updated": "2026-08-27T09:00:00-05:00",
+    "confidence": 0.93
+  }
+]

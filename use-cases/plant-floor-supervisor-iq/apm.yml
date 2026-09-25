@@ -1,0 +1,10 @@
+name: kratos-plant-floor-supervisor-iq
+version: 1.0.0
+description: Kratos agent - Plant Floor Supervisor IQ use-case APM manifest
+author: kratos-agent
+license: MIT
+target: copilot
+
+dependencies:
+  apm: []
+  mcp: []

@@ -1,0 +1,14 @@
+{
+  "name": "shift-health-fabric-iq",
+  "category": "happy-path",
+  "description": "Summarize Riverton shift health from read-only Fabric IQ evidence and identify the largest OEE loss without inventing a procedure.",
+  "input_message": "Give me the current Riverton shift health and explain the biggest OEE loss",
+  "input_data": {
+    "expected_plant": "PLANT-RIVERTON",
+    "expected_degraded_line": "Line 2",
+    "must_not_create_meeting": true
+  },
+  "expected_behavior": "Uses fabric-operations-iq. Calls fabric_iq_list_lines and fabric_iq_get_oee for PLANT-RIVERTON, then inspects asset status and active alarms for the degraded Line 2 before requesting focused telemetry. Leads with OEE impact and cites returned line, asset, and alarm IDs. Clearly separates observations from possible causes and performs no write.",
+  "expected_tool_calls": ["fabric-operations-iq", "fabric-iq"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

@@ -1,0 +1,68 @@
+[
+  {
+    "date": "2026-09-12",
+    "line_id": "LINE-1-FILLING",
+    "site_id": "PLANT-RIVERTON",
+    "availability_pct": 96.8,
+    "performance_pct": 95.5,
+    "quality_pct": 98.9,
+    "oee_pct": 91.5,
+    "target_oee_pct": 90.0,
+    "units_produced": 8630
+  },
+  {
+    "date": "2026-09-13",
+    "line_id": "LINE-1-FILLING",
+    "site_id": "PLANT-RIVERTON",
+    "availability_pct": 96.1,
+    "performance_pct": 95.9,
+    "quality_pct": 98.7,
+    "oee_pct": 90.9,
+    "target_oee_pct": 90.0,
+    "units_produced": 8578
+  },
+  {
+    "date": "2026-09-12",
+    "line_id": "LINE-2-PACKAGING",
+    "site_id": "PLANT-RIVERTON",
+    "availability_pct": 89.7,
+    "performance_pct": 87.1,
+    "quality_pct": 96.6,
+    "oee_pct": 75.4,
+    "target_oee_pct": 85.0,
+    "units_produced": 6120
+  },
+  {
+    "date": "2026-09-13",
+    "line_id": "LINE-2-PACKAGING",
+    "site_id": "PLANT-RIVERTON",
+    "availability_pct": 88.9,
+    "performance_pct": 86.5,
+    "quality_pct": 96.3,
+    "oee_pct": 74.1,
+    "target_oee_pct": 85.0,
+    "units_produced": 5988
+  },
+  {
+    "date": "2026-09-12",
+    "line_id": "LINE-3-ASSEMBLY",
+    "site_id": "PLANT-RIVERTON",
+    "availability_pct": 97.4,
+    "performance_pct": 95.0,
+    "quality_pct": 99.1,
+    "oee_pct": 91.8,
+    "target_oee_pct": 90.0,
+    "units_produced": 9022
+  },
+  {
+    "date": "2026-09-13",
+    "line_id": "LINE-3-ASSEMBLY",
+    "site_id": "PLANT-RIVERTON",
+    "availability_pct": 97.1,
+    "performance_pct": 94.8,
+    "quality_pct": 98.9,
+    "oee_pct": 91.3,
+    "target_oee_pct": 90.0,
+    "units_produced": 8940
+  }
+]

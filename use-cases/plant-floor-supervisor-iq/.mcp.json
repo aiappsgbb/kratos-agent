@@ -1,0 +1,20 @@
+{
+  "fabric-iq": {
+    "type": "local",
+    "command": "fabric-iq-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  },
+  "foundry-iq": {
+    "type": "local",
+    "command": "foundry-iq-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  },
+  "work-iq": {
+    "type": "local",
+    "command": "work-iq-mcp-server",
+    "args": [],
+    "tools": ["*"]
+  }
+}

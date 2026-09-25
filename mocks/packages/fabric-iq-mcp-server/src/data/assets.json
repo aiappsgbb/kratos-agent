@@ -1,0 +1,59 @@
+[
+  {
+    "id": "ASSET-1-FILLER",
+    "site_id": "PLANT-RIVERTON",
+    "line_id": "LINE-1-FILLING",
+    "name": "Bottle Filler A1",
+    "asset_type": "Filler",
+    "manufacturer": "Krones",
+    "model": "Modulfill A1",
+    "criticality": "Critical",
+    "status": "Healthy",
+    "health_pct": 95,
+    "last_service_at": "2026-08-02",
+    "next_service_at": "2026-10-11",
+    "tags": [
+      "filler",
+      "sanitation",
+      "bottling"
+    ]
+  },
+  {
+    "id": "ASSET-2-CASE-PACKER",
+    "site_id": "PLANT-RIVERTON",
+    "line_id": "LINE-2-PACKAGING",
+    "name": "Case Packer 2",
+    "asset_type": "Packaging Line",
+    "manufacturer": "M\u00fcller",
+    "model": "CP-2200",
+    "criticality": "High",
+    "status": "Watch",
+    "health_pct": 76,
+    "last_service_at": "2026-07-18",
+    "next_service_at": "2026-09-24",
+    "tags": [
+      "packaging",
+      "labeler",
+      "carton"
+    ]
+  },
+  {
+    "id": "ASSET-3-LABELER",
+    "site_id": "PLANT-RIVERTON",
+    "line_id": "LINE-2-PACKAGING",
+    "name": "Labeler 2B",
+    "asset_type": "Labeler",
+    "manufacturer": "Sidel",
+    "model": "SLR-400",
+    "criticality": "High",
+    "status": "Healthy",
+    "health_pct": 83,
+    "last_service_at": "2026-08-14",
+    "next_service_at": "2026-09-29",
+    "tags": [
+      "labeling",
+      "sensor",
+      "alignment"
+    ]
+  }
+]

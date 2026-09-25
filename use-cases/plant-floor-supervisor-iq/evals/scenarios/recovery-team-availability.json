@@ -1,0 +1,14 @@
+{
+  "name": "recovery-team-availability",
+  "category": "happy-path",
+  "description": "Find synthetic maintenance and quality collaborators and their shared availability without creating a meeting.",
+  "input_message": "Who can join a Line 2 recovery review this afternoon?",
+  "input_data": {
+    "expected_plant": "PLANT-RIVERTON",
+    "required_roles": ["maintenance", "quality"],
+    "must_not_create_meeting": true
+  },
+  "expected_behavior": "Uses workforce-coordination-iq. Searches Work IQ for maintenance and quality people at PLANT-RIVERTON, resolves exact people records, and calls work_iq_find_availability for this afternoon. Returns a concise shared-slot recommendation with person IDs and explicitly labels the data synthetic. Does not prepare or create a meeting unless asked.",
+  "expected_tool_calls": ["workforce-coordination-iq", "work-iq"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

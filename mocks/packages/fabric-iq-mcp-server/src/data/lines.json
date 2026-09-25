@@ -1,0 +1,44 @@
+[
+  {
+    "id": "LINE-1-FILLING",
+    "site_id": "PLANT-RIVERTON",
+    "name": "Line 1 Filling",
+    "product_family": "Beverage fill",
+    "status": "Healthy",
+    "availability_pct": 96.4,
+    "performance_pct": 95.1,
+    "quality_pct": 98.5,
+    "oee_pct": 90.2,
+    "throughput_per_hr": 172,
+    "target_output_per_hr": 180,
+    "last_updated": "2026-09-15T06:10:00-05:00"
+  },
+  {
+    "id": "LINE-2-PACKAGING",
+    "site_id": "PLANT-RIVERTON",
+    "name": "Line 2 Packaging",
+    "product_family": "Carton packaging",
+    "status": "Watch",
+    "availability_pct": 88.9,
+    "performance_pct": 86.5,
+    "quality_pct": 96.3,
+    "oee_pct": 74.1,
+    "throughput_per_hr": 126,
+    "target_output_per_hr": 150,
+    "last_updated": "2026-09-15T06:18:00-05:00"
+  },
+  {
+    "id": "LINE-3-ASSEMBLY",
+    "site_id": "PLANT-RIVERTON",
+    "name": "Line 3 Assembly",
+    "product_family": "Secondary assembly",
+    "status": "Healthy",
+    "availability_pct": 97.1,
+    "performance_pct": 94.8,
+    "quality_pct": 98.9,
+    "oee_pct": 91.3,
+    "throughput_per_hr": 168,
+    "target_output_per_hr": 175,
+    "last_updated": "2026-09-15T06:24:00-05:00"
+  }
+]

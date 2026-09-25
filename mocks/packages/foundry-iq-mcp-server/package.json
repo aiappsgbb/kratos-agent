@@ -1,0 +1,27 @@
+{
+  "name": "foundry-iq-mcp-server",
+  "version": "0.1.0",
+  "description": "Mock Foundry industrial knowledge MCP server.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "foundry-iq-mcp-server": "dist/server.js"
+  },
+  "files": [
+    "dist/",
+    "src/data/"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"const fs=require('fs'); fs.chmodSync('dist/server.js', 0o755); fs.rmSync('dist/data', { recursive: true, force: true }); fs.cpSync('src/data', 'dist/data', { recursive: true });\"",
+    "smoke": "python scripts/smoke.py",
+    "link": "npm link"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,41 @@
+[
+  {
+    "id": "ALM-2051",
+    "site_id": "PLANT-RIVERTON",
+    "line_id": "LINE-2-PACKAGING",
+    "asset_id": "ASSET-2-CASE-PACKER",
+    "code": "LABEL-DRIFT",
+    "severity": "High",
+    "status": "Active",
+    "started_at": "2026-09-15T05:42:00-05:00",
+    "cleared_at": null,
+    "description": "Case label registration drift exceeded tolerance on the second lane and reduced carton alignment.",
+    "recommended_action": "Inspect label sensor calibration, verify the film feed alignment, and resume the line only after a 12-pack validation run."
+  },
+  {
+    "id": "ALM-2052",
+    "site_id": "PLANT-RIVERTON",
+    "line_id": "LINE-2-PACKAGING",
+    "asset_id": "ASSET-3-LABELER",
+    "code": "SENSOR-OFFSET",
+    "severity": "Medium",
+    "status": "Acknowledged",
+    "started_at": "2026-09-15T04:30:00-05:00",
+    "cleared_at": "2026-09-15T05:12:00-05:00",
+    "description": "Label sensor offset recentered after a quick alignment pass, but the run remained below target.",
+    "recommended_action": "Recheck the camera offset before the next changeover and review calibration log history."
+  },
+  {
+    "id": "ALM-2053",
+    "site_id": "PLANT-RIVERTON",
+    "line_id": "LINE-1-FILLING",
+    "asset_id": "ASSET-1-FILLER",
+    "code": "FLOW-STABLE",
+    "severity": "Low",
+    "status": "Cleared",
+    "started_at": "2026-09-15T01:20:00-05:00",
+    "cleared_at": "2026-09-15T01:44:00-05:00",
+    "description": "Flow variance briefly moved outside target while a fill-head was being backflushed.",
+    "recommended_action": "Keep the fill-head check interval at 30 minutes through the next shift."
+  }
+]

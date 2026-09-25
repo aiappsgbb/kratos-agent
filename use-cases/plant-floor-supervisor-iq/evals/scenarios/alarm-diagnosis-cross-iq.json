@@ -1,0 +1,14 @@
+{
+  "name": "alarm-diagnosis-cross-iq",
+  "category": "cross-mcp",
+  "description": "Join a live synthetic Fabric IQ alarm to cited Foundry IQ troubleshooting guidance.",
+  "input_message": "Diagnose the active Line 2 alarm and cite the relevant machine procedure",
+  "input_data": {
+    "expected_plant": "PLANT-RIVERTON",
+    "expected_line": "Line 2",
+    "requires_source_citation": true
+  },
+  "expected_behavior": "Uses fabric-operations-iq to retrieve Line 2 status, active alarms, and focused telemetry. Uses the returned alarm code and asset model with foundry-industrial-knowledge, calling foundry_iq_search_knowledge and fetching the relevant document if needed. Separates observed alarm evidence from documented guidance and cites at least one returned SRC-* source ID. Does not claim any procedure was executed.",
+  "expected_tool_calls": ["fabric-operations-iq", "fabric-iq", "foundry-industrial-knowledge", "foundry-iq"],
+  "evaluators": ["Relevance", "Coherence", "TaskAdherence", "IntentResolution", "ToolCallAccuracy"]
+}

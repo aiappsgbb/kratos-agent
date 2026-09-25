@@ -1,0 +1,67 @@
+[
+  {
+    "id": "PERSON-100",
+    "name": "Jordan Lee",
+    "email": "jordan.lee@asterworks.example.com",
+    "role": "Plant Floor Supervisor",
+    "team": "Packaging",
+    "location": "Riverton, IL",
+    "timezone": "America/Chicago",
+    "manager_id": "PERSON-101",
+    "status": "Available",
+    "skills": ["Line leadership", "Downtime reduction", "Shift handoff"],
+    "schedule": [
+      {"date": "2026-09-15", "start": "2026-09-15T15:30:00-05:00", "end": "2026-09-15T16:30:00-05:00", "status": "free", "label": "Recovery review window"},
+      {"date": "2026-09-15", "start": "2026-09-15T16:30:00-05:00", "end": "2026-09-15T17:00:00-05:00", "status": "busy", "label": "Shift handoff"},
+      {"date": "2026-09-16", "start": "2026-09-16T13:00:00-05:00", "end": "2026-09-16T15:00:00-05:00", "status": "free", "label": "Packaging walk-through"}
+    ]
+  },
+  {
+    "id": "PERSON-101",
+    "name": "Priya Nair",
+    "email": "priya.nair@asterworks.example.com",
+    "role": "Operations Director",
+    "team": "Operations",
+    "location": "Riverton, IL",
+    "timezone": "America/Chicago",
+    "manager_id": null,
+    "status": "Available",
+    "skills": ["Operating cadence", "Escalation management", "Capacity planning"],
+    "schedule": [
+      {"date": "2026-09-15", "start": "2026-09-15T15:00:00-05:00", "end": "2026-09-15T16:00:00-05:00", "status": "free", "label": "Site escalation window"},
+      {"date": "2026-09-15", "start": "2026-09-15T16:00:00-05:00", "end": "2026-09-15T17:00:00-05:00", "status": "busy", "label": "Leadership forum"}
+    ]
+  },
+  {
+    "id": "PERSON-102",
+    "name": "Samir Patel",
+    "email": "samir.patel@asterworks.example.com",
+    "role": "Maintenance Lead",
+    "team": "Maintenance",
+    "location": "Riverton, IL",
+    "timezone": "America/Chicago",
+    "manager_id": "PERSON-101",
+    "status": "Available",
+    "skills": ["Sensor calibration", "Preventive maintenance", "Root cause analysis"],
+    "schedule": [
+      {"date": "2026-09-15", "start": "2026-09-15T15:30:00-05:00", "end": "2026-09-15T16:30:00-05:00", "status": "free", "label": "Maintenance response window"},
+      {"date": "2026-09-15", "start": "2026-09-15T16:30:00-05:00", "end": "2026-09-15T17:30:00-05:00", "status": "tentative", "label": "PM follow-up"}
+    ]
+  },
+  {
+    "id": "PERSON-103",
+    "name": "Elena Garcia",
+    "email": "elena.garcia@asterworks.example.com",
+    "role": "Quality Lead",
+    "team": "Quality",
+    "location": "Riverton, IL",
+    "timezone": "America/Chicago",
+    "manager_id": "PERSON-101",
+    "status": "Available",
+    "skills": ["Packaging quality", "Label registration", "Release validation"],
+    "schedule": [
+      {"date": "2026-09-15", "start": "2026-09-15T15:00:00-05:00", "end": "2026-09-15T16:00:00-05:00", "status": "free", "label": "Quality response window"},
+      {"date": "2026-09-15", "start": "2026-09-15T16:00:00-05:00", "end": "2026-09-15T17:00:00-05:00", "status": "busy", "label": "Release review"}
+    ]
+  }
+]
