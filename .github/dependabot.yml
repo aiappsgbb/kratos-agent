@@ -104,10 +104,16 @@ updates:
     labels: [dependencies, javascript]
 
   # --- CI -----------------------------------------------------------------
+  # Actions are pinned to full commit SHAs (Microsoft OSS requirement: tags are
+  # mutable and a supply-chain risk). Dependabot keeps the SHA and `# vX.Y.Z`
+  # comment in sync; the cooldown gives a compromised release a week to be
+  # caught before we are offered it.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ["*"]

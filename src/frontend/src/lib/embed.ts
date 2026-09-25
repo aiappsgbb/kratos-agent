@@ -40,6 +40,24 @@ function truthy(value: string | null): boolean {
   return value === "1" || value === "true" || value === "yes";
 }
 
+/**
+ * `back` ends up in an `<a href>`, so anything other than a same-origin path
+ * (`javascript:`, `//evil.example`, `/\evil.example`, absolute URLs) is an
+ * XSS / open-redirect vector. Returns the normalised path, or null.
+ */
+export function safeBackPath(value: string | null, origin: string): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) {
+    return null;
+  }
+  try {
+    const url = new URL(value, origin);
+    if (url.origin !== origin) return null;
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return null;
+  }
+}
+
 /** Parse embed-relevant args from the current URL. SSR-safe (returns defaults). */
 export function readEmbedParams(): EmbedParams {
   if (typeof window === "undefined") {
@@ -53,7 +71,7 @@ export function readEmbedParams(): EmbedParams {
     persona: p.get("persona"),
     prompt: p.get("prompt"),
     doImport: truthy(p.get("import")),
-    back: p.get("back"),
+    back: safeBackPath(p.get("back"), window.location.origin),
   };
 }
 

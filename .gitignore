@@ -79,3 +79,6 @@ use-cases/*/.github/instructions/
 use-cases/*/.github/agents/
 use-cases/*/.agents/
 docker-compose.apim.yml
+
+# Extracted inline hook scripts from .github/scripts/check-hooks.py
+.hooks-inline/
