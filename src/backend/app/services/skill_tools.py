@@ -7,6 +7,7 @@ The SDK calls these when the agent decides to invoke a skill.
 import json
 import logging
 import os
+import re
 import subprocess
 import time
 from contextvars import ContextVar
@@ -161,18 +162,86 @@ class RAGSearchParams(BaseModel):
     top: int = Field(default=5, description="Number of results to return")
 
 
-@define_tool(description="Azure AI Search knowledge base for grounded answers from internal documents")
-async def rag_search(params: RAGSearchParams) -> dict:
-    """Search the Azure AI Search knowledge base."""
+def _use_cases_root() -> Path:
+    configured = os.environ.get("APM_USE_CASES_ROOT", "").strip()
+    if configured:
+        return Path(configured)
+
+    for parent in Path(__file__).resolve().parents:
+        candidate = parent / "use-cases"
+        if candidate.is_dir():
+            return candidate
+    return Path.cwd() / "use-cases"
+
+
+def _local_knowledge_results(query: str, index_name: str, top: int) -> list[dict]:
+    use_case = {
+        "ins-knowledge-base": "insurance",
+        "wm-knowledge-base": "wealth-management",
+        "knowledge-base": "generic",
+    }.get(index_name)
+    if not use_case:
+        return []
+
+    knowledge_dir = _use_cases_root() / use_case / "knowledge-base"
+    if not knowledge_dir.is_dir():
+        return []
+
+    query_terms = set(re.findall(r"[a-z0-9]+", query.lower()))
+    matches: list[tuple[int, dict]] = []
+    for path in sorted(knowledge_dir.glob("*.json")):
+        try:
+            entries = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            logger.exception("Could not read local knowledge document %s", path)
+            continue
+        if isinstance(entries, dict):
+            entries = [entries]
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            searchable = " ".join(str(entry.get(field, "")) for field in ("title", "content", "keywords")).lower()
+            score = sum(1 for term in query_terms if term in searchable)
+            if score:
+                matches.append(
+                    (
+                        score,
+                        {
+                            "content": str(entry.get("content", ""))[:2000],
+                            "title": str(entry.get("title", path.stem)),
+                            "source": str(entry.get("source", path.name)),
+                            "page": entry.get("page", ""),
+                            "score": score,
+                        },
+                    )
+                )
+    matches.sort(key=lambda item: (-item[0], item[1]["title"]))
+    return [result for _, result in matches[: max(1, top)]]
+
+
+async def _rag_search(params: RAGSearchParams) -> dict:
     with tracer.start_as_current_span("skill.rag_search") as span:
         _set_kratos_attrs(span)
-        ai_search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT", "")
-        if not ai_search_endpoint:
-            return {"error": "AZURE_AI_SEARCH_ENDPOINT not configured"}
-
         index_name = params.index_name.strip() if params.index_name else os.environ.get("AI_SEARCH_INDEX", "")
         if not index_name:
             return {"error": "index_name must be provided (e.g. 'wm-knowledge-base')"}
+
+        ai_search_endpoint = os.environ.get("AZURE_AI_SEARCH_ENDPOINT", "")
+        if not ai_search_endpoint:
+            docs = _local_knowledge_results(params.query, index_name, params.top)
+            if docs:
+                return {
+                    "results": docs,
+                    "query": params.query,
+                    "source": "bundled-demo-knowledge-base",
+                }
+            return {
+                "error": (
+                    f"No bundled documents found for index '{index_name}'. "
+                    "Configure AZURE_AI_SEARCH_ENDPOINT to use an external knowledge base."
+                )
+            }
+
         credential = _get_credential()
         async with SearchClient(
             endpoint=ai_search_endpoint,
@@ -196,7 +265,13 @@ async def rag_search(params: RAGSearchParams) -> dict:
                         "score": result.get("@search.score", 0),
                     }
                 )
-            return {"results": docs, "query": params.query}
+            return {"results": docs, "query": params.query, "source": "azure-ai-search"}
+
+
+@define_tool(description="Knowledge base search for grounded answers from internal documents")
+async def rag_search(params: RAGSearchParams) -> dict:
+    """Search Azure AI Search or the bundled demo knowledge base."""
+    return await _rag_search(params)
 
 
 # ─── Code Interpreter ─────────────────────────────────────────────────────────

@@ -6,7 +6,7 @@ enabled: true
 
 ## Instructions
 
-When the user asks about internal insurance policies, coverage terms, exclusions, claims procedures, billing rules, underwriting guidance, or servicing workflows, use the `rag_search` tool to retrieve relevant content from the Azure AI Search knowledge base.
+When the user asks about internal insurance policies, coverage terms, exclusions, claims procedures, billing rules, underwriting guidance, or servicing workflows, use the `rag_search` tool to retrieve relevant content from the configured knowledge base. The demo includes a small synthetic policy corpus; deployments can optionally use Azure AI Search for a larger external corpus.
 
 **IMPORTANT**: Always pass `index_name: "ins-knowledge-base"` when calling `rag_search`. This is the dedicated search index for the insurance knowledge base.
 
