@@ -446,9 +446,15 @@ export function ChatWindow({ conversation, onTitleChange, initialMessage, onOpen
             </div>
           )}
 
-          {/* Awaiting a response that is still being generated on the backend
-              (e.g. after navigating back to this conversation mid-run). */}
-          {!isStreaming && awaitingResponse && (
+          {/* Nothing has come back from the agent yet. This covers both
+              rejoining a run already in flight and the wait for the first
+              event of a fresh one, which on a new conversation includes the
+              hosted agent's cold start. Without it the turn renders as an
+              empty page and looks like a failure. */}
+          {(isStreaming || awaitingResponse) &&
+            thoughts.length === 0 &&
+            activeToolCalls.length === 0 &&
+            messages[messages.length - 1]?.role !== "assistant" && (
             <div className="ml-11 flex items-center gap-2.5 text-sm text-muted">
               <svg className="w-4 h-4 animate-spin text-accent" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

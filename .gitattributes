@@ -1,0 +1,42 @@
+# Line-ending policy.
+#
+# The repository's source of truth is LF (it was developed on macOS, and every
+# blob in the index is already LF). Without this file a Windows clone with the
+# default `core.autocrlf=true` checks the shell scripts out as CRLF, which
+# breaks them before they run: `#!/usr/bin/env bash\r` fails with
+# "bash\r: No such file or directory", and every line ends in a stray $'\r'.
+# That takes out all of the azd hooks — so a fresh Windows clone could not
+# complete `azd up`.
+#
+# Pinning eol here makes the checkout independent of each contributor's
+# core.autocrlf setting.
+
+* text=auto eol=lf
+
+# Shell scripts must be LF wherever they run: the azd posix hooks, the
+# Dockerfile entrypoints, and run-local.sh are all executed by bash.
+*.sh   text eol=lf
+*.bash text eol=lf
+
+# Windows-side scripts keep CRLF — the native convention, and the only form
+# Windows PowerShell 5.1 parses reliably.
+*.ps1  text eol=crlf
+*.psm1 text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Lockfiles and generated manifests: leave the tooling's own formatting alone.
+uv.lock         text eol=lf
+*.lock          text eol=lf
+package-lock.json text eol=lf
+
+# Binary assets — never touch these.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.woff  binary
+*.woff2 binary

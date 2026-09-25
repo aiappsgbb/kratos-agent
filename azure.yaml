@@ -62,8 +62,7 @@ services:
         dist: out
         hooks:
             predeploy:
-                name: predeploy
-                kind: sh
+              posix:
                 shell: sh
                 run: |
                     # config.json tells the static frontend where the backend API is.
@@ -104,10 +103,64 @@ services:
                         cp staticwebapp.config.json out/staticwebapp.config.json
                       fi
                     fi
+              windows:
+                shell: pwsh
+                run: |
+                    # PowerShell mirror of the posix branch above — see there for why
+                    # config.json is written at deploy time rather than baked into the
+                    # static export. Uses native JSON cmdlets, so unlike the sh version
+                    # it does not shell out to node.
+                    $ErrorActionPreference = 'Stop'
+                    $BP = ($env:NEXT_PUBLIC_BASE_PATH ?? '') -replace '/+$', ''
+                    if ($BP) {
+                      @{ apiUrl = $BP } | ConvertTo-Json -Compress | Set-Content out/config.json -Encoding utf8
+                      Write-Host "Injected same-origin config.json with apiUrl=$BP (behind Front Door)"
+                    } elseif ($env:AGENT_SERVICE_URL) {
+                      @{ apiUrl = $env:AGENT_SERVICE_URL } | ConvertTo-Json -Compress | Set-Content out/config.json -Encoding utf8
+                      Write-Host "Injected config.json with apiUrl=$($env:AGENT_SERVICE_URL)"
+                    }
+                    if ($env:OBO_CLIENT_APP_CLIENT_ID -and $env:OBO_TENANT_ID -and $env:OBO_SERVER_APP_IDENTIFIER_URI) {
+                      if (-not (Test-Path out/config.json)) { '{}' | Set-Content out/config.json -Encoding utf8 }
+                      $ScopeValue = $env:OBO_SERVER_APP_SCOPE_VALUE ?? 'access_as_user'
+                      $Scope = "$($env:OBO_SERVER_APP_IDENTIFIER_URI)/$ScopeValue"
+                      $Cfg = Get-Content out/config.json -Raw | ConvertFrom-Json
+                      $Cfg | Add-Member -NotePropertyName auth -NotePropertyValue ([pscustomobject]@{
+                        clientId      = $env:OBO_CLIENT_APP_CLIENT_ID
+                        tenantId      = $env:OBO_TENANT_ID
+                        mcpScope      = $Scope
+                        mcpServerName = $env:OBO_MCP_SERVER_NAME ?? 'graph-obo'
+                      }) -Force
+                      $Cfg | ConvertTo-Json -Compress -Depth 5 | Set-Content out/config.json -Encoding utf8
+                      Write-Host "Merged OBO auth config into config.json (scope=$Scope)"
+                    }
+                    if (Test-Path staticwebapp.config.json) {
+                      if ($BP) {
+                        # .Replace() is literal — the "/api/*" pattern would otherwise
+                        # need regex escaping.
+                        # -NoNewline: -Raw already carries the file's own trailing
+                        # newline, and Set-Content would otherwise append a second
+                        # one, leaving the file one byte off from the sed output.
+                        (Get-Content staticwebapp.config.json -Raw).
+                          Replace('/.auth/login/aad', "$BP/.auth/login/aad").
+                          Replace('"/api/*"', """$BP/api/*""") |
+                          Set-Content out/staticwebapp.config.json -Encoding utf8 -NoNewline
+                        Write-Host "Wrote basePath-aware staticwebapp.config.json (basePath=$BP)"
+                      } else {
+                        Copy-Item staticwebapp.config.json out/staticwebapp.config.json -Force
+                      }
+                    }
+# Every hook declares BOTH a posix: and a windows: variant. A hook with only
+# `shell: sh` cannot run on Windows: azd resolves `sh` from PATH, and a default
+# Git for Windows install puts only `Git\cmd` there (git.exe), while sh.exe
+# lives in `Git\usr\bin`. So `azd up` from PowerShell found no shell at all and
+# every hook failed. Keep both branches in sync when changing either.
+#
+# NOTE: when windows: and posix: are both present, azd forbids `run`, `shell`,
+# `kind`, `dir`, `interactive`, `continueOnError`, `secrets` and `config` at the
+# parent level — they belong inside each branch.
 hooks:
     postdeploy:
-        name: postdeploy
-        kind: sh
+      posix:
         shell: sh
         run: |
             # Grant the Foundry hosted-agent instance identity its least-privilege
@@ -121,9 +174,18 @@ hooks:
             ./hooks/postdeploy.sh --from-deploy
         # Deliberately NOT interactive: nothing here may stop and wait for the
         # user at the end of a deploy. Belt and braces with --from-deploy above.
+      windows:
+        shell: pwsh
+        # Neither script may fail the deploy. assign-agent-roles.ps1 exits 1 on a
+        # real failure (as the .sh does), so its exit code is reported and
+        # swallowed here — the same effect the sh branch gets with `|| echo`.
+        run: |
+            ./hooks/assign-agent-roles.ps1
+            if ($LASTEXITCODE -ne 0) { Write-Host "⚠️  Agent role assignment had issues (see above); continuing." }
+            ./hooks/postdeploy.ps1 -FromDeploy
+        # Same rule as posix: never interactive at the end of a deploy.
     postprovision:
-        name: postprovision
-        kind: sh
+      posix:
         shell: sh
         run: |
             # The azure.ai.agents extension requires AZURE_TENANT_ID in the azd
@@ -144,22 +206,59 @@ hooks:
             # a forbidden resource. Best-effort: never blocks the deploy.
             ./hooks/grant-obo-consent.sh || echo "⚠️  OBO admin consent step had issues (see above); continuing."
             echo "Deployment complete."
+      windows:
+        shell: pwsh
+        run: |
+            if (-not $env:AZURE_TENANT_ID) {
+                $Tid = (az account show --query tenantId -o tsv 2>$null)
+                if ($Tid) {
+                    azd env set AZURE_TENANT_ID "$Tid"
+                    Write-Host "Set AZURE_TENANT_ID=$Tid"
+                }
+            }
+            Write-Host "Post-provisioning: configuring services..."
+            ./hooks/grant-obo-consent.ps1
+            Write-Host "Deployment complete."
     predeploy:
-        name: predeploy
-        kind: sh
+      posix:
         shell: sh
         run: |
             BUILD_TS="$(date +%s)"
             azd env set KRATOS_BUILD_TS "$BUILD_TS"
             echo "KRATOS_BUILD_TS=$BUILD_TS (forces new hosted-agent version)"
+      windows:
+        shell: pwsh
+        run: |
+            $BuildTs = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+            azd env set KRATOS_BUILD_TS "$BuildTs"
+            Write-Host "KRATOS_BUILD_TS=$BuildTs (forces new hosted-agent version)"
     preprovision:
-        name: preprovision
-        kind: sh
-        shell: sh
-        # Ask which skills to upload here, at the very start, rather than at
+      posix:
+        # check-azure-prereqs.sh runs first and exits non-zero if the
+        # subscription is missing the Container Apps VNet feature. Failing here
+        # costs seconds and provisions nothing; failing without it costs ~15
+        # minutes and leaves a half-created Container Apps environment that has
+        # to be deleted by hand.
+        #
+        # Then: ask which skills to upload, at the very start rather than at
         # upload time. azd repaints its progress table over anything a hook
         # prints once the run is under way, which was swallowing the menu and
         # the prompt. hooks/postdeploy.sh reads the answer and uploads without
         # prompting.
-        run: ./hooks/select-use-cases.sh
+        shell: sh
+        run: |
+            ./hooks/check-azure-prereqs.sh || exit 1
+            ./hooks/select-use-cases.sh
         interactive: true
+      windows:
+        # No menu on Windows: the posix script drives it through /dev/tty, which
+        # Windows has not got, and a hook blocking on stdin while azd owns the
+        # console hangs the deploy. The .ps1 records "none" and prints how to
+        # force the upload with KRATOS_UPLOAD_USE_CASES. Not interactive, so azd
+        # hands it no terminal to block on.
+        shell: pwsh
+        run: |
+            ./hooks/check-azure-prereqs.ps1
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            ./hooks/select-use-cases.ps1
+        interactive: false

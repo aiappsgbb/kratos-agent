@@ -11,13 +11,13 @@ param tags object = {}
 param projectName string = '${name}-proj'
 
 @description('Name of the GPT model deployment')
-param modelDeploymentName string = 'gpt-54'
+param modelDeploymentName string = 'gpt-6-astra'
 
 @description('Model name to deploy')
-param modelName string = 'gpt-5.4'
+param modelName string = 'gpt-6-astra'
 
 @description('Model version')
-param modelVersion string = '2026-03-05'
+param modelVersion string = '2026-09-03'
 
 @description('Deployment SKU capacity (thousands of tokens per minute)')
 param modelCapacity int = 350

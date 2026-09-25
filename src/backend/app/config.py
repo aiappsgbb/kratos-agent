@@ -1,6 +1,7 @@
 """Application configuration via environment variables and Azure Key Vault."""
 
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings
 
@@ -21,10 +22,17 @@ class Settings(BaseSettings):
     foundry_model_deployment: str = ""
     foundry_project_name: str = ""
 
-    # Optional: route the LLM (chat completions) calls through the APIM AI gateway
-    # instead of straight to the AI Services account. When set, the Copilot SDK
-    # provider base_url uses this host (…/openai/deployments/<model>) so requests
-    # are governed + observable in APIM/App Insights. Empty = call Foundry direct.
+    # How hard the model thinks before answering. Reasoning models reject function
+    # tools on /chat/completions unless reasoning is off entirely, so the provider
+    # uses the Responses API (see CopilotAgent._build_provider_config) and passes
+    # this through on every session. Empty string = don't send it, i.e. inherit the
+    # deployment's own default.
+    reasoning_effort: Literal["", "low", "medium", "high", "xhigh"] = "low"
+
+    # Optional: route the LLM calls through the APIM AI gateway instead of straight
+    # to the AI Services account. When set, the Copilot SDK provider base_url uses
+    # this host so requests are governed + observable in APIM/App Insights.
+    # Empty = call Foundry direct.
     llm_gateway_base_url: str = ""
 
     # Hosted agent proxy — backend forwards requests to the Foundry hosted agent

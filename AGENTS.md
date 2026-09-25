@@ -131,6 +131,30 @@ Gotchas that have bitten before:
   terminal to read from. Run `./hooks/postdeploy.sh` by hand (no flag) and the
   menu comes back.
 - Never use `|| true` on a test that is meant to gate a release.
+- Every hook needs **both** a `posix:` and a `windows:` variant. azd resolves
+  `sh` from PATH, and a default Git for Windows install puts only `Git\cmd`
+  there (git.exe) — `sh.exe` lives in `Git\usr\bin`, which is not on PATH. A
+  hook with only `shell: sh` therefore fails outright on Windows, and every
+  hook was in that state until the `.ps1` ports landed. Adding a hook, or
+  changing one, means changing both branches. Verify with
+  `azd hooks run <name> --platform windows` and `--platform posix` — no deploy
+  needed. Note that when both branches are present, azd forbids `run`, `shell`,
+  `kind`, `dir`, `interactive`, `continueOnError`, `secrets` and `config` at the
+  parent level.
+  The `hooks-lint` job in `ci.yml` (`.github/scripts/check-hooks.py`) enforces
+  the static half of this: both variants present, a `.ps1` for every `.sh`,
+  every `.sh` committed executable, `shellcheck` clean, and every `.ps1` and
+  inline `windows:` block parseable. It cannot tell you the two branches
+  *behave* the same — that still needs the `azd hooks run` check above.
+- `*.sh` must stay LF. `.gitattributes` pins this because a Windows clone with
+  the default `core.autocrlf=true` otherwise checks the hooks out as CRLF,
+  which breaks them before they run (`#!/usr/bin/env bash\r` → `bash\r: No such
+  file or directory`). Don't remove those rules, and don't commit a `.sh` with
+  CRLF.
+- The Windows `preprovision` hook never prompts. The POSIX one drives its menu
+  through `/dev/tty`, which Windows has not got, and a hook blocking on stdin
+  while azd owns the console hangs the deploy with no way to answer. Windows
+  records `none` and defers to `KRATOS_UPLOAD_USE_CASES`.
 - Entra directory operations are not Azure RBAC. Granting admin consent
   (`oauth2PermissionGrants` with `AllPrincipals`) needs a directory role —
   Global Administrator, Privileged Role Administrator, or Cloud Application

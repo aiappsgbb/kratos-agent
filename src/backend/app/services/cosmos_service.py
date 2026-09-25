@@ -8,6 +8,7 @@ usable for development without any Azure dependency.
 Partition keys: conversations -> /userId, messages -> /conversationId, skills -> /name
 """
 
+import asyncio
 import contextlib
 import json
 import logging
@@ -16,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
+from azure.core.exceptions import ClientAuthenticationError, ServiceRequestError
 from azure.cosmos.aio import CosmosClient
 from azure.cosmos.exceptions import CosmosHttpResponseError
 from azure.identity.aio import DefaultAzureCredential
@@ -27,6 +29,13 @@ logger = logging.getLogger(__name__)
 
 # Log a warning if a Cosmos operation takes longer than this (ms)
 _SLOW_OPERATION_THRESHOLD_MS = 500
+
+# Bound on the one-off reachability probe run at startup. A host that sits
+# outside the Cosmos private endpoint's VNet does not get a refusal — the
+# packets are dropped — so an unbounded call burns ~40s in SDK retries before
+# surfacing anything. Ten seconds is far above a healthy in-VNet container read
+# and far below the blackhole cost.
+_COSMOS_PROBE_TIMEOUT_S = 10
 
 
 class CosmosService:
@@ -57,6 +66,13 @@ class CosmosService:
         DB client with managed identity. Otherwise, opens a local SQLite
         database at ``{local_data_dir}/kratos.db`` and creates the schema on
         first run.
+
+        A configured endpoint that turns out to be *unreachable* also falls back
+        to SQLite. Cosmos is private-endpoint-only, so any host outside its VNet
+        (notably the Foundry hosted-agent sandbox) blackholes every request.
+        Without this fallback the service keeps a live client whose every call
+        stalls ~40s before failing, which dominates cold-start time and adds
+        dead time to each turn.
         """
         if not self.settings.cosmos_db_endpoint:
             await self._sqlite_initialize()
@@ -66,6 +82,11 @@ class CosmosService:
         self._client = CosmosClient(self.settings.cosmos_db_endpoint, credential=credential)
 
         database = self._client.get_database_client(self.settings.cosmos_db_database)
+
+        if not await self._probe_reachable(database):
+            await self._fallback_to_sqlite()
+            return
+
         self._conversations_container = database.get_container_client("conversations")
         self._messages_container = database.get_container_client("messages")
 
@@ -86,6 +107,44 @@ class CosmosService:
             self._sessions_container = None
 
         logger.info("Cosmos DB initialized -- database=%s", self.settings.cosmos_db_database)
+
+    async def _probe_reachable(self, database: Any) -> bool:
+        """Return True when the Cosmos account answers within the probe budget.
+
+        A ``CosmosHttpResponseError`` still counts as reachable: the service
+        replied, it just refused this particular read (missing database, RBAC
+        not propagated). Only a timeout, transport failure, or inability to
+        obtain a token means the account cannot be talked to at all.
+        """
+        try:
+            await asyncio.wait_for(database.read(), timeout=_COSMOS_PROBE_TIMEOUT_S)
+        except CosmosHttpResponseError as exc:
+            logger.warning(
+                "Cosmos reachable but database read refused (status=%s) — continuing",
+                exc.status_code,
+            )
+        except (TimeoutError, ServiceRequestError, ClientAuthenticationError) as exc:
+            logger.warning(
+                "Cosmos DB at %s unreachable within %ds (%s) — falling back to local persistence. "
+                "Expected when running outside the private endpoint's VNet.",
+                self.settings.cosmos_db_endpoint,
+                _COSMOS_PROBE_TIMEOUT_S,
+                type(exc).__name__,
+            )
+            return False
+        return True
+
+    async def _fallback_to_sqlite(self) -> None:
+        """Tear down the unusable Cosmos client and open the SQLite backend."""
+        client, self._client = self._client, None
+        self._conversations_container = None
+        self._messages_container = None
+        self._settings_container = None
+        self._sessions_container = None
+        if client is not None:
+            with contextlib.suppress(Exception):
+                await client.close()
+        await self._sqlite_initialize()
 
     async def close(self) -> None:
         """Release backend resources (currently: the SQLite connection)."""

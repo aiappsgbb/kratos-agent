@@ -134,11 +134,65 @@ Azure services provisioned via `azd up`:
 
 ### Prerequisites
 
-- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/) ≥1.12
-- [Azure CLI](https://learn.microsoft.com/cli/azure/)
-- [Docker](https://www.docker.com/)
+- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/) **≥1.28** — `azure.yaml` uses `condition:`, which older versions silently ignore
+- The `azure.ai.agents` azd extension, at a version compatible with your `azd`. Check with `azd extension list --installed`: an `⚠ Incompatible` status means the hosted agent (`host: azure.ai.agent`) cannot deploy at all. Fix with `azd extension update --all`.
+
+  > Updating a single extension is often not enough: `azure.ai.agents` pins `azure.ai.connections`
+  > (`~1.0.0-beta.6` at the time of writing), and installing it against an older
+  > `azure.ai.connections` fails with `installed dependency ... does not satisfy constraint`.
+  > `azd extension update --all` keeps the set consistent.
+- [Azure CLI](https://learn.microsoft.com/cli/azure/) — sign in to **both**: `az login` *and* `azd auth login` (separate token caches)
 - [Node.js 20+](https://nodejs.org/)
 - [Python 3.11+](https://www.python.org/)
+- [Docker](https://www.docker.com/) — **not** required to deploy: all three images set `remoteBuild: true` and build in ACR. Only needed for the local docker-compose stack.
+
+#### Subscription prerequisites (checked automatically)
+
+The Container Apps environment joins a custom VNet, which requires the
+`Microsoft.Network/AllowBringYourOwnPublicIpAddress` feature and the
+`Microsoft.ContainerService` provider to be registered **on your subscription**. These are
+not enabled by default on every subscription, and this is a property of the subscription —
+not of your machine or OS.
+
+`hooks/check-azure-prereqs.sh` / `.ps1` runs at `preprovision` and handles this for you:
+it checks both, registers whatever is missing, waits for the feature to become active, and
+stops **before anything is provisioned** if it takes too long.
+
+Left unchecked, a missing feature surfaces ~15 minutes into `azd up` as a misleading
+`A resource with this name already exists or is in a conflicting state` (the real cause,
+`SubscriptionNotRegisteredForFeature`, is buried in the ARM deployment details) — and leaves
+a half-created Container Apps environment that must be deleted by hand before any retry can
+succeed.
+
+```bash
+KRATOS_PREREQ_TIMEOUT_MIN=45 azd up   # wait longer than the 15-minute default
+KRATOS_SKIP_PREREQ_CHECK=1 azd up     # skip the check entirely
+```
+
+If you lack permission to register features (Contributor or Owner is required), the hook
+prints the exact commands for an administrator to run.
+
+#### On Windows
+
+`azd up` is supported from **PowerShell 7** (`pwsh`) — every hook ships a `windows:` variant
+that runs `hooks/*.ps1`. Two things to know:
+
+- **PowerShell 7 is required**, not Windows PowerShell 5.1. Check with `pwsh --version`.
+- **No skills-upload menu.** The POSIX hook prompts for which use-cases to upload to blob
+  storage; the Windows one never prompts (it would block the deploy — see
+  [hooks/select-use-cases.ps1](hooks/select-use-cases.ps1)). It records "none", which costs
+  nothing: the backend seeds the same use-cases from its container image at startup. To
+  upload anyway:
+
+  ```powershell
+  $env:KRATOS_UPLOAD_USE_CASES = "all"   # or a comma-separated list
+  azd up
+  # ...or after the fact:
+  ./hooks/postdeploy.ps1
+  ```
+
+Cloning on Windows requires no special git settings — `.gitattributes` pins `*.sh` to LF, so
+the POSIX hooks survive a checkout even with `core.autocrlf=true`.
 
 ### Deploy to Azure
 

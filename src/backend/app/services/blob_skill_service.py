@@ -13,10 +13,17 @@ can read SKILL.md files from disk.  The admin API writes back to blob.
 Uses Azure Managed Identity for passwordless authentication.
 """
 
+import asyncio
 import contextlib
 import logging
 from pathlib import Path
 
+from azure.core.exceptions import (
+    ClientAuthenticationError,
+    HttpResponseError,
+    ResourceExistsError,
+    ServiceRequestError,
+)
 from azure.identity.aio import DefaultAzureCredential
 from azure.storage.blob.aio import ContainerClient
 
@@ -25,6 +32,11 @@ from app.config import Settings
 logger = logging.getLogger(__name__)
 
 _USE_CASES_PREFIX = "use-cases/"
+
+# Bound on the container-provisioning call made at startup. The skills account
+# is private-endpoint-only, so a host outside its VNet has the request dropped
+# rather than refused and would otherwise stall ~40s in SDK retries here.
+_CONTAINER_INIT_TIMEOUT_S = 10
 
 # Files that live at the root of a use-case directory (alongside SYSTEM_PROMPT.md)
 # and are mirrored between blob and the local filesystem.  APM-managed content
@@ -91,9 +103,43 @@ class BlobSkillService:
             logger.warning("Blob storage not configured — skill persistence disabled")
             return
 
-        with contextlib.suppress(Exception):
-            await self._container_client.create_container()
-            # Container likely already exists
+        # Provision the container and, in the same call, establish whether the
+        # account is reachable at all. Marking the service unavailable up front
+        # matters more than the container: callers all have a local-disk
+        # fallback, but they only reach it *after* a request fails, and a
+        # dropped (rather than refused) request takes ~40s to get there. Doing
+        # it once here keeps that cost off every later call.
+        try:
+            await asyncio.wait_for(
+                self._container_client.create_container(),
+                timeout=_CONTAINER_INIT_TIMEOUT_S,
+            )
+        except ResourceExistsError:
+            pass  # already provisioned — the account answered, so it is reachable
+        except HttpResponseError as exc:
+            # Reachable, but this request was refused (e.g. RBAC still
+            # propagating). Keep the client: reads may well succeed.
+            logger.warning("Blob container probe refused (status=%s) — continuing", exc.status_code)
+        except (TimeoutError, ServiceRequestError, ClientAuthenticationError) as exc:
+            logger.warning(
+                "Blob storage at %s unreachable within %ds (%s) — using local skills only. "
+                "Expected when running outside the private endpoint's VNet.",
+                endpoint or "(connection string)",
+                _CONTAINER_INIT_TIMEOUT_S,
+                type(exc).__name__,
+            )
+            await self._disable()
+
+    async def _disable(self) -> None:
+        """Drop the unusable client so ``is_available`` reports False."""
+        client, self._container_client = self._container_client, None
+        credential, self._credential = self._credential, None
+        if client is not None:
+            with contextlib.suppress(Exception):
+                await client.close()
+        if credential is not None:
+            with contextlib.suppress(Exception):
+                await credential.close()
 
     @property
     def is_available(self) -> bool:

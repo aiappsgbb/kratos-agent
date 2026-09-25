@@ -64,3 +64,38 @@ jobs:
 
       - name: Validate Bicep
         run: az bicep build --file infra/main.bicep --stdout > /dev/null
+
+  # The azd hooks exist twice — POSIX sh and Windows pwsh — and no other job
+  # runs either. This catches the two drifting apart before a real `azd up`
+  # does. shellcheck and pwsh ship on the ubuntu-latest image.
+  hooks-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Check hook structure
+        run: |
+          pip install --no-cache-dir pyyaml
+          python .github/scripts/check-hooks.py "$RUNNER_TEMP/hooks-inline"
+
+      - name: Shellcheck
+        run: shellcheck -S warning hooks/*.sh
+
+      - name: Parse PowerShell
+        shell: pwsh
+        run: |
+          $files = @(Get-ChildItem hooks/*.ps1) + @(Get-ChildItem "$env:RUNNER_TEMP/hooks-inline/*.ps1")
+          $failed = $false
+          foreach ($f in $files) {
+            $tokens = $null; $errs = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$tokens, [ref]$errs) | Out-Null
+            if ($errs) {
+              $failed = $true
+              foreach ($e in $errs) { Write-Host "::error file=$($f.Name),line=$($e.Extent.StartLineNumber)::$($e.Message)" }
+            } else { Write-Host "ok $($f.Name)" }
+          }
+          if ($failed) { exit 1 }

@@ -27,6 +27,13 @@ _AI_SCOPE = "https://ai.azure.com/.default"
 _COLD_START_STATUSES = frozenset({408, 425, 429, 503, 504})
 _MAX_INVOKE_ATTEMPTS = 3
 
+# Budget for a warm-pool ping. Provisioning a brand-new sandbox has to boot the
+# platform microVM *and* run the hosted agent's own startup, so this has to stay
+# comfortably above the worst observed cold start. Too low and every replenish
+# aborts just before succeeding, leaving the pool permanently empty and pushing
+# the full cold start onto the first user of every conversation.
+_WARMUP_PING_TIMEOUT_S = 180
+
 
 class FoundryAgentProxy:
     """Invokes the Foundry hosted agent via the Invocations REST API."""
@@ -134,7 +141,7 @@ class FoundryAgentProxy:
                 endpoint,
                 headers=headers,
                 json={"warmup": True},
-                timeout=aiohttp.ClientTimeout(total=45),
+                timeout=aiohttp.ClientTimeout(total=_WARMUP_PING_TIMEOUT_S),
             ) as resp:
                 body = await resp.read()
                 elapsed = loop.time() - t0

@@ -22,7 +22,9 @@
 #
 # Requirements: the deploying principal must be able to create role assignments
 # (Owner or "User Access Administrator") — the same right `azd provision` already
-# relies on for the Bicep role assignments.
+# relies on for the Bicep role assignments. The Azure CLI must additionally be
+# signed in to the subscription's home tenant, because the Entra lookup below
+# runs through `az`, whose sign-in is independent of azd's.
 
 set -uo pipefail
 
@@ -63,11 +65,74 @@ echo "║     Assign least-privilege roles to hosted agent(s)      ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo "  Foundry account : ${FOUNDRY_ACCOUNT}"
 echo "  Foundry project : ${FOUNDRY_PROJECT}"
+echo "  Subscription    : ${SUBSCRIPTION_ID}"
 
 if [ -z "$FOUNDRY_ACCOUNT" ] || [ -z "$FOUNDRY_PROJECT" ] || [ -z "$COSMOS_NAME" ] \
    || [ -z "$KEY_VAULT_NAME" ] || [ -z "$STORAGE_ACCOUNT" ]; then
   echo "⚠️  Could not derive all resource names from the azd environment. Skipping."
   exit 0
+fi
+
+# ─── Preflight: the lookup below runs through the Azure CLI, whose sign-in is
+#     SEPARATE from azd's. Pointed at another directory, `az ad sp list` returns
+#     an empty list with exit code 0 — indistinguishable from "the identity does
+#     not exist yet" — so the roles are silently never applied while the deploy
+#     still reports success.
+#
+#     The expected directory is the subscription's home tenant, not
+#     AZURE_TENANT_ID: the postprovision hook in azure.yaml seeds that variable
+#     from the active `az` session when unset, so comparing against it would let
+#     a CLI in the wrong directory validate itself. ───
+if ! command -v az >/dev/null 2>&1; then
+  echo "❌ The Azure CLI ('az') is required to resolve the hosted-agent identity"
+  echo "   in Microsoft Entra ID, but it was not found on PATH."
+  exit 1
+fi
+
+if ! AZ_TENANT="$(az account show --query tenantId -o tsv 2>/dev/null)" || [ -z "$AZ_TENANT" ]; then
+  echo "❌ Could not read the Azure CLI account context. azd's sign-in does not"
+  echo "   cover 'az'."
+  echo "   Fix: az login --tenant <home-tenant-of-${SUBSCRIPTION_ID}> --use-device-code"
+  exit 1
+fi
+AZ_SUBSCRIPTION="$(az account show --query id -o tsv 2>/dev/null)"
+
+# The agent identity is created in the subscription's home tenant, so that — not
+# a tenant the subscription merely happens to be reachable through — is the
+# directory the lookup has to run against.
+SUB_TENANT="$(az account list --all \
+  --query "[?id=='${SUBSCRIPTION_ID}'].homeTenantId" -o tsv 2>/dev/null \
+  | grep -v '^$' | sort -u)"
+
+if [ -z "$SUB_TENANT" ] || [ "$(printf '%s\n' "$SUB_TENANT" | wc -l)" -ne 1 ]; then
+  echo "❌ Could not establish the deployment subscription's home tenant from the"
+  echo "   Azure CLI, so the directory to search cannot be confirmed."
+  echo "     deployment subscription : ${SUBSCRIPTION_ID}"
+  echo "     az CLI active tenant    : ${AZ_TENANT}"
+  echo "   Fix: az login --tenant <home-tenant-of-the-subscription> --use-device-code"
+  echo "        (if access is recent, try 'az account list --refresh' first)"
+  exit 1
+fi
+
+if [ "$AZ_TENANT" != "$SUB_TENANT" ]; then
+  echo "❌ The Azure CLI is active in a different directory than the one holding"
+  echo "   the agent identity — the lookup would find nothing and the roles would"
+  echo "   silently never be applied."
+  echo "     subscription's home tenant : ${SUB_TENANT}"
+  echo "     az CLI active tenant       : ${AZ_TENANT}"
+  echo "   Fix: az account set --subscription ${SUBSCRIPTION_ID}"
+  echo "        (or, if that does not switch directory: az login --tenant ${SUB_TENANT})"
+  exit 1
+fi
+
+echo "  Directory       : ${AZ_TENANT} (Azure CLI, verified)"
+# Only the directory has to match. The role deployment below pins --subscription
+# explicitly and the Entra lookup is directory-scoped, so a different active
+# subscription is harmless -- but say so, rather than leaving it unexplained.
+if [ "$AZ_SUBSCRIPTION" != "$SUBSCRIPTION_ID" ]; then
+  echo "  Note: the Azure CLI's active subscription is ${AZ_SUBSCRIPTION},"
+  echo "        not the deployment subscription above. That is fine here —"
+  echo "        only the directory matters for the identity lookup."
 fi
 
 # ─── Resolve the hosted-agent instance identity (the Entra lookup Bicep can't do) ───
@@ -77,8 +142,12 @@ fi
 # discovers every hosted agent under this project without hard-coding the agent
 # name, so the hook keeps working if the template is renamed or grows more agents.
 PREFIX="${FOUNDRY_ACCOUNT}-${FOUNDRY_PROJECT}-"
-AGENT_PRINCIPAL_IDS="$(az ad sp list --display-name "$PREFIX" \
-  --query "[?ends_with(displayName, '-AgentIdentity')].id" -o tsv 2>/dev/null || true)"
+if ! AGENT_PRINCIPAL_IDS="$(az ad sp list --display-name "$PREFIX" \
+  --query "[?ends_with(displayName, '-AgentIdentity')].id" -o tsv)"; then
+  echo "❌ Could not query the hosted-agent identity in Microsoft Entra ID."
+  echo "   The signed-in principal needs permission to read directory objects."
+  exit 1
+fi
 
 if [ -z "$AGENT_PRINCIPAL_IDS" ]; then
   echo "⚠️  No '*-AgentIdentity' service principal found yet for prefix '${PREFIX}'."
@@ -128,6 +197,8 @@ elif grep -q "RoleAssignmentExists" "$DEPLOY_ERR" && \
 else
   echo "   ⚠️  Role-assignment deployment failed."
   echo "      Verify the deploying principal has Owner or User Access Administrator."
+  echo "      The hosted agent's permissions could not be fully applied or verified;"
+  echo "      invocations may fail with HTTP 401 PermissionDenied until this succeeds."
   sed -n '1,20p' "$DEPLOY_ERR" | sed 's/^/      /'
-  exit 0
+  exit 1
 fi
