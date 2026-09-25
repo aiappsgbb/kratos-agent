@@ -1,0 +1,438 @@
+{
+  "Microsoft.CognitiveServices/accounts": [
+    {
+      "name": "success-rate",
+      "metricName": "SuccessRate",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "LessThan",
+        "threshold": 99
+      },
+      "unhealthyRule": {
+        "operator": "LessThan",
+        "threshold": 95
+      }
+    },
+    {
+      "name": "time-to-response",
+      "metricName": "TimeToResponse",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "MilliSeconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 2000
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 5000
+      }
+    },
+    {
+      "name": "total-errors",
+      "metricName": "TotalErrors",
+      "aggregationType": "Total",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Count",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 2
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 10
+      }
+    }
+  ],
+  "Microsoft.DocumentDB/databaseAccounts": [
+    {
+      "name": "service-availability",
+      "metricName": "ServiceAvailability",
+      "aggregationType": "Minimum",
+      "timeGrain": "PT1H",
+      "refreshInterval": "PT1H",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "LessThan",
+        "threshold": 99
+      },
+      "unhealthyRule": {
+        "operator": "LessThan",
+        "threshold": 95
+      }
+    },
+    {
+      "name": "server-side-latency",
+      "metricName": "ServerSideLatency",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "MilliSeconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 100
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 500
+      }
+    },
+    {
+      "name": "normalized-ru-consumption",
+      "metricName": "NormalizedRUConsumption",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 70
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 90
+      }
+    }
+  ],
+  "Microsoft.App/containerApps": [
+    {
+      "name": "response-time",
+      "metricName": "ResponseTime",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "MilliSeconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 1000
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 3000
+      }
+    },
+    {
+      "name": "restart-count",
+      "metricName": "RestartCount",
+      "aggregationType": "Total",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Count",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 2
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 5
+      }
+    },
+    {
+      "name": "cpu-percentage",
+      "metricName": "CpuPercentage",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 80
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 95
+      }
+    }
+  ],
+  "Microsoft.ContainerRegistry/registries": [
+    {
+      "name": "total-pull-count",
+      "metricName": "TotalPullCount",
+      "aggregationType": "Total",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Count",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 100
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 500
+      }
+    },
+    {
+      "name": "storage-used",
+      "metricName": "StorageUsed",
+      "aggregationType": "Average",
+      "timeGrain": "PT1H",
+      "refreshInterval": "PT1H",
+      "dataUnit": "Bytes",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 8000000000
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 9500000000
+      }
+    }
+  ],
+  "Microsoft.Storage/storageAccounts": [
+    {
+      "name": "storage-availability",
+      "metricName": "Availability",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "LessThan",
+        "threshold": 99
+      },
+      "unhealthyRule": {
+        "operator": "LessThan",
+        "threshold": 95
+      }
+    },
+    {
+      "name": "success-e2e-latency",
+      "metricName": "SuccessE2ELatency",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "MilliSeconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 1000
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 3000
+      }
+    }
+  ],
+  "Microsoft.KeyVault/vaults": [
+    {
+      "name": "keyvault-availability",
+      "metricName": "Availability",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "LessThan",
+        "threshold": 99
+      },
+      "unhealthyRule": {
+        "operator": "LessThan",
+        "threshold": 95
+      }
+    },
+    {
+      "name": "service-api-latency",
+      "metricName": "ServiceApiLatency",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "MilliSeconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 500
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 2000
+      }
+    }
+  ],
+  "Microsoft.Insights/components": [
+    {
+      "name": "server-exceptions",
+      "metricName": "exceptions/server",
+      "aggregationType": "Count",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Count",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 2
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 10
+      }
+    },
+    {
+      "name": "requests-duration",
+      "metricName": "requests/duration",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "MilliSeconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 1000
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 3000
+      }
+    },
+    {
+      "name": "requests-failed",
+      "metricName": "requests/failed",
+      "aggregationType": "Count",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Count",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 2
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 25
+      }
+    }
+  ],
+  "Microsoft.OperationalInsights/workspaces": [
+    {
+      "name": "query-availability-rate",
+      "metricName": "AvailabilityRate_Query",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "LessThan",
+        "threshold": 99
+      },
+      "unhealthyRule": {
+        "operator": "LessThan",
+        "threshold": 95
+      }
+    },
+    {
+      "name": "query-failure-count",
+      "metricName": "Query Failure Count",
+      "aggregationType": "Count",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Count",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 2
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 10
+      }
+    },
+    {
+      "name": "ingestion-time",
+      "metricName": "Ingestion Time",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Seconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 180
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 300
+      }
+    }
+  ],
+  "Microsoft.ApiManagement/service": [
+    {
+      "name": "failed-requests",
+      "metricName": "FailedRequests",
+      "aggregationType": "Total",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Count",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 5
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 100
+      }
+    },
+    {
+      "name": "gateway-duration",
+      "metricName": "Duration",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "MilliSeconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 1000
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 3000
+      }
+    },
+    {
+      "name": "gateway-capacity",
+      "metricName": "Capacity",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 80
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 95
+      }
+    }
+  ],
+  "Microsoft.Search/searchServices": [
+    {
+      "name": "search-latency",
+      "metricName": "SearchLatency",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Seconds",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 1
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 2
+      }
+    },
+    {
+      "name": "throttled-search-queries-percentage",
+      "metricName": "ThrottledSearchQueriesPercentage",
+      "aggregationType": "Average",
+      "timeGrain": "PT5M",
+      "refreshInterval": "PT5M",
+      "dataUnit": "Percent",
+      "degradedRule": {
+        "operator": "GreaterThan",
+        "threshold": 5
+      },
+      "unhealthyRule": {
+        "operator": "GreaterThan",
+        "threshold": 15
+      }
+    }
+  ]
+}

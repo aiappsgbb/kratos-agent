@@ -1,0 +1,1127 @@
+{
+  "advisors": [
+    {
+      "key": "clinician-visit-prep",
+      "displayName": "Clinician Visit Prep",
+      "curated": false,
+      "tools": [
+        {
+          "key": "mcp:epic",
+          "displayName": "epic",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "epic-fhir-api",
+              "displayName": "Epic FHIR API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "finance-close",
+      "displayName": "Finance Close Controller",
+      "curated": false,
+      "tools": [
+        {
+          "key": "mcp:m365-graph",
+          "displayName": "m365-graph",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "microsoft-graph",
+              "displayName": "Microsoft Graph API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:sap-s4",
+          "displayName": "sap-s4",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "sap-s4-api",
+              "displayName": "SAP S/4 API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:workday",
+          "displayName": "workday",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "workday-api",
+              "displayName": "Workday API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        },
+        {
+          "key": "skill:variance-analysis",
+          "displayName": "variance-analysis",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "local-data-compute",
+              "displayName": "Local data/compute",
+              "kind": "External"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "generic",
+      "displayName": "Generic Assistant",
+      "curated": true,
+      "tools": [
+        {
+          "key": "mcp:microsoft-learn",
+          "displayName": "microsoft-learn",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "microsoft-learn-api",
+              "displayName": "Microsoft Learn API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:code-interpreter",
+          "displayName": "code-interpreter",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "agent-runtime",
+              "displayName": "Agent runtime",
+              "kind": "AzureResource",
+              "resourceKey": "agentApp"
+            }
+          ]
+        },
+        {
+          "key": "skill:data-analysis",
+          "displayName": "data-analysis",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:document-summary",
+          "displayName": "document-summary",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:docx-editor",
+          "displayName": "docx-editor",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "local-data-compute",
+              "displayName": "Local data/compute",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "skill:email-draft",
+          "displayName": "email-draft",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        },
+        {
+          "key": "skill:pptx-editor",
+          "displayName": "pptx-editor",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "local-data-compute",
+              "displayName": "Local data/compute",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "skill:rag-search",
+          "displayName": "rag-search",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "search",
+              "displayName": "Knowledge base search",
+              "kind": "AzureResource",
+              "resourceKey": "search"
+            }
+          ]
+        },
+        {
+          "key": "skill:web-search",
+          "displayName": "web-search",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "hr-onboarding",
+      "displayName": "HR Onboarding Specialist",
+      "curated": false,
+      "tools": [
+        {
+          "key": "mcp:m365-graph",
+          "displayName": "m365-graph",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "microsoft-graph",
+              "displayName": "Microsoft Graph API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:servicenow",
+          "displayName": "servicenow",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "servicenow-api",
+              "displayName": "ServiceNow API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:workday",
+          "displayName": "workday",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "workday-api",
+              "displayName": "Workday API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "insurance",
+      "displayName": "Insurance Service Advisor",
+      "curated": true,
+      "tools": [
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:claims-mgmt",
+          "displayName": "claims-mgmt",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "local-data-compute",
+              "displayName": "Local data/compute",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "skill:code-interpreter",
+          "displayName": "code-interpreter",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "agent-runtime",
+              "displayName": "Agent runtime",
+              "kind": "AzureResource",
+              "resourceKey": "agentApp"
+            }
+          ]
+        },
+        {
+          "key": "skill:crm",
+          "displayName": "crm",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "local-data-compute",
+              "displayName": "Local data/compute",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "skill:data-analysis",
+          "displayName": "data-analysis",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:document-summary",
+          "displayName": "document-summary",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:email-draft",
+          "displayName": "email-draft",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        },
+        {
+          "key": "skill:rag-search",
+          "displayName": "rag-search",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "search",
+              "displayName": "Knowledge base search",
+              "kind": "AzureResource",
+              "resourceKey": "search"
+            }
+          ]
+        },
+        {
+          "key": "skill:web-search",
+          "displayName": "web-search",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "it-service-desk",
+      "displayName": "IT Service Desk L1",
+      "curated": false,
+      "tools": [
+        {
+          "key": "mcp:m365-graph",
+          "displayName": "m365-graph",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "microsoft-graph",
+              "displayName": "Microsoft Graph API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:servicenow",
+          "displayName": "servicenow",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "servicenow-api",
+              "displayName": "ServiceNow API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:workday",
+          "displayName": "workday",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "workday-api",
+              "displayName": "Workday API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "plant-floor-supervisor",
+      "displayName": "Plant Floor Supervisor",
+      "curated": false,
+      "tools": [
+        {
+          "key": "mcp:azure-iot",
+          "displayName": "azure-iot",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "azure-iot-api",
+              "displayName": "Azure IoT API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:m365-graph",
+          "displayName": "m365-graph",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "microsoft-graph",
+              "displayName": "Microsoft Graph API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:sap-s4",
+          "displayName": "sap-s4",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "sap-s4-api",
+              "displayName": "SAP S/4 API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:servicenow",
+          "displayName": "servicenow",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "servicenow-api",
+              "displayName": "ServiceNow API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "mcp:workday",
+          "displayName": "workday",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "workday-api",
+              "displayName": "Workday API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        },
+        {
+          "key": "skill:oee-analysis",
+          "displayName": "oee-analysis",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "local-data-compute",
+              "displayName": "Local data/compute",
+              "kind": "External"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "retail-banking",
+      "displayName": "Retail Banking Assistant",
+      "curated": true,
+      "tools": [
+        {
+          "key": "mcp:faker",
+          "displayName": "faker",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "core-banking-api",
+              "displayName": "Core Banking API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:code-interpreter",
+          "displayName": "code-interpreter",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "agent-runtime",
+              "displayName": "Agent runtime",
+              "kind": "AzureResource",
+              "resourceKey": "agentApp"
+            }
+          ]
+        },
+        {
+          "key": "skill:data-analysis",
+          "displayName": "data-analysis",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:document-summary",
+          "displayName": "document-summary",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:email-draft",
+          "displayName": "email-draft",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        },
+        {
+          "key": "skill:web-search",
+          "displayName": "web-search",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "sales-account-review",
+      "displayName": "Sales Account Review",
+      "curated": false,
+      "tools": [
+        {
+          "key": "mcp:salesforce",
+          "displayName": "salesforce",
+          "kind": "mcp",
+          "downstreams": [
+            {
+              "key": "salesforce-api",
+              "displayName": "Salesforce API",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "wealth-management",
+      "displayName": "Wealth Management Advisor",
+      "curated": true,
+      "tools": [
+        {
+          "key": "platform:llm",
+          "displayName": "Platform LLM",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "platform:state",
+          "displayName": "Platform state",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "cosmos",
+              "displayName": "Conversation store",
+              "kind": "AzureResource",
+              "resourceKey": "cosmos"
+            }
+          ]
+        },
+        {
+          "key": "skill:code-interpreter",
+          "displayName": "code-interpreter",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "agent-runtime",
+              "displayName": "Agent runtime",
+              "kind": "AzureResource",
+              "resourceKey": "agentApp"
+            }
+          ]
+        },
+        {
+          "key": "skill:crm",
+          "displayName": "crm",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "local-data-compute",
+              "displayName": "Local data/compute",
+              "kind": "External"
+            }
+          ]
+        },
+        {
+          "key": "skill:data-analysis",
+          "displayName": "data-analysis",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:document-summary",
+          "displayName": "document-summary",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:email-draft",
+          "displayName": "email-draft",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        },
+        {
+          "key": "skill:file-sharing",
+          "displayName": "file-sharing",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "storage",
+              "displayName": "File storage",
+              "kind": "AzureResource",
+              "resourceKey": "storage"
+            }
+          ]
+        },
+        {
+          "key": "skill:rag-search",
+          "displayName": "rag-search",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "search",
+              "displayName": "Knowledge base search",
+              "kind": "AzureResource",
+              "resourceKey": "search"
+            }
+          ]
+        },
+        {
+          "key": "skill:web-search",
+          "displayName": "web-search",
+          "kind": "skill",
+          "downstreams": [
+            {
+              "key": "foundry",
+              "displayName": "LLM inference",
+              "kind": "AzureResource",
+              "resourceKey": "foundry"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "layoutOrder": {
+    "advisor": [
+      "clinician-visit-prep",
+      "finance-close",
+      "generic",
+      "hr-onboarding",
+      "insurance",
+      "it-service-desk",
+      "plant-floor-supervisor",
+      "retail-banking",
+      "sales-account-review",
+      "wealth-management"
+    ],
+    "tool": [
+      "mcp:epic",
+      "skill:variance-analysis",
+      "mcp:microsoft-learn",
+      "skill:docx-editor",
+      "skill:pptx-editor",
+      "mcp:sap-s4",
+      "mcp:m365-graph",
+      "mcp:workday",
+      "skill:claims-mgmt",
+      "platform:llm",
+      "platform:state",
+      "skill:file-sharing",
+      "mcp:servicenow",
+      "skill:rag-search",
+      "skill:code-interpreter",
+      "skill:data-analysis",
+      "skill:document-summary",
+      "skill:email-draft",
+      "skill:web-search",
+      "mcp:azure-iot",
+      "skill:oee-analysis",
+      "skill:crm",
+      "mcp:faker",
+      "mcp:salesforce"
+    ],
+    "service": [
+      "epic-fhir-api",
+      "microsoft-learn-api",
+      "sap-s4-api",
+      "microsoft-graph",
+      "workday-api",
+      "local-data-compute",
+      "cosmos",
+      "storage",
+      "servicenow-api",
+      "search",
+      "agent-runtime",
+      "foundry",
+      "azure-iot-api",
+      "core-banking-api",
+      "salesforce-api"
+    ],
+    "resource": [
+      "cosmos",
+      "storage",
+      "search",
+      "agentApp",
+      "foundry"
+    ]
+  }
+}

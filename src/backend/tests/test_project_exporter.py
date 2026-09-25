@@ -144,6 +144,8 @@ def test_assemble_renders_agent_yaml_with_persona(exporter: ProjectExporter, tmp
     assert "kind: hosted" in agent_yaml
     assert "protocols:" in agent_yaml
     assert "environment_variables:" in agent_yaml
+    assert "value: ${FOUNDRY_ENDPOINT}" in agent_yaml
+    assert "value: ${AZURE_AI_PROJECT_ENDPOINT}" not in agent_yaml
     # Cosmos DB database is per-export to avoid collisions.
     assert "kratos-agent-finance-close" in agent_yaml
 
@@ -164,6 +166,8 @@ def test_assemble_renders_azure_yaml_with_slug(exporter: ProjectExporter, tmp_pa
     assert "language: docker" in azure_yaml
     assert "context: ../.." in azure_yaml
     assert "azure.ai.agents:" in azure_yaml  # required extension
+    assert "AI_SERVICES_ENDPOINT: ${FOUNDRY_ENDPOINT}" in azure_yaml
+    assert "AI_SERVICES_ENDPOINT: ${AZURE_AI_PROJECT_ENDPOINT}" not in azure_yaml
 
 
 def test_assemble_copies_backend_app_recursively(exporter: ProjectExporter, tmp_path: Path):

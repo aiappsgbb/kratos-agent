@@ -30,6 +30,10 @@ on:
         description: "Upload use-case skills to blob storage (needs network access to the storage account)"
         type: boolean
         default: false
+      deploy_health_model:
+        description: "Deploy Azure Monitor health model infrastructure (DEPLOY_HEALTH_MODEL; preview, needs Microsoft.CloudHealth registered)"
+        type: boolean
+        default: false
       run_integration_tests:
         description: "Run integration tests after deploying"
         type: boolean
@@ -113,6 +117,7 @@ jobs:
           AZURE_ENV_NAME: ${{ inputs.environment }}
           AZURE_LOCATION: ${{ vars.AZURE_LOCATION || 'eastus2' }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          DEPLOY_HEALTH_MODEL: ${{ inputs.deploy_health_model && 'true' || 'false' }}
         run: azd provision --no-prompt
 
       - name: Refresh environment outputs
@@ -144,6 +149,7 @@ jobs:
             echo "| Result | ${{ job.status }} |"
             echo "| Commit | \`${{ github.sha }}\` |"
             echo "| Provisioned | ${{ inputs.provision }} |"
+            echo "| Health model deployed | ${{ inputs.provision && inputs.deploy_health_model }} |"
             echo "| Skills uploaded | ${{ inputs.upload_use_cases }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 

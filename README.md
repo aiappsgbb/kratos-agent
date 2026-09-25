@@ -242,6 +242,37 @@ Per-environment settings are set with `azd env set` while that environment is ac
 `azd env set DEPLOY_OBO false` to skip the on-behalf-of stack in an experiment. Values set this way
 land in that environment's `.env` only, never in another's.
 
+#### Azure Monitor health model
+
+`infra/` can deploy an Azure Monitor health model (`Microsoft.CloudHealth/healthmodels`, preview) that
+models health as advisor (one entity per use case) → tool → downstream-service → Azure resource.
+
+The model is opt-in (`DEPLOY_HEALTH_MODEL=false` by default), because it is a preview,
+region-limited resource that needs the `Microsoft.CloudHealth` provider registered first — with
+it on by default, every `azd provision` on a subscription without that registration would fail.
+Complete the prerequisites below, then enable it:
+
+```bash
+azd env set DEPLOY_HEALTH_MODEL true
+```
+
+Prerequisites (one-time):
+
+```bash
+az provider register -n Microsoft.CloudHealth
+az extension add -n health-models
+```
+
+Region notes:
+
+- This is a preview resource and region-limited.
+- `healthModelLocation` defaults to `centralus`.
+- Supported regions are the ones returned by `az provider show -n Microsoft.CloudHealth`.
+- `eastus2` is not supported.
+- The health model can live in a different region than the monitored resources.
+
+`azd` and ARM deployments are incremental. On a fresh deployment with `DEPLOY_HEALTH_MODEL=false`, no health model is created. If a health model already exists, turning the flag off later does not delete it, and removing entities from topology input does not delete already-deployed entities. Delete the health model resource explicitly (or redeploy fresh) to reconcile.
+
 ### Register the Agent in Foundry (One-Time Manual Step)
 
 After `azd up`, register the agent in the Foundry portal so traces appear in the Operate tab:
@@ -268,6 +299,7 @@ SKIP_BROWSER=1 ./run.sh  # API-only, skips the Chromium download
 `run.sh` reads `AZURE_STATIC_WEB_APP_URL` and `AGENT_SERVICE_URL` from `azd env get-values`, so it always follows whichever environment is currently selected. Override with `KRATOS_FRONTEND_URL` / `KRATOS_BACKEND_URL` to point it elsewhere. It fails fast rather than falling back to a stale default.
 
 See [`.copilot/skills/e2e-smoke/SKILL.md`](./.copilot/skills/e2e-smoke/SKILL.md) for the spec catalogue, env-var reference, and tips for running just the API or just the UX project.
+See [`docs/runbooks/post-azd-setup-manual.md`](./docs/runbooks/post-azd-setup-manual.md) for the full post-`azd up` setup and verification checklist.
 
 ---
 

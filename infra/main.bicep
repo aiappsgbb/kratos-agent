@@ -35,6 +35,35 @@ param agentApiPath string = 'kratos-agent'
 @description('Deploy the OBO MCP server and its Entra app registrations. Requires directory permission to register Entra applications. Set to false in tenants/subscriptions where the deploying identity cannot create app registrations.')
 param deployObo bool = true
 
+@description('Deploy the Azure Monitor health model resources')
+param deployHealthModel bool = false
+
+@description('Location for Azure Monitor health model resources')
+@allowed([
+  'uksouth'
+  'canadacentral'
+  'centralus'
+  'swedencentral'
+  'southeastasia'
+  'switzerlandnorth'
+  'italynorth'
+  'northeurope'
+  'germanywestcentral'
+  'australiaeast'
+  'eastasia'
+  'japanwest'
+])
+param healthModelLocation string = 'centralus'
+
+@description('Optional health model name override')
+param healthModelName string = ''
+
+@description('Optional Azure AI Search resource id for health model wiring. Must be in this deployment resource group because the health-model identity is granted Monitoring Reader on the RG only. For out-of-RG targets, add Monitoring Reader at that scope.')
+param aiSearchResourceId string = ''
+
+@description('Optional APIM resource id for health model wiring. Must be in this deployment resource group because the health-model identity is granted Monitoring Reader on the RG only. For out-of-RG targets, add Monitoring Reader at that scope.')
+param apimResourceId string = ''
+
 @description('Location for the Static Web App (must be one of: centralus, eastus2, westus2, westeurope, eastasia)')
 @allowed([
   'centralus'
@@ -51,6 +80,32 @@ var resourceToken = toLower(uniqueString(subscription().id, environmentName, loc
 var namePrefix = empty(resourcePrefix) ? '' : '${resourcePrefix}-'
 var namePrefixNoHyphen = empty(resourcePrefix) ? '' : toLower(resourcePrefix)
 var tags = { 'azd-env-name': environmentName, project: 'kratos-agent' }
+var resourceCatalog = {
+  foundry: {
+    azureResourceId: aiFoundry.outputs.id
+    metricNamespace: 'Microsoft.CognitiveServices/accounts'
+  }
+  cosmos: {
+    azureResourceId: cosmosDb.outputs.id
+    metricNamespace: 'Microsoft.DocumentDB/databaseAccounts'
+  }
+  agentApp: {
+    azureResourceId: agentService.outputs.id
+    metricNamespace: 'Microsoft.App/containerApps'
+  }
+  storage: {
+    azureResourceId: blobStorage.outputs.id
+    metricNamespace: 'Microsoft.Storage/storageAccounts'
+  }
+  search: {
+    azureResourceId: aiSearchResourceId
+    metricNamespace: 'Microsoft.Search/searchServices'
+  }
+  apim: {
+    azureResourceId: apimResourceId
+    metricNamespace: 'Microsoft.ApiManagement/service'
+  }
+}
 
 // ─── Resource Group ───
 resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -217,6 +272,17 @@ module staticWebApp './modules/static-web-app.bicep' = {
   }
 }
 
+module healthModel './modules/health-model.bicep' = if (deployHealthModel) {
+  name: 'health-model'
+  scope: rg
+  params: {
+    name: !empty(healthModelName) ? healthModelName : '${namePrefix}${abbrs.cloudHealthHealthModels}${resourceToken}'
+    location: healthModelLocation
+    tags: tags
+    resourceCatalog: resourceCatalog
+  }
+}
+
 // ─── OBO MCP Server: identity, Entra apps, container app ───
 // One user-assigned managed identity is the ACR-pull identity, the container
 // runtime identity, AND the federated subject the OBO server app trusts.
@@ -325,6 +391,8 @@ output FOUNDRY_PROJECT_ENDPOINT string = aiFoundry.outputs.projectEndpoint
 output AZURE_AI_PROJECT_ID string = aiFoundry.outputs.projectId
 output AZURE_BLOB_STORAGE_ENDPOINT string = blobStorage.outputs.endpoint
 output AZURE_BLOB_STORAGE_ACCOUNT_NAME string = blobStorage.outputs.name
+output AZURE_HEALTH_MODEL_ID string = deployHealthModel ? healthModel.outputs.id : ''
+output AZURE_HEALTH_MODEL_NAME string = deployHealthModel ? healthModel.outputs.name : ''
 
 // ─── OBO MCP server outputs ───
 output OBO_MCP_SERVER_URL string = deployObo ? oboMcpServer.outputs.url : ''

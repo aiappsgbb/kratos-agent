@@ -35,7 +35,7 @@ services:
                 # Without this, the agentserver framework falls back to a console
                 # OTLP exporter and floods stdout with metric JSON every 60s.
                 APPLICATIONINSIGHTS_CONNECTION_STRING: $${AZURE_APP_INSIGHTS_CONNECTION_STRING}
-                AI_SERVICES_ENDPOINT: $${AZURE_AI_PROJECT_ENDPOINT}
+                AI_SERVICES_ENDPOINT: $${FOUNDRY_ENDPOINT}
                 BLOB_SKILLS_CONTAINER: skills
                 BLOB_STORAGE_ENDPOINT: $${AZURE_BLOB_STORAGE_ENDPOINT}
                 COSMOS_DB_DATABASE: kratos-agent-${slug}

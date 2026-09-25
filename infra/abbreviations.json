@@ -12,6 +12,7 @@
   "searchSearchServices": "srch-",
   "cognitiveServicesAccounts": "oai-",
   "bingSearchAccounts": "bing-",
+  "cloudHealthHealthModels": "hm-",
   "webStaticSites": "stapp-",
   "storageAccounts": "st"
 }
