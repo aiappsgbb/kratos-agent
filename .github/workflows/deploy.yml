@@ -31,9 +31,9 @@ on:
         type: boolean
         default: false
       deploy_health_model:
-        description: "Deploy Azure Monitor health model infrastructure (DEPLOY_HEALTH_MODEL)"
+        description: "Deploy Azure Monitor health model infrastructure (DEPLOY_HEALTH_MODEL; preview, needs Microsoft.CloudHealth registered)"
         type: boolean
-        default: true
+        default: false
       run_integration_tests:
         description: "Run integration tests after deploying"
         type: boolean

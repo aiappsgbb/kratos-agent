@@ -18,7 +18,7 @@
       "value": "${DEPLOY_OBO=true}"
     },
     "deployHealthModel": {
-      "value": "${DEPLOY_HEALTH_MODEL=true}"
+      "value": "${DEPLOY_HEALTH_MODEL=false}"
     }
   }
 }

@@ -36,7 +36,7 @@ param agentApiPath string = 'kratos-agent'
 param deployObo bool = true
 
 @description('Deploy the Azure Monitor health model resources')
-param deployHealthModel bool = true
+param deployHealthModel bool = false
 
 @description('Location for Azure Monitor health model resources')
 @allowed([

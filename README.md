@@ -247,10 +247,13 @@ land in that environment's `.env` only, never in another's.
 `infra/` can deploy an Azure Monitor health model (`Microsoft.CloudHealth/healthmodels`, preview) that
 models health as advisor (one entity per use case) → tool → downstream-service → Azure resource.
 
-The model is enabled by default (`DEPLOY_HEALTH_MODEL=true`). Set it to `false` to skip creating it:
+The model is opt-in (`DEPLOY_HEALTH_MODEL=false` by default), because it is a preview,
+region-limited resource that needs the `Microsoft.CloudHealth` provider registered first — with
+it on by default, every `azd provision` on a subscription without that registration would fail.
+Complete the prerequisites below, then enable it:
 
 ```bash
-azd env set DEPLOY_HEALTH_MODEL false
+azd env set DEPLOY_HEALTH_MODEL true
 ```
 
 Prerequisites (one-time):
