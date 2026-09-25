@@ -44,6 +44,13 @@ updates:
         applies-to: version-updates
         update-types: [minor, patch]
     labels: [dependencies, python]
+    # Grouping alone is not enough: Dependabot bumps each exact pin to its own
+    # latest, so it offered pydantic_core 2.49.0 next to pydantic 2.13.5
+    # (which requires ==2.46.5) in #80 and again in #85. pydantic_core is only
+    # ever moved by hand, to whatever the chosen pydantic release pins.
+    ignore:
+      - dependency-name: "pydantic-core"
+      - dependency-name: "pydantic_core"
 
   # The hosted agent has its own pyproject and shares github-copilot-sdk with
   # the backend. Without this block it silently drifted behind (backend moved
