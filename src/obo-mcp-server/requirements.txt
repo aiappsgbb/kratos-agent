@@ -8,12 +8,12 @@
 # (ideally move to a hash-locked lockfile via pip-tools or uv).
 
 # --- Direct dependencies ---
-PyJWT[crypto]==2.14.0
+PyJWT[crypto]==2.15.0
 azure-identity==1.25.3
 httpx==0.28.1
 mcp==1.28.1
-starlette==1.6.0
-uvicorn==0.53.0
+starlette==1.7.0
+uvicorn==0.54.0
 
 # --- Transitive dependencies (pinned for reproducibility) ---
 annotated-types==0.8.0
