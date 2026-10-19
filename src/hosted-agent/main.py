@@ -45,6 +45,10 @@ if "FOUNDRY_ENDPOINT" not in os.environ:
 # Add the backend app to the Python path so we can reuse all existing modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
+from ag_ui.core import CustomEvent, RunAgentInput, RunFinishedEvent, TextMessageContentEvent
+from ag_ui.encoder import EventEncoder
+
+from app.agui import KratosAGUIAgent
 from app.config import Settings, get_settings
 from app.hosted_agent_invoke import parse_invoke_payload
 from app.models import (
@@ -76,6 +80,7 @@ logger = logging.getLogger(__name__)
 # ─── Global state (initialised in startup) ──────────────────────────────────
 
 _copilot_agent: CopilotAgent | None = None
+_agui_agent: KratosAGUIAgent | None = None
 _cosmos_service: CosmosService | None = None
 _blob_service: BlobSkillService | None = None
 _apm_service: ApmService | None = None
@@ -89,6 +94,9 @@ _settings: Settings | None = None
 # Copilot agent) and load a single use-case's skills the first time it is
 # actually requested, caching it in ``_registries`` thereafter.
 _registry_lock = asyncio.Lock()
+# Blob content fingerprint each cached registry was loaded from, so a new
+# conversation can pick up Agent Manager edits without a restart.
+_registry_fingerprints: dict[str, str] = {}
 
 # Cold-start timing — populated by _startup() and surfaced in the warmup
 # response so the backend can log the hosted-agent's own startup cost (vs the
@@ -109,7 +117,7 @@ async def _startup() -> None:
     loaded lazily by :func:`_ensure_registry` on first use, so a pre-warmed
     sandbox becomes ready without paying to load all 9 use-cases up front.
     """
-    global _copilot_agent, _cosmos_service, _blob_service, _apm_service, _settings
+    global _copilot_agent, _agui_agent, _cosmos_service, _blob_service, _apm_service, _settings
     global _startup_total_ms, _startup_phases
 
     import time as _time
@@ -145,6 +153,11 @@ async def _startup() -> None:
     )
     _blob_service = blob_service
     _copilot_agent.set_cosmos_service(_cosmos_service)
+    # AG-UI front door over the same CopilotClient, registries and session config.
+    # Persona runs can legitimately take many minutes (multi-step reports with
+    # code execution), so the per-run cap is generous; a human pause ends the
+    # run and does not count against it.
+    _agui_agent = KratosAGUIAgent(_copilot_agent, run_timeout=float(os.environ.get("AGUI_RUN_TIMEOUT_S", "1800")))
     # APM service (kept for lazy per-use-case syncs)
     _apm_service = ApmService(_settings, blob_service)
     _mark("core_parallel", t0)
@@ -175,21 +188,33 @@ async def _startup() -> None:
     )
 
 
-async def _ensure_registry(use_case: str) -> None:
+async def _ensure_registry(use_case: str, revalidate: bool = False) -> None:
     """Lazily load a single use-case's skill registry on first use.
 
     Loading is guarded by a lock and cached in ``_registries`` so concurrent or
     repeat requests for the same use-case load it only once. Falls back to the
     baked-in local ``use-cases/`` directory when blob is unavailable.
+
+    ``revalidate`` (set when a new conversation starts) reloads a cached
+    registry whose blob content changed since it was loaded, so skill, prompt
+    and MCP edits made in the Agent Manager reach new conversations.
     """
-    if use_case in _registries:
+    if use_case in _registries and not revalidate:
         return
 
     import time as _time
 
     async with _registry_lock:
+        fingerprint = ""
+        if _blob_service is not None and _blob_service.is_available:
+            try:
+                fingerprint = await _blob_service.content_fingerprint(use_case)
+            except Exception:
+                logger.warning("Could not fingerprint use-case '%s' in blob", use_case, exc_info=True)
         if use_case in _registries:
-            return
+            if not fingerprint or _registry_fingerprints.get(use_case) == fingerprint:
+                return
+            logger.info("Use-case '%s' changed in blob; reloading for the new conversation", use_case)
         t0 = _time.monotonic()
 
         # Sync just this use-case's APM dependencies (no-op when none declared).
@@ -234,6 +259,7 @@ async def _ensure_registry(use_case: str) -> None:
                 return
 
         _registries[use_case] = registry
+        _registry_fingerprints[use_case] = fingerprint
         logger.info(
             "Lazy-loaded use-case '%s' (%d skills, prompt=%s) in %.0fms",
             use_case,
@@ -245,6 +271,8 @@ async def _ensure_registry(use_case: str) -> None:
 
 async def _shutdown() -> None:
     """Cleanup on shutdown."""
+    if _agui_agent:
+        await _agui_agent.close()
     if _copilot_agent:
         await _copilot_agent.stop()
     if _cosmos_service:
@@ -420,6 +448,43 @@ async def _stream_response(
     yield f"event: done\ndata: {json.dumps({'invocation_id': invocation_id, 'conversation_id': conversation_id})}\n\n".encode()
 
 
+FILE_CONTENT_EVENT = "kratos.file_content"
+
+
+def _mcp_tokens_from(data: dict) -> dict[str, str]:
+    raw_tokens = data.get("mcpAccessTokens")
+    if not isinstance(raw_tokens, dict):
+        return {}
+    return {str(k): v for k, v in raw_tokens.items() if isinstance(v, str) and v}
+
+
+async def _stream_agui(invocation_id: str, run_input: RunAgentInput, use_case: str, mcp_tokens: dict[str, str]):
+    """Run one AG-UI turn and stream AG-UI events as SSE.
+
+    Generated ``/tmp`` files are relayed as ``kratos.file_content`` CUSTOM events
+    just before RUN_FINISHED; the backend stores them and never forwards them.
+    """
+    encoder = EventEncoder()
+    conversation_id = run_input.thread_id
+    _copilot_agent.set_conversation_use_case(conversation_id, use_case)
+    _copilot_agent.set_conversation_mcp_tokens(conversation_id, mcp_tokens)
+
+    text_parts: list[str] = []
+    async for event in _agui_agent.run(run_input):
+        if isinstance(event, TextMessageContentEvent):
+            text_parts.append(event.delta)
+        elif isinstance(event, RunFinishedEvent):
+            for filename, blob in _collect_generated_files("".join(text_parts)):
+                file_event = CustomEvent(
+                    name=FILE_CONTENT_EVENT,
+                    value={"filename": filename, "content": base64.b64encode(blob).decode("ascii")},
+                )
+                yield encoder.encode(file_event).encode()
+        yield encoder.encode(event).encode()
+
+    yield f"event: done\ndata: {json.dumps({'invocation_id': invocation_id, 'conversation_id': conversation_id})}\n\n".encode()
+
+
 @app.invoke_handler
 async def handle_invoke(request: Request) -> Response:
     """Handle invocation requests — accepts the same payload as the FastAPI /api/agent/chat endpoint."""
@@ -452,6 +517,32 @@ async def handle_invoke(request: Request) -> Response:
                 "phases": _startup_phases,
                 "loaded_use_cases": list(_registries.keys()),
             },
+        )
+
+    # AG-UI turn: the backend relays a RunAgentInput in the "agui" body field.
+    if isinstance(data.get("agui"), dict):
+        try:
+            run_input = RunAgentInput.model_validate(data["agui"])
+        except ValueError as e:
+            return JSONResponse(status_code=400, content={"error": "invalid_request", "message": str(e)})
+        use_case = str(data.get("useCase") or "generic")
+        mcp_tokens = _mcp_tokens_from(data)
+        logger.info(
+            "handle_invoke[agui]: useCase=%s thread=%s run=%s messages=%d tools=%s mcp_tokens=%s",
+            use_case,
+            run_input.thread_id,
+            run_input.run_id,
+            len(run_input.messages),
+            [t.name for t in run_input.tools],
+            sorted(mcp_tokens.keys()),
+        )
+        # A conversation this process has not served yet starts from the current
+        # persona definition; an ongoing one keeps the session it was built with.
+        await _ensure_registry(use_case, revalidate=run_input.thread_id not in _agui_agent._threads)
+        return StreamingResponse(
+            _stream_agui(request.state.invocation_id, run_input, use_case, mcp_tokens),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
         )
 
     try:

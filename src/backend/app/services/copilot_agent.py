@@ -641,6 +641,17 @@ class CopilotAgent:
         logger.info("Config updated — all sessions reset")
 
     @property
+    def _byok_base_url(self) -> str:
+        """OpenAI-compatible endpoint override for local runs (e.g. the aimock model).
+
+        Honoured only in local mode, so a stray ``OPENAI_BASE_URL`` in a cloud
+        environment can never reroute production traffic.
+        """
+        if not self.settings.is_local_mode:
+            return ""
+        return os.environ.get("OPENAI_BASE_URL", "").strip()
+
+    @property
     def _use_azure_provider(self) -> bool:
         """Whether to route LLM calls through the Azure provider (Foundry / APIM).
 
@@ -681,6 +692,12 @@ class CopilotAgent:
             A provider configuration dict for ``CopilotClient`` sessions when
             running against Azure OpenAI, or ``None`` for local GitHub-hosted mode.
         """
+        if self._byok_base_url:
+            return {
+                "type": "openai",
+                "base_url": self._byok_base_url,
+                "api_key": os.environ.get("OPENAI_API_KEY", ""),
+            }
         if not self._use_azure_provider:
             return None
         llm_base = (self.settings.llm_gateway_base_url or self.settings.foundry_endpoint).rstrip("/")
@@ -696,7 +713,11 @@ class CopilotAgent:
     ) -> dict:
         """Build the shared session config dict used for both create and resume."""
         config = {
-            "model": self.settings.foundry_model_deployment,
+            "model": (
+                os.environ.get("OPENAI_CHAT_MODEL_ID", "gpt-4o")
+                if self._byok_base_url
+                else self.settings.foundry_model_deployment
+            ),
             "streaming": True,
             "tools": enabled_tools,
             "skill_directories": skill_dirs,
@@ -766,6 +787,58 @@ class CopilotAgent:
         session = self._sessions.get(conversation_id)
         return getattr(session, "session_id", None) if session else None
 
+    def resolve_session_config(self, conversation_id: str) -> tuple[dict, bool, str]:
+        """Build the SDK session config for a conversation from its use-case registry.
+
+        Returns ``(config, has_identity, fingerprint)``: the create/resume kwargs,
+        whether an MCP server carries the user's OBO bearer, and the fingerprint of
+        that bearer. Shared by the legacy SSE path and the AG-UI path.
+        """
+        registry = self._get_registry(conversation_id)
+        enabled_tools = ALL_TOOLS
+        skill_dirs = []
+        mcp_servers: dict = {}
+        if registry is not None:
+            enabled_names = registry.get_enabled_tool_names()
+            enabled_tools = [t for t in ALL_TOOLS if t.name in enabled_names]
+            skill_dirs = registry.get_skill_directories()
+            mcp_servers = getattr(registry, "mcp_servers", {})
+
+        # Inject the signed-in user's OBO tokens as Authorization headers on the
+        # matching remote MCP servers (and auto-add the env-configured OBO server
+        # when a token is present for it). No-op when no tokens are registered.
+        mcp_servers = self._apply_mcp_tokens(conversation_id, mcp_servers)
+        has_identity = self._mcp_has_auth(mcp_servers)
+        fingerprint = self._mcp_fingerprint(mcp_servers)
+
+        logger.info(
+            "Session config for conversation=%s: mcp_servers=%s identity=%s skill_dirs=%d tools=%d",
+            conversation_id,
+            list(mcp_servers.keys()) if mcp_servers else "none",
+            has_identity,
+            len(skill_dirs),
+            len(enabled_tools),
+        )
+
+        system_prompt = self._get_system_prompt(conversation_id)
+        config = self._build_session_config(enabled_tools, skill_dirs, system_prompt, mcp_servers)
+        return config, has_identity, fingerprint
+
+    def identity_fingerprint(self, conversation_id: str) -> str:
+        """Fingerprint of the OBO bearer(s) a new session for this conversation would carry."""
+        registry = self._get_registry(conversation_id)
+        mcp_servers = getattr(registry, "mcp_servers", {}) if registry is not None else {}
+        return self._mcp_fingerprint(self._apply_mcp_tokens(conversation_id, mcp_servers))
+
+    @property
+    def client(self) -> CopilotClient | None:
+        """The shared ``CopilotClient`` (``None`` until :meth:`start`)."""
+        return self._client
+
+    @property
+    def cosmos_service(self) -> "CosmosService | None":
+        return self._cosmos_service
+
     async def _get_or_create_session(self, conversation_id: str, sdk_session_id: str | None = None) -> object:
         """Return an existing session or create/resume one for this conversation.
 
@@ -779,23 +852,7 @@ class CopilotAgent:
         """
         lock = self._session_locks.setdefault(conversation_id, asyncio.Lock())
         async with lock:
-            # Resolve enabled tools and skill directories from the use-case registry
-            registry = self._get_registry(conversation_id)
-            enabled_tools = ALL_TOOLS
-            skill_dirs = []
-            mcp_servers: dict = {}
-            if registry is not None:
-                enabled_names = registry.get_enabled_tool_names()
-                enabled_tools = [t for t in ALL_TOOLS if t.name in enabled_names]
-                skill_dirs = registry.get_skill_directories()
-                mcp_servers = getattr(registry, "mcp_servers", {})
-
-            # Inject the signed-in user's OBO tokens as Authorization headers on the
-            # matching remote MCP servers (and auto-add the env-configured OBO server
-            # when a token is present for it). No-op when no tokens are registered.
-            mcp_servers = self._apply_mcp_tokens(conversation_id, mcp_servers)
-            has_identity = self._mcp_has_auth(mcp_servers)
-            fingerprint = self._mcp_fingerprint(mcp_servers)
+            config, has_identity, fingerprint = self.resolve_session_config(conversation_id)
 
             # In-memory reuse — only when the injected identity is unchanged. A changed,
             # newly added, or removed token evicts the cached session so the next create
@@ -807,18 +864,6 @@ class CopilotAgent:
                     return cached
                 logger.info("MCP identity changed for conversation=%s — rebuilding SDK session", conversation_id)
                 await self._discard_session(conversation_id)
-
-            logger.info(
-                "Session config for conversation=%s: mcp_servers=%s identity=%s skill_dirs=%d tools=%d",
-                conversation_id,
-                list(mcp_servers.keys()) if mcp_servers else "none",
-                has_identity,
-                len(skill_dirs),
-                len(enabled_tools),
-            )
-
-            system_prompt = self._get_system_prompt(conversation_id)
-            config = self._build_session_config(enabled_tools, skill_dirs, system_prompt, mcp_servers)
 
             # Identity-bearing sessions must never resume a persisted session id (Cosmos
             # or caller-supplied) — the CLI would replay the create-time bearer. Force a
@@ -867,7 +912,7 @@ class CopilotAgent:
                     conversation_id,
                     self.settings.foundry_model_deployment,
                     has_identity,
-                    ",".join(tool.name for tool in enabled_tools),
+                    ",".join(tool.name for tool in config["tools"]),
                     elapsed_ms,
                 )
             self._sessions[conversation_id] = session

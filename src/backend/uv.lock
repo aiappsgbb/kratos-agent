@@ -9,6 +9,18 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "ag-ui-protocol"
+version = "0.1.22"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e8/f7/9bf788e7d3608725d022a248a58427040f4f930ab87ddb54bd29ee4d9a51/ag_ui_protocol-0.1.22.tar.gz", hash = "sha256:d21f265284a50d9fc87ad7bcbd58f737b4b16eef7b5375f13a6e925117b52046", size = 18110, upload-time = "2026-09-30T16:56:56Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/be/6c/af3d577e68c9474c99600e65b2c6283772aae187edca6f0f2f5cbd9f565a/ag_ui_protocol-0.1.22-py3-none-any.whl", hash = "sha256:fca13ee7820f8f53e869c19e09ddd75826c1799b27c2adb6f2e567295433c704", size = 22068, upload-time = "2026-09-07T19:32:44Z" },
+]
+
+[[package]]
 name = "aiohappyeyeballs"
 version = "2.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1034,7 +1046,7 @@ wheels = [
 
 [[package]]
 name = "github-copilot-sdk"
-version = "1.0.8"
+version = "1.0.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -1042,7 +1054,7 @@ dependencies = [
     { name = "python-dateutil" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3e/d2/517ae4be0dbbb02d5546f48e4be59f0ac2d83752cd608da739c5c580942f/github_copilot_sdk-1.0.8-py3-none-any.whl", hash = "sha256:7c3d868b73daa3a154ae6c1c5a2bd9301c47349c6b080f1ed77ba9027da3e0fa", size = 429721, upload-time = "2026-07-24T17:22:57Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/e2/4d8c622545f55f06773548cf86ffe60f59e6a4cedcc412ff84fcac244b2b/github_copilot_sdk-1.0.14-py3-none-any.whl", hash = "sha256:9f4538cec7295f24507c650d794307396458a51f280a0fbbcd840da177109050", size = 614607, upload-time = "2026-09-23T05:11:34Z" },
 ]
 
 [[package]]
@@ -1418,6 +1430,7 @@ name = "kratos-agent-service"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "ag-ui-protocol" },
     { name = "aiohttp" },
     { name = "aiosqlite" },
     { name = "apm-cli" },
@@ -1457,6 +1470,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "ag-ui-protocol", specifier = "==0.1.22" },
     { name = "aiohttp", specifier = ">=3.9.0" },
     { name = "aiosqlite", specifier = ">=0.20.0" },
     { name = "apm-cli", specifier = ">=0.5.0" },
@@ -1470,7 +1484,7 @@ requires-dist = [
     { name = "azure-search-documents", specifier = ">=11.6.0" },
     { name = "azure-storage-blob", specifier = ">=12.20.0" },
     { name = "fastapi", specifier = ">=0.115.0" },
-    { name = "github-copilot-sdk", specifier = "==1.0.8" },
+    { name = "github-copilot-sdk", specifier = "==1.0.14" },
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = "==1.18.2" },
     { name = "opentelemetry-api", specifier = ">=1.25.0" },

@@ -287,18 +287,6 @@ class FoundryAgentProxy:
         # below, which the Invocations gateway preserves.
         input_text = "\n\n".join(preamble_parts) + f"\n\n{message}" if preamble_parts else message
 
-        token = await self._get_token()
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "text/event-stream",
-            "Foundry-Features": "HostedAgents=V1Preview",
-            "x-kratos-use-case": str(use_case) if use_case else "",
-            "x-kratos-conversation-id": str(conversation_id) if conversation_id else "",
-        }
-        if eval_run_id:
-            headers["x-kratos-eval-run-id"] = str(eval_run_id)
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
         payload: dict[str, Any] = {
             "input": input_text,
             "conversationId": conversation_id,
@@ -312,6 +300,88 @@ class FoundryAgentProxy:
         # secrets — never placed in the prompt and never logged.
         if mcp_access_tokens:
             payload["mcpAccessTokens"] = mcp_access_tokens
+
+        async for kind, value in self._stream_blocks(payload, conversation_id, use_case, eval_run_id, agent_session_id):
+            if kind == "error":
+                yield {"event": "error", "data": {"message": value, "code": "PROXY_ERROR"}}
+                return
+            if kind == "session":
+                yield {"event": "_gateway_session", "data": {"agentSessionId": value}}
+                return
+            parsed = self._parse_sse_block(value)
+            if parsed is None:
+                continue
+            if parsed.get("_protocol_done"):
+                continue
+            # Hosted-agent diagnostic (keys only, no token values) — log to
+            # backend telemetry and drop it so it never reaches the user/model.
+            if parsed.get("event") == "kratos_diag":
+                logger.info("hosted-agent diag: %s", parsed.get("data"))
+                continue
+            yield parsed
+
+    async def invoke_agui(
+        self,
+        run_input: dict[str, Any],
+        use_case: str = "generic",
+        agent_session_id: str | None = None,
+        eval_run_id: str | None = None,
+        mcp_access_tokens: dict[str, str] | None = None,
+    ) -> AsyncGenerator[dict, None]:
+        """Relay one AG-UI run to the hosted agent and yield AG-UI event dicts.
+
+        ``run_input`` is the client's ``RunAgentInput`` (camelCase JSON). Yields the
+        hosted agent's AG-UI events as dicts, then ``{"type": "_gateway_session",
+        "agentSessionId": ...}`` when the gateway assigned a session. Transport
+        failures surface as a ``RUN_ERROR`` event.
+        """
+        conversation_id = str(run_input.get("threadId") or "")
+        payload: dict[str, Any] = {
+            # The gateway requires an input; the run itself travels in "agui".
+            "input": "[agui]",
+            "conversationId": conversation_id,
+            "useCase": use_case,
+            "agui": run_input,
+        }
+        if mcp_access_tokens:
+            payload["mcpAccessTokens"] = mcp_access_tokens
+
+        async for kind, value in self._stream_blocks(payload, conversation_id, use_case, eval_run_id, agent_session_id):
+            if kind == "error":
+                yield {"type": "RUN_ERROR", "message": value, "code": "PROXY_ERROR"}
+                return
+            if kind == "session":
+                yield {"type": "_gateway_session", "agentSessionId": value}
+                return
+            event = self._parse_agui_block(value)
+            if event is not None:
+                yield event
+
+    async def _stream_blocks(
+        self,
+        payload: dict[str, Any],
+        conversation_id: str,
+        use_case: str,
+        eval_run_id: str | None,
+        agent_session_id: str | None,
+    ) -> AsyncGenerator[tuple[str, str], None]:
+        """POST to the hosted agent and yield raw SSE blocks.
+
+        Yields ``("block", text)`` per SSE block, then ``("session", id)`` once the
+        stream ends (when the gateway returned a session id), or ``("error", msg)``.
+        """
+        token = await self._get_token()
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
+            "Foundry-Features": "HostedAgents=V1Preview",
+            "x-kratos-use-case": str(use_case) if use_case else "",
+            "x-kratos-conversation-id": str(conversation_id) if conversation_id else "",
+        }
+        if eval_run_id:
+            headers["x-kratos-eval-run-id"] = str(eval_run_id)
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
 
         # Append agent_session_id as query parameter to reuse the same
         # gateway session (container) across messages in a conversation. For the
@@ -335,7 +405,8 @@ class FoundryAgentProxy:
                     endpoint,
                     headers=headers,
                     json=payload,
-                    timeout=aiohttp.ClientTimeout(total=300),
+                    # Idle limits, not a total one: long agent runs keep streaming.
+                    timeout=aiohttp.ClientTimeout(total=None, sock_connect=30, sock_read=900),
                 ) as resp:
                     if resp.status != 200:
                         body = await resp.text()
@@ -354,50 +425,51 @@ class FoundryAgentProxy:
                             )
                             await asyncio.sleep(backoff)
                             continue
-                        yield {
-                            "event": "error",
-                            "data": {"message": f"Hosted agent error: HTTP {resp.status}", "code": "PROXY_ERROR"},
-                        }
+                        yield ("error", f"Hosted agent error: HTTP {resp.status}")
                         return
 
                     # Capture the gateway session ID from response headers
                     gateway_session = resp.headers.get("x-agent-session-id")
 
-                    # Parse SSE stream
                     buffer = ""
                     async for chunk in resp.content.iter_any():
-                        buffer += chunk.decode("utf-8", errors="replace")
-
+                        buffer += chunk.decode("utf-8", errors="replace").replace("\r\n", "\n")
                         while "\n\n" in buffer:
                             event_block, buffer = buffer.split("\n\n", 1)
-                            parsed = self._parse_sse_block(event_block)
-                            if parsed is not None:
-                                if parsed.get("_protocol_done"):
-                                    # Yield the gateway session ID before ending
-                                    # so the router can persist it for future calls.
-                                    if gateway_session:
-                                        yield {"event": "_gateway_session", "data": {"agentSessionId": gateway_session}}
-                                    return
-                                # Hosted-agent diagnostic (keys only, no token
-                                # values) — log to backend telemetry and drop it
-                                # so it never reaches the user/model.
-                                if parsed.get("event") == "kratos_diag":
-                                    logger.info("hosted-agent diag: %s", parsed.get("data"))
-                                    continue
-                                yield parsed
+                            yield ("block", event_block)
+                    if buffer.strip():
+                        yield ("block", buffer)
 
-                    # Fallback: if stream ends without a protocol done event,
-                    # still yield the gateway session.
+                    # The router persists the gateway session for future calls.
                     if gateway_session:
-                        yield {"event": "_gateway_session", "data": {"agentSessionId": gateway_session}}
+                        yield ("session", gateway_session)
                     return
 
         except aiohttp.ClientError:
             logger.exception("Failed to invoke hosted agent")
-            yield {
-                "event": "error",
-                "data": {"message": "Connection to hosted agent failed", "code": "PROXY_ERROR"},
-            }
+            yield ("error", "Connection to hosted agent failed")
+
+    @staticmethod
+    def _parse_agui_block(block: str) -> dict | None:
+        """Parse one SSE block from an AG-UI stream; ``None`` for protocol noise."""
+        event_type = None
+        data_parts: list[str] = []
+        for line in block.split("\n"):
+            if line.startswith("event:"):
+                event_type = line[6:].strip()
+            elif line.startswith("data:"):
+                data_parts.append(line[5:].lstrip(" "))
+        # The invocations protocol's own trailing "done" event is not AG-UI.
+        if not data_parts or event_type == "done":
+            return None
+        try:
+            data = json.loads("\n".join(data_parts))
+        except json.JSONDecodeError:
+            logger.warning("Invalid JSON in AG-UI SSE data: %s", data_parts[0][:200])
+            return None
+        if not isinstance(data, dict) or not isinstance(data.get("type"), str):
+            return None
+        return data
 
     @staticmethod
     def _parse_sse_block(block: str) -> dict | None:

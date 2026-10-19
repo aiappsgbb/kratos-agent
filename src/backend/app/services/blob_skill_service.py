@@ -15,6 +15,7 @@ Uses Azure Managed Identity for passwordless authentication.
 
 import asyncio
 import contextlib
+import hashlib
 import logging
 from pathlib import Path
 
@@ -161,6 +162,18 @@ class BlobSkillService:
             if parts and parts[0]:
                 names.add(parts[0])
         return sorted(names)
+
+    async def content_fingerprint(self, use_case: str) -> str:
+        """Cheap change marker for a use-case: a hash of its blob names and ETags.
+
+        One listing call, no downloads. Returns ``""`` when blob is unavailable.
+        """
+        if not self._container_client:
+            return ""
+        digest = hashlib.sha256()
+        async for blob in self._container_client.list_blobs(name_starts_with=f"{_USE_CASES_PREFIX}{use_case}/"):
+            digest.update(f"{blob.name}\x00{blob.etag}\n".encode())
+        return digest.hexdigest()
 
     async def seed_from_local(self) -> list[str]:
         """Upload each local use-case folder to blob if it isn't already present.

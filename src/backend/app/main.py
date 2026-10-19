@@ -17,6 +17,7 @@ from app.routers import (
     admin_prompt,
     admin_skills,
     agent,
+    agui,
     conversations,
     copilot_studio,
     evals,
@@ -239,6 +240,7 @@ app.add_middleware(
 app.include_router(health.router, tags=["health"])
 app.include_router(conversations.router, prefix="/api/conversations", tags=["conversations"])
 app.include_router(agent.router, prefix="/api/agent", tags=["agent"])
+app.include_router(agui.router, prefix="/api/agui", tags=["agui"])
 app.include_router(settings.router, prefix="/api/settings", tags=["settings"])
 app.include_router(admin_skills.router, prefix="/api/admin/skills", tags=["admin"])
 app.include_router(admin_prompt.router, prefix="/api/admin/system-prompt", tags=["admin"])

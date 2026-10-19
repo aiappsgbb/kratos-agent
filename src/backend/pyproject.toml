@@ -26,7 +26,8 @@ dependencies = [
     "pymupdf>=1.24.0",
     "pyyaml>=6.0",
     "sse-starlette>=2.0.0",
-    "github-copilot-sdk==1.0.8",
+    "github-copilot-sdk==1.0.14",
+    "ag-ui-protocol==0.1.22",
     "aiosqlite>=0.20.0",
     "azure-monitor-query>=1.3.0",
     "azure-ai-evaluation>=1.0.0",
@@ -52,7 +53,9 @@ include = ["app*"]
 [tool.ruff]
 target-version = "py311"
 line-length = 120
-extend-exclude = ["app/exporter_templates"]
+# app/agui/{agent,mapper}.py are vendored from the AG-UI Copilot SDK adapter;
+# keep them byte-close to upstream so the eventual package swap is a delete.
+extend-exclude = ["app/exporter_templates", "app/agui/agent.py", "app/agui/mapper.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "S", "B", "A", "C4", "SIM"]
