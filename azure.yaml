@@ -56,99 +56,19 @@ services:
             path: ./Dockerfile
             remoteBuild: true
     web:
+        # Next.js standalone server: hosts the UI, the CopilotKit runtime route
+        # (/copilotkit/kratos) that relays AG-UI runs to agent-service, and a
+        # config.json built from the container's environment (set in
+        # infra/modules/web-app.bicep), so no deploy hook writes files.
         project: ./src/frontend
-        host: staticwebapp
+        host: containerapp
         language: js
-        dist: out
-        hooks:
-            predeploy:
-              posix:
-                shell: sh
-                run: |
-                    # config.json tells the static frontend where the backend API is.
-                    # When hosted behind Front Door under a sub-path (NEXT_PUBLIC_BASE_PATH,
-                    # e.g. /kratos), the embedded UI calls the backend SAME-ORIGIN at
-                    # <basePath>/api/* — Front Door routes /kratos/api/* to the Container
-                    # App (stripping the /kratos prefix). This avoids CORS entirely.
-                    # In standalone (root) deployments there is no sub-path, so we point
-                    # config.json at the backend's own URL (AGENT_SERVICE_URL).
-                    BP="$(printf '%s' "${NEXT_PUBLIC_BASE_PATH:-}" | sed 's#/*$##')"
-                    if [ -n "$BP" ]; then
-                      echo "{\"apiUrl\":\"${BP}\"}" > out/config.json
-                      echo "Injected same-origin config.json with apiUrl=${BP} (behind Front Door)"
-                    elif [ -n "${AGENT_SERVICE_URL}" ]; then
-                      echo "{\"apiUrl\":\"${AGENT_SERVICE_URL}\"}" > out/config.json
-                      echo "Injected config.json with apiUrl=${AGENT_SERVICE_URL}"
-                    fi
-                    # Merge the OBO sign-in config (Entra app + MCP scope) into
-                    # config.json so MSAL.js can sign the user in and acquire a
-                    # token for the OBO MCP server. Skipped if outputs are unset.
-                    if [ -n "${OBO_CLIENT_APP_CLIENT_ID}" ] && [ -n "${OBO_TENANT_ID}" ] && [ -n "${OBO_SERVER_APP_IDENTIFIER_URI}" ]; then
-                      [ -f out/config.json ] || echo "{}" > out/config.json
-                      SCOPE="${OBO_SERVER_APP_IDENTIFIER_URI}/${OBO_SERVER_APP_SCOPE_VALUE:-access_as_user}"
-                      AUTH_JSON="{\"clientId\":\"${OBO_CLIENT_APP_CLIENT_ID}\",\"tenantId\":\"${OBO_TENANT_ID}\",\"mcpScope\":\"${SCOPE}\",\"mcpServerName\":\"${OBO_MCP_SERVER_NAME:-graph-obo}\"}"
-                      node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('out/config.json','utf8'));c.auth=JSON.parse(process.argv[1]);fs.writeFileSync('out/config.json',JSON.stringify(c));" "$AUTH_JSON"
-                      echo "Merged OBO auth config into config.json (scope=${SCOPE})"
-                    fi
-                    # Emit a basePath-aware staticwebapp.config.json into out/ so the
-                    # SWA EasyAuth 401 redirect + /api/* gating stay inside the mount
-                    # path (e.g. /kratos) when hosted behind Front Door. Empty base
-                    # path → straight copy (standalone root deployment).
-                    if [ -f staticwebapp.config.json ]; then
-                      if [ -n "$BP" ]; then
-                        sed "s#/.auth/login/aad#${BP}/.auth/login/aad#g; s#\"/api/\*\"#\"${BP}/api/*\"#g" \
-                          staticwebapp.config.json > out/staticwebapp.config.json
-                        echo "Wrote basePath-aware staticwebapp.config.json (basePath=${BP})"
-                      else
-                        cp staticwebapp.config.json out/staticwebapp.config.json
-                      fi
-                    fi
-              windows:
-                shell: pwsh
-                run: |
-                    # PowerShell mirror of the posix branch above — see there for why
-                    # config.json is written at deploy time rather than baked into the
-                    # static export. Uses native JSON cmdlets, so unlike the sh version
-                    # it does not shell out to node.
-                    $ErrorActionPreference = 'Stop'
-                    $BP = ($env:NEXT_PUBLIC_BASE_PATH ?? '') -replace '/+$', ''
-                    if ($BP) {
-                      @{ apiUrl = $BP } | ConvertTo-Json -Compress | Set-Content out/config.json -Encoding utf8
-                      Write-Host "Injected same-origin config.json with apiUrl=$BP (behind Front Door)"
-                    } elseif ($env:AGENT_SERVICE_URL) {
-                      @{ apiUrl = $env:AGENT_SERVICE_URL } | ConvertTo-Json -Compress | Set-Content out/config.json -Encoding utf8
-                      Write-Host "Injected config.json with apiUrl=$($env:AGENT_SERVICE_URL)"
-                    }
-                    if ($env:OBO_CLIENT_APP_CLIENT_ID -and $env:OBO_TENANT_ID -and $env:OBO_SERVER_APP_IDENTIFIER_URI) {
-                      if (-not (Test-Path out/config.json)) { '{}' | Set-Content out/config.json -Encoding utf8 }
-                      $ScopeValue = $env:OBO_SERVER_APP_SCOPE_VALUE ?? 'access_as_user'
-                      $Scope = "$($env:OBO_SERVER_APP_IDENTIFIER_URI)/$ScopeValue"
-                      $Cfg = Get-Content out/config.json -Raw | ConvertFrom-Json
-                      $Cfg | Add-Member -NotePropertyName auth -NotePropertyValue ([pscustomobject]@{
-                        clientId      = $env:OBO_CLIENT_APP_CLIENT_ID
-                        tenantId      = $env:OBO_TENANT_ID
-                        mcpScope      = $Scope
-                        mcpServerName = $env:OBO_MCP_SERVER_NAME ?? 'graph-obo'
-                      }) -Force
-                      $Cfg | ConvertTo-Json -Compress -Depth 5 | Set-Content out/config.json -Encoding utf8
-                      Write-Host "Merged OBO auth config into config.json (scope=$Scope)"
-                    }
-                    if (Test-Path staticwebapp.config.json) {
-                      if ($BP) {
-                        # .Replace() is literal — the "/api/*" pattern would otherwise
-                        # need regex escaping.
-                        # -NoNewline: -Raw already carries the file's own trailing
-                        # newline, and Set-Content would otherwise append a second
-                        # one, leaving the file one byte off from the sed output.
-                        (Get-Content staticwebapp.config.json -Raw).
-                          Replace('/.auth/login/aad', "$BP/.auth/login/aad").
-                          Replace('"/api/*"', """$BP/api/*""") |
-                          Set-Content out/staticwebapp.config.json -Encoding utf8 -NoNewline
-                        Write-Host "Wrote basePath-aware staticwebapp.config.json (basePath=$BP)"
-                      } else {
-                        Copy-Item staticwebapp.config.json out/staticwebapp.config.json -Force
-                      }
-                    }
+        docker:
+            path: ./Dockerfile
+            remoteBuild: true
+            # basePath is compiled into the Next.js build, so it is a build arg.
+            buildArgs:
+                - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
 # Every hook declares BOTH a posix: and a windows: variant. A hook with only
 # `shell: sh` cannot run on Windows: azd resolves `sh` from PATH, and a default
 # Git for Windows install puts only `Git\cmd` there (git.exe), while sh.exe

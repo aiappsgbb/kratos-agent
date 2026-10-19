@@ -91,17 +91,15 @@ test.describe("UX — interactive flows", () => {
       "user message bubble rendered",
     ).toBeVisible({ timeout: 15_000 });
 
-    // Wait for the assistant's reply: once the agent finishes streaming, the
-    // ChatWindow's send button label flips from "Sending message" back to
-    // "Send message". That's the unambiguous "done" signal.
-    await page
-      .getByRole("button", { name: "Sending message" })
-      .waitFor({ state: "visible", timeout: 30_000 })
-      .catch(() => undefined);
+    // The run inspector's status pill is the unambiguous "done" signal: it
+    // leaves "ready" while the agent runs and returns once the reply lands.
+    await expect(page.getByTestId("assistant-message").first(), "assistant reply rendered").toBeVisible({
+      timeout: 120_000,
+    });
     await expect(
-      page.getByRole("button", { name: "Send message" }),
-      "send button returns to non-streaming state after assistant reply",
-    ).toBeVisible({ timeout: 120_000 });
+      page.locator('[data-testid="run-status"]').first(),
+      "run status returns to ready after the assistant reply",
+    ).toHaveAttribute("data-phase", "ready", { timeout: 120_000 });
 
     // Sanity: <main> should have grown well beyond just the user prompt.
     const mainText = await page.locator("main").innerText();

@@ -6,11 +6,11 @@ Use this after `azd up` to finish the manual setup and prove the deployed app is
 
 ```bash
 azd env get-value AZURE_ENV_NAME
-azd env get-values | grep -E '^(AZURE_STATIC_WEB_APP_URL|AGENT_SERVICE_URL|AZURE_AI_PROJECT_ID)='
+azd env get-values | grep -E '^(AZURE_WEB_APP_URL|AGENT_SERVICE_URL|AZURE_AI_PROJECT_ID)='
 git check-ignore -v .azure .env.local .copilot/skills/e2e-smoke/playwright-report .copilot/skills/e2e-smoke/test-results
 ```
 
-`AZURE_STATIC_WEB_APP_URL` is the frontend. `AGENT_SERVICE_URL` is the backend Container App. The e2e runner reads both from the active `azd` environment unless `KRATOS_FRONTEND_URL` or `KRATOS_BACKEND_URL` is explicitly exported.
+`AZURE_WEB_APP_URL` is the frontend Container App (environments provisioned before it replaced the Static Web App expose `AZURE_STATIC_WEB_APP_URL` instead). `AGENT_SERVICE_URL` is the backend Container App. The e2e runner reads both from the active `azd` environment unless `KRATOS_FRONTEND_URL` or `KRATOS_BACKEND_URL` is explicitly exported.
 
 ## 2. Register the custom agent in Foundry
 

@@ -124,3 +124,10 @@ export async function loadRuntimeConfig(): Promise<void> {
     // No config.json — that's fine, use fallbacks
   }
 }
+
+/** "mock" when the stack runs against the deterministic offline model. */
+export function getDemoMode(): string {
+  if (typeof window === "undefined") return "";
+  const cfg = (window as unknown as Record<string, unknown>).__KRATOS_CONFIG__ as Record<string, unknown> | undefined;
+  return typeof cfg?.demoMode === "string" ? cfg.demoMode : "";
+}

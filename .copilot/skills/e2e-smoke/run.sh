@@ -24,6 +24,9 @@ if [[ -z "${KRATOS_FRONTEND_URL:-}" || -z "${KRATOS_BACKEND_URL:-}" ]]; then
     echo "[e2e-smoke] resolving endpoints from azd environment …"
     AZD_VALUES="$(cd "$REPO_ROOT" && azd env get-values 2>/dev/null || true)"
     azd_value() { sed -n "s/^$1=\"\{0,1\}\([^\"]*\)\"\{0,1\}$/\1/p" <<<"$AZD_VALUES" | head -1; }
+    # AZURE_WEB_APP_URL is the web Container App; environments provisioned
+    # before it replaced the Static Web App only have the old output.
+    : "${KRATOS_FRONTEND_URL:=$(azd_value AZURE_WEB_APP_URL)}"
     : "${KRATOS_FRONTEND_URL:=$(azd_value AZURE_STATIC_WEB_APP_URL)}"
     : "${KRATOS_BACKEND_URL:=$(azd_value AGENT_SERVICE_URL)}"
     export KRATOS_FRONTEND_URL KRATOS_BACKEND_URL

@@ -1,0 +1,3 @@
+/* CopilotKit is used headless here: the UI renders Kratos components, so its
+ * prebuilt Tailwind v4 stylesheet (which Tailwind v3 PostCSS rejects) is
+ * swapped for this empty file in next.config.js. */

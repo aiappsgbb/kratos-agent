@@ -37,7 +37,7 @@ load per use-case, chat round-trips, evals API, and traces API.
 
 | Var | Default | Purpose |
 |-----|---------|---------|
-| `KRATOS_FRONTEND_URL` | from `azd env` → `AZURE_STATIC_WEB_APP_URL` | SWA URL |
+| `KRATOS_FRONTEND_URL` | from `azd env` → `AZURE_WEB_APP_URL` (falls back to `AZURE_STATIC_WEB_APP_URL`) | web Container App URL |
 | `KRATOS_BACKEND_URL` | from `azd env` → `AGENT_SERVICE_URL` | Container Apps URL |
 | `KRATOS_USE_CASES` | curated personas discovered from `/api/use-cases` | Comma-separated |
 | `CHAT_TIMEOUT_MS` | `60000` | Chat round-trip ceiling |

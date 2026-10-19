@@ -82,3 +82,8 @@ docker-compose.apim.yml
 
 # Extracted inline hook scripts from .github/scripts/check-hooks.py
 .hooks-inline/
+
+# Backend / hosted agent started by hand sync blob skills into ./use-cases
+# relative to their working directory.
+src/backend/use-cases/
+src/hosted-agent/use-cases/

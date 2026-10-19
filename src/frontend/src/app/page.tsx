@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ChatWindow } from "@/components/ChatWindow";
+import dynamic from "next/dynamic";
 import { Sidebar } from "@/components/Sidebar";
 import { SettingsModal } from "@/components/SettingsModal";
 import { SkillsAdminPanel } from "@/components/SkillsAdminPanel";
@@ -11,6 +11,12 @@ import { listUseCases, listConversations, createConversation, deleteConversation
 import { loadRuntimeConfig } from "@/lib/config";
 import { readEmbedParams, takeImportManifest, settlePersonaUrl, type EmbedParams } from "@/lib/embed";
 import { useTheme, THEMES, type ThemeName, type Mode } from "@/components/ThemeProvider";
+
+// CopilotKit is heavy; load the agent workspace only when a conversation opens.
+const AgentWorkspace = dynamic(() => import("@/components/agent/AgentWorkspace").then((m) => m.AgentWorkspace), {
+  ssr: false,
+  loading: () => <div className="flex-1 flex items-center justify-center text-sm text-muted" role="status">Loading…</div>,
+});
 
 type ImportStatus = "idle" | "importing" | "error" | "done";
 
@@ -284,9 +290,11 @@ export default function Home() {
       {/* Main chat area */}
       <main id="main-content" className="flex-1 flex flex-col min-w-0">
         {activeConversation ? (
-          <ChatWindow
+          <AgentWorkspace
             key={activeConversation.id}
             conversation={activeConversation}
+            personaName={useCases.find((uc) => uc.name === activeConversation.useCase)?.displayName || activeConversation.useCase}
+            skills={skills}
             onTitleChange={handleTitleChange}
             initialMessage={pendingMessage ?? undefined}
             onOpenSidebar={() => setSidebarOpen(true)}
@@ -444,7 +452,7 @@ export default function Home() {
       )}
 
       {/* Full-screen Agent Manager overlay — rendered on top so the active
-          ChatWindow stays mounted and any in-flight stream keeps running. */}
+          agent workspace stays mounted and any in-flight run keeps going. */}
       {skillsOpen && (
         <div className="fixed inset-0 z-[60]">
           <SkillsAdminPanel

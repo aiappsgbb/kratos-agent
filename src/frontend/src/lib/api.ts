@@ -1,107 +1,11 @@
-import { getApiUrl, getAuthConfig } from "@/lib/config";
-import { getMcpAccessToken } from "@/lib/auth";
+import { getApiUrl } from "@/lib/config";
 import type {
-  Attachment,
   EvalScenario,
   EvalRun,
   EvalMode,
   TraceList,
   TraceOperation,
 } from "@/types";
-
-/**
- * Send a message to the agent and receive streaming SSE events.
- */
-export async function streamAgentChat(
-  conversationId: string,
-  message: string,
-  onEvent: (event: { type: string; data: unknown }) => void,
-  onError: (error: Error) => void,
-  onDone: () => void,
-  attachments?: Attachment[],
-  useCase?: string
-): Promise<void> {
-  try {
-    const payload: Record<string, unknown> = { conversationId, message };
-    if (attachments && attachments.length > 0) {
-      payload.attachments = attachments;
-    }
-    if (useCase) {
-      payload.useCase = useCase;
-    }
-
-    // When OBO sign-in is configured, attach the user's MCP-scoped access token
-    // so the hosted agent can call the OBO MCP server On-Behalf-Of the user.
-    // Silent-only (never interactive): an interactive acquisition here opens an
-    // MSAL popup, and a popup that is blocked or ignored leaves its promise
-    // pending forever, which would hang the send instead of failing. Signing in
-    // is the explicit job of the OBO sign-in button; until the user does that,
-    // the chat proceeds without a token.
-    const authCfg = getAuthConfig();
-    if (authCfg) {
-      try {
-        const token = await getMcpAccessToken(false);
-        if (token) {
-          payload.mcpAccessTokens = { [authCfg.mcpServerName]: token };
-        }
-      } catch (err) {
-        console.warn("OBO token acquisition failed; continuing without it", err);
-      }
-    }
-
-    const response = await fetch(`${getApiUrl()}/api/agent/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Agent request failed: ${response.status}`);
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error("No response body");
-    }
-
-    const decoder = new TextDecoder();
-    let buffer = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-
-      for (const line of lines) {
-        if (line.startsWith("event: ")) {
-          // Ignore — we extract type from the data
-          continue;
-        }
-        if (line.startsWith("data: ")) {
-          const jsonStr = line.slice(6);
-          try {
-            const parsed = JSON.parse(jsonStr);
-            onEvent({ type: parsed.type, data: parsed });
-
-            if (parsed.type === "done") {
-              onDone();
-              return;
-            }
-          } catch {
-            // Skip malformed JSON
-          }
-        }
-      }
-    }
-
-    onDone();
-  } catch (err) {
-    onError(err instanceof Error ? err : new Error(String(err)));
-  }
-}
 
 /**
  * Create a new conversation.
@@ -121,24 +25,6 @@ export async function createConversation(
   }
 
   return response.json();
-}
-
-/**
- * Respond to a user input request from the agent.
- */
-export async function respondToUserInput(
-  conversationId: string,
-  requestId: string,
-  answer: string
-): Promise<void> {
-  const response = await fetch(`${getApiUrl()}/api/agent/user-input`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ conversationId, requestId, answer }),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to respond to user input: ${response.status}`);
-  }
 }
 
 /**

@@ -78,16 +78,18 @@ Kratos runs two compute layers that work together:
 
 | Layer | Runtime | Purpose |
 |-------|---------|---------|
-| **Hosted Agent** | Microsoft Foundry (auto-scaled, Invocations protocol, port 8088) | Runs the Copilot SDK agentic loop, executes skills, calls models |
-| **Backend Proxy** | Azure Container Apps (FastAPI, port 8000) | Frontend API, conversation persistence, file serving, admin endpoints |
+| **Hosted Agent** | Microsoft Foundry (auto-scaled, Invocations protocol, port 8088) | Runs the Copilot SDK agentic loop behind an AG-UI adapter, executes skills, calls models |
+| **Backend Proxy** | Azure Container Apps (FastAPI, port 8000) | AG-UI relay, conversation persistence, file serving, admin endpoints |
+| **Web** | Azure Container Apps (Next.js server, port 3000) | UI on CopilotKit, plus the CopilotKit runtime route that relays AG-UI runs to the backend |
 
-The backend proxies all chat requests to the Foundry hosted agent via the Invocations REST API and streams SSE events back to the frontend. Agent session pinning (`x-agent-session-id` header) ensures multi-turn conversations route to the same agent container, preserving in-memory SDK state.
+Agent runs travel as [AG-UI](https://docs.ag-ui.com) events end to end: the browser talks to the web app's CopilotKit runtime, which relays each run to the backend, which forwards it to the Foundry hosted agent and streams the events back. Agent session pinning (`x-agent-session-id` header) ensures multi-turn conversations route to the same agent container, preserving in-memory SDK state.
 
 ### Core Pillars
 
 | Pillar | Technology | Role |
 |--------|------------|------|
-| **Engine** | [GitHub Copilot SDK](https://github.com/features/copilot) `1.0.8` | Agentic loop — Plan → Act → Observe → Iterate |
+| **Engine** | [GitHub Copilot SDK](https://github.com/features/copilot) `1.0.14` | Agentic loop — Plan → Act → Observe → Iterate |
+| **Agent UX** | [AG-UI](https://docs.ag-ui.com) + [CopilotKit](https://docs.copilotkit.ai) `1.71` (v2 API) | Streaming chat, live tool cards, human-in-the-loop approvals, run inspector |
 | **Platform** | [Microsoft Foundry](https://ai.azure.com) | Hosted agent lifecycle, model hosting, evaluation, guardrails |
 | **Extensibility** | [MCP Skills Protocol](https://modelcontextprotocol.io) | Portable, standard tool interface for agent capabilities |
 | **Persistence** | [Azure Cosmos DB](https://learn.microsoft.com/azure/cosmos-db/) | Conversations, messages, settings, session mappings |
@@ -117,17 +119,18 @@ The backend proxies all chat requests to the Foundry hosted agent via the Invoca
 
 | Component | Technology | Version |
 |-----------|-----------|---------|
-| Framework | Next.js (static export) | 15 |
+| Framework | Next.js (standalone server) | 15 |
+| Agent UX | CopilotKit (`@copilotkit/react-core/v2`, `@copilotkit/runtime/v2`) + AG-UI client | 1.71 / 0.0.59 |
 | UI | React + Tailwind CSS | 18 / 3.4 |
 | Auth | MSAL (Azure AD) | 3.20 |
 | Markdown | react-markdown + remark-gfm | 9.0 / 4.0 |
-| Hosting | Azure Static Web Apps | — |
+| Hosting | Azure Container Apps | — |
 
 ### Infrastructure (Bicep)
 
 Azure services provisioned via `azd up`:
 
-> VNet · Container Apps Environment · Container Apps (backend proxy **+** OBO MCP server) · Container Registry · Static Web App · AI Services (Foundry — agent calls models **directly**, no APIM) · Cosmos DB · Blob Storage · Key Vault · App Insights · Log Analytics · Bing Search · Entra OBO app registrations + user-assigned managed identity · RBAC Role Assignments
+> VNet · Container Apps Environment · Container Apps (web frontend **+** backend proxy **+** OBO MCP server) · Container Registry · AI Services (Foundry — agent calls models **directly**, no APIM) · Cosmos DB · Blob Storage · Key Vault · App Insights · Log Analytics · Bing Search · Entra OBO app registrations + user-assigned managed identity · RBAC Role Assignments
 
 ---
 
@@ -204,13 +207,12 @@ azd up
 
 This single command:
 1. Provisions all Azure infrastructure via Bicep (VNet, Cosmos DB, AI Services, OBO MCP server, etc.)
-2. Builds Docker images for the backend and hosted agent
+2. Builds Docker images for the web frontend, backend and hosted agent
 3. Pushes images to Azure Container Registry
-4. Deploys the backend and the Entra OBO MCP server to Container Apps
+4. Deploys the web frontend, the backend and the Entra OBO MCP server to Container Apps
 5. Deploys the hosted agent to Microsoft Foundry (via `azd ai agent` extension)
-6. Exports the frontend as a static site and deploys to Static Web Apps
-7. Configures all Managed Identity role assignments
-8. Outputs the public URL
+6. Configures all Managed Identity role assignments
+7. Outputs the public URL (`AZURE_WEB_APP_URL`)
 
 ### Running Multiple Environments
 
@@ -297,7 +299,7 @@ cd .copilot/skills/e2e-smoke
 SKIP_BROWSER=1 ./run.sh  # API-only, skips the Chromium download
 ```
 
-`run.sh` reads `AZURE_STATIC_WEB_APP_URL` and `AGENT_SERVICE_URL` from `azd env get-values`, so it always follows whichever environment is currently selected. Override with `KRATOS_FRONTEND_URL` / `KRATOS_BACKEND_URL` to point it elsewhere. It fails fast rather than falling back to a stale default.
+`run.sh` reads `AZURE_WEB_APP_URL` (falling back to `AZURE_STATIC_WEB_APP_URL` on environments provisioned before the web app moved to Container Apps) and `AGENT_SERVICE_URL` from `azd env get-values`, so it always follows whichever environment is currently selected. Override with `KRATOS_FRONTEND_URL` / `KRATOS_BACKEND_URL` to point it elsewhere. It fails fast rather than falling back to a stale default.
 
 See [`.copilot/skills/e2e-smoke/SKILL.md`](./.copilot/skills/e2e-smoke/SKILL.md) for the spec catalogue, env-var reference, and tips for running just the API or just the UX project.
 See [`docs/runbooks/post-azd-setup-manual.md`](./docs/runbooks/post-azd-setup-manual.md) for the full post-`azd up` setup and verification checklist.
@@ -329,6 +331,30 @@ cp .env.local.example .env.local
 - `.local/azurite/` — Emulated blob storage (skills, APM manifests)
 - `use-cases/` — Bind-mounted; edits on host appear immediately
 
+### Run locally without Docker
+
+`scripts/dev-local.mjs` starts the whole stack as local processes: Azurite, the hosted agent (`:8088`), the backend (`:8000`) and the Next.js frontend with its CopilotKit runtime route (`:3000`).
+
+```bash
+# once: Python env for backend + hosted agent, frontend deps, mock MCP servers
+cd src/backend && uv sync --extra dev && uv pip install "azure-ai-agentserver-invocations>=1.0.0b3" python-dotenv && cd ../..
+cd src/frontend && npm install && cd ../..
+cd mocks && npm install --workspaces && npm run build --workspaces --if-present && cd ..
+
+node scripts/dev-local.mjs          # live model: COPILOT_GITHUB_TOKEN from .env.local
+node scripts/dev-local.mjs --mock   # deterministic offline model (no login, no cost)
+```
+
+`--mock` points the Copilot SDK at a scripted OpenAI-compatible model (`src/frontend/e2e/mock-model.mjs`, built on `@copilotkit/aimock`) through a local-mode-only BYOK override (`OPENAI_BASE_URL`). Everything else is the real stack. The UI shows a **Mock model** badge, and only the scripted prompts work: the capital of France, a demo approval, and loading the email skill.
+
+The runner gives the hosted agent an isolated `COPILOT_HOME`, so your own Copilot CLI config (MCP servers, instructions) does not leak into the agent, and puts the in-repo mock MCP servers on `PATH`, as the container does.
+
+End-to-end tests run the same stack against the mock model:
+
+```bash
+cd src/frontend && npx playwright install chromium && npm run test:e2e
+```
+
 ### Development Against Azure
 
 ```bash
@@ -349,32 +375,40 @@ npm install && npm run dev
 ### Request Flow
 
 ```
-1. User sends message via frontend
-2. POST /api/agent/chat → Backend (FastAPI)
-3. Backend looks up the agent session ID for the conversation
-4. Backend forwards to Foundry hosted agent via Invocations REST API
-5. Hosted agent runs CopilotClient agentic loop:
-   a. Load system prompt + use-case skills
-   b. Call model (GPT-4o / GPT-5) with tools
-   c. Execute tool calls (MCP skills, code interpreter, RAG, etc.)
+1. User sends a message; CopilotKit posts an AG-UI RunAgentInput (threadId = conversation id,
+   forwardedProps = { useCase, mcpAccessTokens }) to the web app's /copilotkit/kratos route
+2. The CopilotKit runtime's HttpAgent relays the run to POST /api/agui on the backend
+3. Backend looks up the agent session ID for the conversation and forwards the run to the
+   Foundry hosted agent via the Invocations REST API (OBO tokens travel out-of-band in the body)
+4. Hosted agent runs the Copilot SDK behind the AG-UI adapter (src/backend/app/agui):
+   a. One SDK session per thread, built from the use case's system prompt, skills and MCP servers
+   b. Call model with tools; execute tool calls (skills, MCP, code interpreter, RAG, ...)
+   c. A call to a browser tool (ask_user) suspends: the run ends and waits for the user
    d. Iterate until the model produces a final response
-6. Hosted agent streams SSE events back through the proxy
-7. Backend persists messages to Cosmos DB
-8. Frontend renders streaming response with live execution details
+5. AG-UI events stream back through backend and runtime to the browser
+6. Backend persists messages and tool calls to Cosmos DB and adds follow-up suggestions
+7. The UI renders text, live tool cards, approval cards and the run inspector
 ```
 
-### Event Streaming (SSE)
+### Human-in-the-loop approvals
 
-The agent streams structured events to the frontend in real-time:
+Persona skills gate write actions behind `ask_user`. In the AG-UI path that tool is declared by the browser (`useFrontendTool`), so the SDK runtime suspends the model's call instead of executing it. The UI shows the question inline and in the run inspector. When the user answers, CopilotKit starts a continuation run whose tool message resolves the *original* pending call, and the model carries on in the same turn. The answer is never re-sent as a new prompt. Pending calls live in the hosted agent's process, which session pinning keeps per conversation.
+
+### Event Streaming (AG-UI)
+
+The UI path streams standard [AG-UI events](https://docs.ag-ui.com/concepts/events) over SSE:
 
 | Event | Purpose |
 |-------|---------|
-| `thought` | Agent reasoning and planning steps |
-| `tool_call` | Skill invocations (started → completed/failed) |
-| `content` | Response text chunks |
-| `usage` | Token consumption (prompt, completion, reasoning) |
-| `done` | Completion signal with execution metrics |
-| `error` | Error details |
+| `RUN_STARTED` / `RUN_FINISHED` / `RUN_ERROR` | Run lifecycle |
+| `TEXT_MESSAGE_START` / `_CONTENT` / `_END` | Streamed response text |
+| `TOOL_CALL_START` / `_ARGS` / `_END` / `_RESULT` | Skill, MCP and built-in tool calls, with arguments and results |
+| `REASONING_*` | Model reasoning, when the model emits it |
+| `SUBAGENT_*` | Sub-agent lanes, when custom agents are configured |
+| `CUSTOM` `kratos.run_stats` | Tokens, time to first token, duration, tool-call count |
+| `CUSTOM` `kratos.follow_ups` | Suggested follow-up questions (sent before `RUN_FINISHED`) |
+
+The legacy `POST /api/agent/chat` SSE stream (`thought`, `tool_call`, `content`, `usage`, `done`, `error`) is kept for evals and scripted callers.
 
 ### Entra On-Behalf-Of (OBO) — the agent acts as the signed-in user
 
@@ -484,6 +518,8 @@ Multi-turn conversations require routing to the same hosted agent container to p
 4. Foundry routes to the same container instance
 
 ### Copilot SDK Integration
+
+The UI path serves the SDK through an AG-UI adapter vendored from the [AG-UI Copilot SDK integration](https://github.com/ag-ui-protocol/ag-ui/pull/2981) (`src/backend/app/agui/`, MIT; swap for the published package once it ships). `KratosAGUIAgent` supplies the Kratos parts: the use case's tools, skills, MCP servers with OBO bearers, system prompt and model provider, plus session resume and run statistics.
 
 The `CopilotAgent` class wraps the GitHub Copilot SDK:
 
@@ -694,13 +730,13 @@ Traces come from the application's **OpenTelemetry** instrumentation exporting t
 
 ### Frontend Execution Details
 
-The UI shows real-time execution details per message:
+The UI is built headless on CopilotKit hooks, styled with the Kratos themes:
 
-- **Tool pills** — Live status (started → completed/failed) during streaming
-- **Metrics grid** — Total time, first token latency, model latency, tool call count
-- **Token usage bar** — Prompt / reasoning / output breakdown
-- **Execution flow timeline** — Thoughts connected with arrows
-- **Tool I/O** — Expandable input/output for each completed tool call
+- **Tool cards** — every skill, MCP and built-in call renders live (`useRenderTool` wildcard), labelled by kind, expandable to its input and result
+- **Approval cards** — `ask_user` questions with choices or a free-text answer, inline and mirrored in the run inspector
+- **Run inspector** — run status, a timed activity timeline (tools, decisions, sub-agents), last-run tokens and latency, and the persona's skills
+- **Per-turn stats** — duration, time to first token, tokens and tool calls under each answer
+- **History** — conversations reload from Cosmos with their tool cards and answered decisions
 
 ---
 
@@ -864,11 +900,12 @@ kratos-agent/
 │   │   ├── agent.yaml              # Foundry agent manifest
 │   │   └── pyproject.toml
 │   │
-│   └── frontend/                   # Next.js 14 chat UI
+│   └── frontend/                   # Next.js 15 server: UI + CopilotKit runtime
+│       ├── e2e/                    # Playwright specs + scripted mock model
 │       └── src/
-│           ├── app/                # Pages
-│           ├── components/         # ChatWindow, MessageBubble, ThoughtChain, etc.
-│           ├── lib/                # API client, config
+│           ├── app/                # Pages, /copilotkit/[agent] runtime route, /config.json
+│           ├── components/agent/   # AgentWorkspace, MessageList, ToolCallChip, AskUserCard, RunInspector
+│           ├── lib/                # API client, config, AG-UI helpers
 │           └── types/              # TypeScript types
 │
 ├── use-cases/                      # Agent personas
@@ -892,8 +929,9 @@ kratos-agent/
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/agent/chat` | Stream agent response (SSE) |
-| `POST` | `/api/agent/user-input` | Respond to agent input requests |
+| `POST` | `/api/agui` | Run the agent over AG-UI (`RunAgentInput` in, AG-UI events out); used by the UI |
+| `POST` | `/api/agent/chat` | Legacy SSE stream, kept for evals and scripted callers |
+| `POST` | `/api/agent/user-input` | Legacy; returns 501 in hosted mode (the AG-UI path answers `ask_user` in the browser) |
 
 ### Conversations
 
@@ -977,7 +1015,7 @@ All service-to-service auth uses Managed Identity with least-privilege roles:
 | Container App | Storage Blob Data Contributor | Storage account |
 | Container App | Key Vault Secrets User | Key Vault |
 | AI Services | Storage Blob Data Contributor | Storage account |
-| Static Web App | — | Reads config.json injected at deploy |
+| Web Container App | AcrPull | Container Registry (user-assigned identity) |
 
 ---
 
@@ -986,7 +1024,6 @@ All service-to-service auth uses Managed Identity with least-privilege roles:
 | Service | Monthly Estimate |
 |---------|-----------------|
 | Container Apps (consumption) | $0 – $50 |
-| Static Web Apps (free tier) | $0 |
 | Cosmos DB (serverless) | $5 – $25 |
 | Key Vault | ~$1 |
 | Container Registry (Basic) | ~$5 |

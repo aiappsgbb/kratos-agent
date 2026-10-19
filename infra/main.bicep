@@ -21,7 +21,7 @@ param bingSearchName string = ''
 param keyVaultName string = ''
 param appInsightsName string = ''
 param logAnalyticsName string = ''
-param staticWebAppName string = ''
+param webAppName string = ''
 param agentServiceName string = ''
 param vnetName string = ''
 param storageAccountName string = ''
@@ -64,20 +64,12 @@ param aiSearchResourceId string = ''
 @description('Optional APIM resource id for health model wiring. Must be in this deployment resource group because the health-model identity is granted Monitoring Reader on the RG only. For out-of-RG targets, add Monitoring Reader at that scope.')
 param apimResourceId string = ''
 
-@description('Location for the Static Web App (must be one of: centralus, eastus2, westus2, westeurope, eastasia)')
-@allowed([
-  'centralus'
-  'eastus2'
-  'westus2'
-  'westeurope'
-  'eastasia'
-])
-param staticWebAppLocation string = 'eastus2'
-
 // ─── Resource Naming ───
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var namePrefix = empty(resourcePrefix) ? '' : '${resourcePrefix}-'
+var webAppResolvedName = !empty(webAppName) ? webAppName : '${namePrefix}${abbrs.appContainerApps}web-${resourceToken}'
+var webAppUrl = 'https://${webAppResolvedName}.${containerAppsEnv.outputs.defaultDomain}'
 var namePrefixNoHyphen = empty(resourcePrefix) ? '' : toLower(resourcePrefix)
 var tags = { 'azd-env-name': environmentName, project: 'kratos-agent' }
 var resourceCatalog = {
@@ -257,18 +249,27 @@ module agentService './modules/agent-service.bicep' = {
     foundryProjectEndpoint: aiFoundry.outputs.projectEndpoint
     bingSearchEndpoint: bingSearch.outputs.endpoint
     blobStorageEndpoint: blobStorage.outputs.endpoint
-    staticWebAppUrl: staticWebApp.outputs.url
+    // Computed rather than read from the web module: the web app depends on the
+    // agent service URL, so this breaks the cycle.
+    webAppUrl: webAppUrl
   }
 }
 
-// ─── Static Web App ───
-module staticWebApp './modules/static-web-app.bicep' = {
-  name: 'static-web-app'
+// ─── Web frontend (Container App: Next.js + CopilotKit runtime) ───
+module webApp './modules/web-app.bicep' = {
+  name: 'web-app'
   scope: rg
   params: {
-    name: !empty(staticWebAppName) ? staticWebAppName : '${namePrefix}${abbrs.webStaticSites}${resourceToken}'
-    location: staticWebAppLocation
+    name: webAppResolvedName
+    location: location
     tags: tags
+    containerAppsEnvId: containerAppsEnv.outputs.id
+    containerRegistryName: containerRegistry.outputs.name
+    agentServiceUrl: agentService.outputs.url
+    oboClientAppClientId: deployObo ? oboEntraAppClient.outputs.entraAppClientId : ''
+    oboTenantId: deployObo ? tenant().tenantId : ''
+    oboServerAppIdentifierUri: deployObo ? oboEntraAppServer.outputs.entraAppIdentifierUri : ''
+    oboServerAppScopeValue: deployObo ? oboEntraAppServer.outputs.entraAppScopeValue : 'access_as_user'
   }
 }
 
@@ -306,7 +307,7 @@ module oboEntraAppClient './modules/obo-entra-app.bicep' = if (deployObo) {
     entraAppUniqueName: 'kratos-obo-client-${resourceToken}'
     isServer: false
     spaRedirectUris: [
-      staticWebApp.outputs.url
+      webAppUrl
       'http://localhost:3000'
       'http://localhost:5173'
       'http://localhost:4280'
@@ -372,7 +373,7 @@ output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.logi
 output AZURE_COSMOS_DB_ENDPOINT string = cosmosDb.outputs.endpoint
 output AZURE_KEY_VAULT_URI string = keyVault.outputs.uri
 output AZURE_APP_INSIGHTS_CONNECTION_STRING string = appInsights.outputs.connectionString
-output AZURE_STATIC_WEB_APP_URL string = staticWebApp.outputs.url
+output AZURE_WEB_APP_URL string = webApp.outputs.url
 output AGENT_SERVICE_DIRECT_URL string = agentService.outputs.url
 output AGENT_SERVICE_URL string = agentService.outputs.url
 output FOUNDRY_ENDPOINT string = aiFoundry.outputs.endpoint

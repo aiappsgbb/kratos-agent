@@ -39,7 +39,7 @@ repo are disruptive and the data is already exposed.
 | Path | What it is |
 |------|-----------|
 | `src/backend` | Python agent service (FastAPI), deployed as Container App `agent-service` |
-| `src/frontend` | Next.js UI, deployed to Azure Static Web Apps |
+| `src/frontend` | Next.js server (UI on CopilotKit + the `/copilotkit/kratos` AG-UI runtime route), deployed as Container App `web` |
 | `src/hosted-agent` | Foundry hosted-agent variant |
 | `src/obo-mcp-server` | On-behalf-of MCP server (optional, `DEPLOY_OBO` flag) |
 | `use-cases/` | Persona definitions, skills and synthetic assets |
@@ -66,15 +66,59 @@ cd src/backend && uv run pytest && uv run ruff check .
 
 # frontend
 cd src/frontend && npm run lint && npm run build
+cd src/frontend && npm run test:e2e        # full local stack vs the scripted mock model
+
+# whole stack locally, no Docker (live model, or --mock)
+node scripts/dev-local.mjs [--mock]
 
 # deployed environment, end to end (after any azd deploy)
-cd .copilot/skills/e2e-smoke && ./run.sh          # 21 specs
+cd .copilot/skills/e2e-smoke && ./run.sh          # 23 specs
 SKIP_BROWSER=1 ./run.sh                           # API-only, no chromium
 ```
 
 `e2e-smoke/run.sh` resolves its target from the selected `azd` environment,
 so it always follows whichever env is active. See its `SKILL.md` for details.
 First run installs npm deps and Chromium (cached afterwards).
+
+## Agent UX: AG-UI + CopilotKit
+
+The UI talks to the agent over [AG-UI](https://docs.ag-ui.com): browser →
+web `/copilotkit/kratos` (CopilotKit runtime) → backend `/api/agui` → hosted
+agent, where `app/agui/` serves the Copilot SDK. Things that will bite:
+
+- `app/agui/agent.py` and `mapper.py` are **vendored** from the AG-UI Copilot
+  SDK adapter (ag-ui PR #2981, not yet on PyPI/npm). Kratos edits are marked
+  `KRATOS:`; ruff excludes both files to keep them diffable against upstream.
+  Kratos behaviour belongs in `kratos_agent.py`. When `ag-ui-copilot-sdk` is
+  published, swap the vendored files for it.
+- `github-copilot-sdk` and `ag-ui-protocol` are pinned to the adapter's
+  verified versions (1.0.14 / 0.1.22). Bump them together and rerun
+  `tests/test_agui.py` and the frontend e2e.
+- Import CopilotKit only from `/v2` (`@copilotkit/react-core/v2`,
+  `@copilotkit/runtime/v2`). The UI is headless; `next.config.js` swaps
+  CopilotKit's prebuilt Tailwind v4 stylesheet for an empty file, because
+  Tailwind v3's PostCSS rejects it.
+- The runtime route lives at `/copilotkit/*`, **not** under `/api`: behind
+  Front Door `<basePath>/api/*` is routed to the backend.
+- `ask_user` is a browser tool. Never make a backend handler wait on the user;
+  the adapter suspends the call and the continuation run resolves it.
+- Pending approvals live in the hosted agent's process. Session pinning keeps a
+  conversation on one container; a restart mid-approval loses that approval.
+- Persona runs can take many minutes (reports with code execution). The run
+  cap is `AGUI_RUN_TIMEOUT_S` (default 1800 s) and the backend → hosted-agent
+  call uses idle timeouts, not a total one. Don't reintroduce a short total cap.
+- Agent Manager edits land in blob. The hosted agent caches each persona, so
+  it re-checks the blob fingerprint when a *new* conversation starts and
+  reloads on change; ongoing conversations keep the session they started
+  with. This only works where the hosted agent can reach blob storage.
+- Locally, the Copilot SDK reads `~/.copilot` unless `COPILOT_HOME` points
+  elsewhere, so your own MCP servers leak into the agent. `dev-local.mjs` sets
+  an isolated one.
+- The scripted mock model (`src/frontend/e2e/mock-model.mjs`) answers only its
+  scripted prompts. `OPENAI_BASE_URL` reaches the SDK only in local mode.
+- Persona prompt edits reach a local stack only after the blob copy changes:
+  seeding skips personas already in Azurite. Upload the edited file or wipe
+  `.local/azurite`.
 
 ## Deployment is manual, never automatic
 
