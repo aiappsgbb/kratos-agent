@@ -8,6 +8,7 @@ import type { Conversation, RunStats, Skill } from "@/types";
 import { getConversationMessages, updateConversation } from "@/lib/api";
 import { getAuthConfig, getBasePath, getDemoMode } from "@/lib/config";
 import { getMcpAccessToken } from "@/lib/auth";
+import { speak, speakableText, stopSpeaking } from "@/lib/voice";
 import {
   ASK_USER_TOOL,
   FOLLOW_UPS_EVENT,
@@ -21,11 +22,21 @@ import { Composer, type ImageAttachment } from "./Composer";
 import { MessageList } from "./MessageList";
 import { RunInspector, type ActivityItem, type RunPhase } from "./RunInspector";
 import { ToolCallChip } from "./ToolCallChip";
+import { PROPOSE_ALLOCATION_TOOL, useKratosVisuals } from "./visuals";
 
 /** Browser tools that pause the run until the user decides. */
-const DECISION_TOOLS = new Set([ASK_USER_TOOL]);
+const DECISION_TOOLS = new Set([ASK_USER_TOOL, PROPOSE_ALLOCATION_TOOL]);
 
-function decisionSummary(content: string): string {
+function decisionSummary(toolName: string | undefined, content: string): string {
+  if (toolName === PROPOSE_ALLOCATION_TOOL) {
+    try {
+      const d = JSON.parse(content) as { decision?: string; edited?: boolean };
+      if (d.decision === "approved") return d.edited ? "You approved the allocation with edits" : "You approved the allocation";
+      if (d.decision === "rejected") return "You rejected the allocation";
+    } catch {
+      // fall through
+    }
+  }
   return `You answered: ${content}`;
 }
 
@@ -201,7 +212,7 @@ function Workspace({
       onToolCallResultEvent: ({ event }) => {
         setActivity((prev) =>
           prev.map((a) =>
-            a.id === event.toolCallId && a.kind === "decision" ? { ...a, name: decisionSummary(event.content) } : a,
+            a.id === event.toolCallId && a.kind === "decision" ? { ...a, name: decisionSummary(a.toolName, event.content) } : a,
           ),
         );
         close(event.toolCallId);
@@ -293,7 +304,15 @@ function Workspace({
     [isReady, conversation.id],
   );
 
-  const waiting = !!decision || restoredPending.size > 0;
+  useKratosVisuals([isReady, conversation.id]);
+
+  // A human-in-the-loop card (e.g. a rebalance proposal) is waiting when its
+  // call has no result yet and the run has handed off to the browser.
+  const answeredCalls = new Set(agent.messages.filter((m) => m.role === "tool").map((m) => (m as { toolCallId: string }).toolCallId));
+  const pendingCard = !agent.isRunning && agent.messages.some(
+    (m) => m.role === "assistant" && (m.toolCalls ?? []).some((c) => c.function.name === PROPOSE_ALLOCATION_TOOL && !answeredCalls.has(c.id)),
+  );
+  const waiting = !!decision || pendingCard || restoredPending.size > 0;
   const busy = agent.isRunning || executingToolCallIds.size > 0 || submitting;
   const phase: RunPhase = !isReady || !hydrated ? "connecting" : waiting ? "waiting" : busy || awaitingResponse ? "working" : error ? "error" : "ready";
 
@@ -381,6 +400,27 @@ function Workspace({
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, decision, followUps.length]);
 
+  // Read-aloud: speak each finished answer and any question put to the user.
+  const [readAloud, setReadAloud] = useState(false);
+  useEffect(() => setReadAloud(localStorage.getItem("kratos.readAloud") === "1"), []);
+  const toggleReadAloud = () => {
+    const next = !readAloud;
+    setReadAloud(next);
+    localStorage.setItem("kratos.readAloud", next ? "1" : "0");
+    if (!next) stopSpeaking();
+  };
+  const prevPhase = useRef<RunPhase>(phase);
+  useEffect(() => {
+    const was = prevPhase.current;
+    prevPhase.current = phase;
+    if (!readAloud || was !== "working" || phase !== "ready") return;
+    const answer = [...agent.messages].reverse().find((m) => m.role === "assistant" && typeof m.content === "string" && m.content.trim());
+    if (answer) speak(speakableText(answer.content as string));
+  }, [phase, readAloud, agent]);
+  useEffect(() => {
+    if (readAloud && decision?.question) speak(decision.question);
+  }, [decision?.question, readAloud]);
+
   const last = messages[messages.length - 1];
   const showThinking = (busy || awaitingResponse) && !waiting && (!last || last.role === "user" || last.role === "tool");
 
@@ -431,6 +471,25 @@ function Workspace({
                   <span className="text-[11px] px-2 py-0.5 bg-accent-soft text-accent rounded-full font-medium flex-shrink-0">{personaName}</span>
                 )}
               </div>
+              <button
+                type="button"
+                onClick={toggleReadAloud}
+                aria-pressed={readAloud}
+                aria-label={readAloud ? "Stop reading answers aloud" : "Read answers aloud"}
+                title={readAloud ? "Reading answers aloud" : "Read answers aloud"}
+                data-testid="read-aloud"
+                className={`p-1.5 rounded-lg border transition-colors ${
+                  readAloud ? "border-accent text-accent bg-accent-soft" : "border-border-soft text-muted hover:text-text hover:bg-hover"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  {readAloud ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531V19.94a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.395C2.806 8.757 3.63 8.25 4.51 8.25H6.75z" />
+                  )}
+                </svg>
+              </button>
               <button
                 type="button"
                 onClick={() => setInspectorOpen((v) => !v)}

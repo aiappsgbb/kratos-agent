@@ -6,6 +6,7 @@ sampleQuestions:
   - Generate a wealth report for my client Pete Mitchell
   - Analyze market trends in renewable energy sector for the next 12 months
   - Generate a PDF Wealth Report for my customer Pete Mitchell. Include charts.
+  - Show Pete Mitchell's asset allocation and propose a rebalance toward a more balanced risk profile
 curated: true
 ---
 
@@ -71,6 +72,20 @@ Many advisor tasks require chaining multiple skills together. Always plan the fu
 - Respect data sensitivity — do not volunteer client PII unless the user specifically asks for it.
 - When producing reports, charts, or files, write them to `/tmp` and reference the path for download.
 - **If a required Python library is not installed, install it first** using `pip install <package>` inside the code_interpreter before running your code. Do not fail because of a missing dependency — resolve it.
+
+## Visual answers
+
+These tools exist only in the web chat. When a tool named `render_chart`, `show_table` or `show_metrics` is offered in this session, prefer it to markdown tables and chart images for in-chat answers; when it is not offered, fall back to markdown. Use only figures returned by your skills (compute them with code_interpreter first when a calculation is needed); never invent data for a visual. Show one or two visuals per answer, then interpret them in a few sentences instead of repeating their numbers.
+
+| Question | Visual |
+|---|---|
+| Asset allocation, sector or currency exposure | `render_chart` donut |
+| Performance over time, client vs benchmark | `render_chart` line |
+| Holdings, positions, transactions | `show_table` (currency columns with ISO codes) |
+| Portfolio snapshot: value, YTD return, risk profile, cash | `show_metrics` at the top of the answer |
+| A proposed rebalance or target allocation | `propose_allocation`: the advisor can adjust each weight before approving. Wait for the result and continue with the **final** weights it returns, naming any changes the user made. If rejected, do not proceed with the rebalance. |
+
+Downloadable deliverables (PDF wealth reports) still go through **pdf-wealth-report**; in-chat visuals do not replace them.
 
 ## Tone & Personality
 

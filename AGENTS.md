@@ -116,6 +116,10 @@ agent, where `app/agui/` serves the Copilot SDK. Things that will bite:
   an isolated one.
 - The scripted mock model (`src/frontend/e2e/mock-model.mjs`) answers only its
   scripted prompts. `OPENAI_BASE_URL` reaches the SDK only in local mode.
+- Visual tools (`render_chart`, `show_table`, `show_metrics`,
+  `propose_allocation`) are declared by the browser, not the backend. Personas
+  reference them in a **Visual answers** section that must keep its markdown
+  fallback: evals and the legacy `/api/agent/chat` path never offer them.
 - Persona prompt edits reach a local stack only after the blob copy changes:
   seeding skips personas already in Azurite. Upload the edited file or wipe
   `.local/azurite`.

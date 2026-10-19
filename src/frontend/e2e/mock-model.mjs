@@ -9,6 +9,9 @@
 //   "capital of France"     -> plain streamed answer
 //   "demo approval"         -> ask_user (Approve / Reject), then a branch-specific answer
 //   "load the email skill"  -> real `skill` tool call, then a summary of its result
+//   "demo chart"            -> render_chart (generative UI), then an interpretation
+//   "demo rebalance"        -> propose_allocation (editable HITL card), then the final weights
+//   "demo table" / "demo metrics" -> show_table / show_metrics, then a one-line summary
 import { pathToFileURL } from "node:url";
 import { LLMock } from "@copilotkit/aimock";
 
@@ -65,9 +68,90 @@ export function respond(req) {
     return { content: `Loaded the email-draft skill (${results.at(-1).length} characters of instructions).` };
   }
 
+  if (/demo table/i.test(user)) {
+    if (results.length === 0) {
+      return call(req, "show_table", {
+        title: "Demo transactions",
+        caption: "Scripted mock data",
+        columns: [
+          { key: "date", label: "Date" },
+          { key: "merchant", label: "Merchant" },
+          { key: "amount", label: "Amount", format: "currency", currency: "USD" },
+        ],
+        rows: [
+          { date: "2026-10-01", merchant: "Grocer", amount: 82.4 },
+          { date: "2026-10-03", merchant: "Airline", amount: 412 },
+          { date: "2026-10-05", merchant: "Cafe", amount: 6.5 },
+        ],
+      });
+    }
+    return { content: "The airline ticket is the largest of the three transactions." };
+  }
+
+  if (/demo metrics/i.test(user)) {
+    if (results.length === 0) {
+      return call(req, "show_metrics", {
+        title: "Demo shift health",
+        metrics: [
+          { label: "OEE", value: 71.2, unit: "%", delta: -4.8, deltaLabel: "pp vs target", status: "bad" },
+          { label: "Availability", value: 88, unit: "%", status: "warning" },
+          { label: "Quality", value: 99.1, unit: "%", status: "good" },
+        ],
+      });
+    }
+    return { content: "OEE is below target, driven by availability." };
+  }
+
+  if (/demo odd chart/i.test(user)) {
+    // The shape a live model sent when it guessed the schema of a deferred tool.
+    if (results.length === 0) {
+      return call(req, "render_chart", {
+        type: "bar",
+        title: "OEE gap to target by line",
+        data: [
+          { label: "Line 1", value: 90.2, target: 90 },
+          { label: "Line 2", value: 74.1, target: 85 },
+        ],
+      });
+    }
+    return { content: "Line 2 is furthest below target." };
+  }
+
+  if (/demo chart/i.test(user)) {
+    if (results.length === 0) {
+      return call(req, "render_chart", {
+        title: "Demo portfolio allocation",
+        subtitle: "Scripted mock data",
+        kind: "donut",
+        labels: ["Equities", "Bonds", "Cash", "Alternatives"],
+        series: [{ name: "Weight", values: [55, 30, 5, 10] }],
+        unit: "%",
+      });
+    }
+    return { content: "Equities dominate at 55%, with bonds as the main ballast at 30%." };
+  }
+
+  if (/demo rebalance/i.test(user)) {
+    if (results.length === 0) {
+      return call(req, "propose_allocation", {
+        title: "Rebalance toward the target model",
+        rationale: "Equities drifted above target after the rally; trimming them restores the agreed risk budget.",
+        items: [
+          { name: "Equities", current: 62, proposed: 55 },
+          { name: "Bonds", current: 28, proposed: 35 },
+          { name: "Cash", current: 10, proposed: 10 },
+        ],
+      });
+    }
+    const decision = JSON.parse(results.at(-1));
+    if (decision.decision !== "approved") return { content: "Understood. The rebalance is cancelled; nothing changes." };
+    const weights = decision.allocation.map((a) => `${a.name} ${a.proposed}%`).join(", ");
+    return { content: `Approved${decision.edited ? " with your edits" : ""}: ${weights}.` };
+  }
+
   return {
     content:
-      "This is the offline mock model, so it only answers scripted prompts: ask for the capital of France, a demo approval, or to load the email skill.",
+      "This is the offline mock model, so it only answers scripted prompts: ask for the capital of France, a demo approval, a demo chart, table, metrics or rebalance, or to load the email skill.",
   };
 }
 

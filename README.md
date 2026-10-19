@@ -345,7 +345,7 @@ node scripts/dev-local.mjs          # live model: COPILOT_GITHUB_TOKEN from .env
 node scripts/dev-local.mjs --mock   # deterministic offline model (no login, no cost)
 ```
 
-`--mock` points the Copilot SDK at a scripted OpenAI-compatible model (`src/frontend/e2e/mock-model.mjs`, built on `@copilotkit/aimock`) through a local-mode-only BYOK override (`OPENAI_BASE_URL`). Everything else is the real stack. The UI shows a **Mock model** badge, and only the scripted prompts work: the capital of France, a demo approval, and loading the email skill.
+`--mock` points the Copilot SDK at a scripted OpenAI-compatible model (`src/frontend/e2e/mock-model.mjs`, built on `@copilotkit/aimock`) through a local-mode-only BYOK override (`OPENAI_BASE_URL`). Everything else is the real stack. The UI shows a **Mock model** badge, and only the scripted prompts work: the capital of France, a demo approval, a demo chart, table, metrics or rebalance, and loading the email skill.
 
 The runner gives the hosted agent an isolated `COPILOT_HOME`, so your own Copilot CLI config (MCP servers, instructions) does not leak into the agent, and puts the in-repo mock MCP servers on `PATH`, as the container does.
 
@@ -737,6 +737,22 @@ The UI is built headless on CopilotKit hooks, styled with the Kratos themes:
 - **Run inspector** — run status, a timed activity timeline (tools, decisions, sub-agents), last-run tokens and latency, and the persona's skills
 - **Per-turn stats** — duration, time to first token, tokens and tool calls under each answer
 - **History** — conversations reload from Cosmos with their tool cards and answered decisions
+
+#### Generative UI and voice
+
+The browser declares tools the agent can call to render real components in the chat (`src/frontend/src/components/agent/visuals/`). They travel with every AG-UI run, so no backend change is needed to add one:
+
+| Tool | Renders | Kind |
+|---|---|---|
+| `render_chart` | Bar, line or donut chart with a data-table toggle | Display |
+| `show_table` | Sortable table with currency/percent formatting | Display |
+| `show_metrics` | KPI tiles with change and on-track status | Display |
+| `propose_allocation` | Editable rebalance proposal; the agent continues with the user's final weights | Human-in-the-loop |
+| `ask_user` | Question with choices or free text | Human-in-the-loop |
+
+Each curated persona's `SYSTEM_PROMPT.md` has a **Visual answers** section mapping its questions to these tools, with a markdown fallback where they are not offered (evals, the legacy chat endpoint).
+
+**Voice:** hold the mic in the composer to talk and release to send (a quick tap toggles listening). Speech is transcribed by the browser's own speech recognition (Chrome, Edge, Safari; Chrome sends audio to Google, Edge to Microsoft; Firefox has none, so the mic is hidden). The speaker toggle in the chat header reads finished answers and the agent's questions aloud.
 
 ---
 

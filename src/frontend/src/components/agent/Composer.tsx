@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useSpeechInput } from "@/lib/voice";
 
 export interface ImageAttachment {
   filename: string;
@@ -41,6 +42,49 @@ export function Composer({
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const canSend = !disabled && !busy && text.trim().length > 0;
 
+  // Push-to-talk: hold the mic (or Space/Enter on it) and release to send; a
+  // quick tap toggles listening instead, and a second tap sends.
+  const prefixRef = useRef("");
+  const pressRef = useRef<{ at: number; wasToggled: boolean } | null>(null);
+  const [voiceMode, setVoiceMode] = useState<"idle" | "holding" | "toggled">("idle");
+  const voice = useSpeechInput((transcript) => {
+    setText(`${prefixRef.current}${prefixRef.current && transcript ? " " : ""}${transcript}`);
+  });
+  const voiceBlocked = disabled || busy;
+
+  const pressStart = () => {
+    if (voiceBlocked || pressRef.current) return;
+    if (voiceMode === "toggled") {
+      pressRef.current = { at: Date.now(), wasToggled: true };
+      return;
+    }
+    prefixRef.current = text.trim();
+    pressRef.current = { at: Date.now(), wasToggled: false };
+    setVoiceMode("holding");
+    voice.start();
+  };
+
+  const finishVoice = async () => {
+    setVoiceMode("idle");
+    const transcript = (await voice.stop()).trim();
+    const message = `${prefixRef.current}${prefixRef.current && transcript ? " " : ""}${transcript}`.trim();
+    prefixRef.current = "";
+    if (transcript && message) {
+      onSend(message, images);
+      setText("");
+      setImages([]);
+      setNotice("");
+    }
+  };
+
+  const pressEnd = () => {
+    const press = pressRef.current;
+    pressRef.current = null;
+    if (!press) return;
+    if (press.wasToggled || Date.now() - press.at >= 350) void finishVoice();
+    else setVoiceMode("toggled");
+  };
+
   const submit = () => {
     if (!canSend) return;
     onSend(text.trim(), images);
@@ -70,6 +114,18 @@ export function Composer({
   return (
     <div className="px-3 sm:px-4 pb-4 sm:pb-5 pt-2">
       <div className="max-w-4xl mx-auto">
+        {(voice.listening || voice.error) && (
+          <p className="px-1 pb-2 text-xs" role="status" data-testid="voice-status">
+            {voice.error ? (
+              <span className="text-red-600">{voice.error}</span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-text">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                Listening… {voiceMode === "holding" ? "release to send" : "tap the mic again to send"}
+              </span>
+            )}
+          </p>
+        )}
         {(images.length > 0 || notice) && (
           <div className="flex flex-wrap items-center gap-2 px-1 pb-2">
             {images.map((img, i) => (
@@ -104,6 +160,42 @@ export function Composer({
               <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
             </svg>
           </button>
+          {voice.supported && (
+            <button
+              type="button"
+              data-testid="mic-button"
+              aria-label={voice.listening ? "Listening: release or tap to send" : "Hold to talk"}
+              aria-pressed={voice.listening}
+              title="Hold to talk, release to send. Tap to toggle."
+              disabled={voiceBlocked}
+              onPointerDown={(e) => {
+                e.currentTarget.setPointerCapture(e.pointerId);
+                pressStart();
+              }}
+              onPointerUp={pressEnd}
+              onPointerCancel={pressEnd}
+              onKeyDown={(e) => {
+                if ((e.key === " " || e.key === "Enter") && !e.repeat) {
+                  e.preventDefault();
+                  pressStart();
+                }
+              }}
+              onKeyUp={(e) => {
+                if (e.key === " " || e.key === "Enter") {
+                  e.preventDefault();
+                  pressEnd();
+                }
+              }}
+              className={`relative p-2 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed touch-none select-none ${
+                voice.listening ? "text-red-600 bg-red-50 dark:bg-red-500/10" : "text-muted hover:text-accent hover:bg-hover"
+              }`}
+            >
+              {voice.listening && <span className="absolute inset-0 rounded-lg ring-2 ring-red-500/60 animate-pulse" aria-hidden="true" />}
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              </svg>
+            </button>
+          )}
           <textarea
             ref={areaRef}
             value={text}
@@ -122,11 +214,15 @@ export function Composer({
               t.style.height = `${Math.min(t.scrollHeight, 200)}px`;
             }}
             placeholder={
-              waitingForDecision
-                ? "Answer the agent's question to continue…"
-                : busy
-                  ? "The agent is working…"
-                  : "Ask me anything…"
+              voice.listening
+                ? "Listening…"
+                : waitingForDecision
+                  ? "Answer the agent's question to continue…"
+                  : busy
+                    ? "The agent is working…"
+                    : voice.supported
+                      ? "Ask me anything, or hold the mic to talk…"
+                      : "Ask me anything…"
             }
             rows={1}
             disabled={disabled}
